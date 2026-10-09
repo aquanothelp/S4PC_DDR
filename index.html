@@ -4,8 +4,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ddr-build" content="20261009200549">
-<script>(function(){var B="20261009200549";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+<meta name="ddr-build" content="20261009204020">
+<script>try{var t=localStorage.getItem("ddr-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>(function(){var B="20261009204020";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>S4PC DDR Walkthrough</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
@@ -278,22 +279,24 @@ nav .apps button[aria-current="true"]::before { content: ""; position: absolute;
 }
 @media (max-width: 820px) { .tabs { overflow-x: auto; max-width: 100%; } .tabs button { flex-shrink: 0; } }
 @media (max-width: 820px) { .dlg { max-width: calc(100vw - 24px); } .dlg .b > * { min-width: 0; max-width: 100%; } }
+.shell .thm { width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--sel); color: var(--link); display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; }
+.shell .thm[hidden] { display: none; }
 
 /* ===== DDMRP theory page (shown before the mock-up) =====
    Layout: engineering field notes — a long single column with a buffer diagram as the hero, two-column component spreads, a live buffer lab. */
 :root {
   --ix-paper: #f3f5f6; --ix-sheet: #ffffff; --ix-ink: #15212b; --ix-mute: #56656f; --ix-rule: #d8dfe3;
-  --ix-steel: #1668c4; --ix-r: #ec3b3b; --ix-y: #f7c600; --ix-g: #1fb35a; --ix-dr: #9b1414; --ix-over: #2f8fe8; --ix-band: .32; --ix-r-ink: #c42323; --ix-g-ink: #137a3c;
+  --ix-steel: #1668c4; --ix-r: #ec3b3b; --ix-y: #f7c600; --ix-g: #1fb35a; --ix-dr: #9b1414; --ix-over: #2f8fe8; --ix-vio: #7a4fd0; --ix-band: .32; --ix-r-ink: #c42323; --ix-g-ink: #137a3c;
   --ix-disp: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --ix-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
   --ix-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --ix-paper: #0f1519; --ix-sheet: #172027; --ix-ink: #e6ecef; --ix-mute: #9badb8; --ix-rule: #2b3a44;
-  --ix-steel: #4dc3ff; --ix-r: #ff4d4d; --ix-y: #ffd21f; --ix-g: #2ee07a; --ix-dr: #ff8a8a; --ix-over: #5aa9ff; --ix-band: .5; --ix-r-ink: #ff6b6b; --ix-g-ink: #2ee07a; } }
+  --ix-steel: #4dc3ff; --ix-r: #ff4d4d; --ix-y: #ffd21f; --ix-g: #2ee07a; --ix-dr: #ff8a8a; --ix-over: #5aa9ff; --ix-vio: #b794ff; --ix-band: .5; --ix-r-ink: #ff6b6b; --ix-g-ink: #2ee07a; } }
 :root[data-theme="dark"] {
   --ix-paper: #0f1519; --ix-sheet: #172027; --ix-ink: #e6ecef; --ix-mute: #9badb8; --ix-rule: #2b3a44;
-  --ix-steel: #4dc3ff; --ix-r: #ff4d4d; --ix-y: #ffd21f; --ix-g: #2ee07a; --ix-dr: #ff8a8a; --ix-over: #5aa9ff; --ix-band: .5; --ix-r-ink: #ff6b6b; --ix-g-ink: #2ee07a; }
+  --ix-steel: #4dc3ff; --ix-r: #ff4d4d; --ix-y: #ffd21f; --ix-g: #2ee07a; --ix-dr: #ff8a8a; --ix-over: #5aa9ff; --ix-vio: #b794ff; --ix-band: .5; --ix-r-ink: #ff6b6b; --ix-g-ink: #2ee07a; }
 
 body.intro-on .shell, body.intro-on .frame { display: none; }
 #intro { display: none; background: var(--ix-paper); color: var(--ix-ink); font: 16px/1.55 var(--ix-body); }
@@ -790,6 +793,8 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
 @media (min-width: 1400px) { .ix-labgrid { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); } .ix-labgrid .ix-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; align-content: start; } .ix-labgrid .ix-controls hr { grid-column: 1 / -1; width: 100%; } }
 /* wide screens: the dynamic lab results table runs full width under the chart and the scenario column */
 @media (min-width: 1400px) { .ix-dyn-grid { grid-template-areas: "side chart" "side legend" "kpi kpi"; } .ix-dyn-grid > .ix-dyn-side { grid-area: side; } .ix-dyn-grid > .ix-dyn-main { display: contents; } .ix-dyn-main > svg { grid-area: chart; } .ix-dyn-main > .ix-legend { grid-area: legend; } .ix-dyn-main > .ix-tw { grid-area: kpi; } }
+.ix-theme { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--ix-rule); background: var(--ix-sheet); color: var(--ix-ink); display: inline-grid; place-items: center; cursor: pointer; padding: 0; }
+.ix-theme[hidden] { display: none; }
 </style>
 
 <!-- DDMRP theory page shown before the mock-up (theory only: Ptak & Smith, Demand Driven Institute) -->
@@ -797,7 +802,7 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
   <div class="ix">
     <header class="ix-top">
       <span class="ix-mark">DDMRP · field notes</span><span class="ix-disc">Unofficial learning mock-up inspired by SAP and DDI</span>
-      <span class="ix-top-r"><a class="ix-link small" href="#ix-abbr">Abbreviations</a><button class="ix-go small" type="button" data-enter>Skip to the mock-up →</button></span>
+      <span class="ix-top-r"><button class="ix-theme" type="button" data-theme-tg hidden></button><a class="ix-link small" href="#ix-abbr">Abbreviations</a><button class="ix-go small" type="button" data-enter>Skip to the mock-up →</button></span>
     </header>
     <nav class="ix-toc" id="ixToc" aria-label="Sections on this page"></nav>
 
@@ -1061,7 +1066,7 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
       </div>
       <div class="ix-span ix-dyn" id="ix-tr">
         <div class="ix-dyn-head"><p class="ix-sub">Planned adjustment · product transition</p><h3>Overlapping DAFs hand demand from the old product to the new one</h3>
-          <ul class="ix-plain"><li>Top panel: each product's demand adjustment factor (DAF). Bottom panel: the top of green (TOG) that each DAF produces (ADU 20, DLT 10).</li><li>A negative gap means the new product's ramp starts early, so both buffers overlap and hold extra stock; a positive gap leaves a coverage hole.</li><li>&quot;Extra stock at the peak&quot; compares the two buffers together with one product's buffer.</li></ul>
+          <ul class="ix-plain"><li>Top panel: each product's demand adjustment factor (DAF). Bottom panel: the red, yellow and green zones each DAF produces (ADU 20, DLT 10): the old product's buffer, the new product's buffer and both together, on the same scale.</li><li>A negative gap means the new product's ramp starts early, so both buffers overlap and hold extra stock; a positive gap leaves a coverage hole.</li><li>&quot;Extra stock at the peak&quot; compares the two buffers together with one product's buffer.</li></ul>
           <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, from sample inputs and the formulas shown (the overlapping-DAF mechanics are from knowledge of Ptak &amp; Smith; verify). They are not data from Ptak &amp; Smith or DDI.</p></div>
         <div id="ixTrViz"></div>
       </div>
@@ -1284,6 +1289,7 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
   <span class="srch" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" style="fill:none;stroke:currentColor;stroke-width:1.6"/><path d="M11 11l3.5 3.5" style="stroke:currentColor;stroke-width:1.6"/></svg>Search in Apps</span>
   <span class="mock" title="SAP S/4HANA Cloud Public Edition, Demand-Driven Replenishment">Unofficial learning mock-up inspired by SAP and DDI · Plant 1 US (1710)</span>
   <span class="act" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 1.5a4 4 0 0 0-4 4v3L2.5 11h11L12 8.5v-3a4 4 0 0 0-4-4zM6.5 13a1.5 1.5 0 0 0 3 0" style="fill:none;stroke:currentColor;stroke-width:1.4"/></svg></span>
+  <button class="thm" type="button" data-theme-tg hidden></button>
   <button class="av" id="av" type="button" aria-label="User menu" style="border:0;cursor:pointer">PP</button>
 </header>
 <div class="frame">
@@ -1540,6 +1546,25 @@ const PIRS = { "S-201": 1, "S-202": 1 }; // products with planned independent re
 const giDay = (id, d) => { const p = by[id]; if (!p.gi) return 0; if (p.gap) return (-d) % 2 === 0 ? 2 * p.adu : 0; return p.adu * (1 + p.cv * Math.SQRT2 * Math.sin(((-d) % 10) * Math.PI / 5 + id.length)); };
 const price = id => by[id].adu ? by[id].gi / (30 * by[id].adu) : 0; // gi = goods issue value of 30 days at nominal usage
 const pirDay = (id, d) => PIRS[id] ? by[id].adu : 0;
+// goods issue documents and sales order lines behind the data (shown in the supporting apps, checked by calc_test)
+const baseMvt = id => by[id].ty === "FERT" ? "601" : "261";
+function giDocs(id, days) {
+  const out = [], gx = by[id].gx || {}, rest = 1 - Object.values(gx).reduce((s, v) => s + v, 0);
+  for (let d = 1; d <= days; d++) {
+    const q = giDay(id, -d); if (!q) continue;
+    [[baseMvt(id), rest], ...Object.entries(gx)].forEach(([m, sh]) => { if (sh > 0) out.push({ d: -d, m, q: q * sh, ex: S.gix.plant === PLANT && !!S.gix.mt[m] }); });
+  }
+  return out;
+}
+// sales orders behind the open-past-demand categories "Open sales order quantities" and "Outbound deliveries"
+function soLines() {
+  const out = []; let n = 0;
+  Object.keys(ODC).forEach(id => {
+    const open = ODC[id].filter(z => z[0] === OD_IN[3]).reduce((s, z) => s + z[1], 0), dlv = ODC[id].filter(z => z[0] === OD_IN[2]).reduce((s, z) => s + z[1], 0);
+    if (open || dlv) out.push({ so: String(2000 + 15 * ++n), id, q: open + dlv, dlv, open, d: dlv ? -1 : 0 });
+  });
+  return out;
+}
 // ADU = (goods issues in Horizon for Past + PIRs in Horizon for Future) / days (1Y2); Exclude Non Goods Issue Days drops past days without goods issues
 function aduOf(id, o = {}) {
   const h = S.hz[id], past = Array.from({ length: h.p }, (_, i) => giDay(id, -(i + 1))), fut = Array.from({ length: h.f }, (_, i) => pirDay(id, i));
@@ -2370,17 +2395,17 @@ function detail(box) {
     body = `<div class="fb">${seg(["Chart", "Table"], S.mct, "data-cv")}</div>` + (S.mct === "Table" ? aduTbl : `<svg viewBox="0 0 900 110" style="width:100%;height:110px" role="img" aria-label="Goods issued and PIRs">${gi.map((v, t) => `<rect data-dp="${day(t - 30)}: Goods Issued ${f(v)}" x="${t * 20 + 2}" y="${100 - v / mx * 90}" width="15" height="${v / mx * 90}" rx="2" style="fill:var(--link);opacity:.6;cursor:pointer"><title>${day(t - 30)}: Goods Issued ${f(v)}</title></rect>`).join("")}${pir.map((v, t) => `<rect data-dp="${t ? day(t) : "Today"}: PIRs ${f(v)}" x="${(30 + t) * 20 + 2}" y="${100 - v / mx * 90}" width="15" height="${v / mx * 90}" rx="2" style="fill:var(--z-y);opacity:.8;cursor:pointer"><title>${t ? day(t) : "Today"}: PIRs ${f(v)}</title></rect>`).join("")}<line x1="600" x2="600" y1="0" y2="104" style="stroke:var(--ink);stroke-dasharray:4 3"/></svg>
       <div class="legend note" style="border:0;padding:0"><span style="color:var(--link)">■</span> Goods Issued · <span style="color:var(--z-y)">■</span> PIRs (weekly PIRs shown per day) · dashed line = today</div>`) + `
       ${kv([["ADU for Proposal Run", aduRun.toFixed(1)], ...(giShare(id) < 1 ? [["Goods Issue Exclusion Profile", S.gix.prof]] : []), ...(x && x.exNgi ? [["Exclude Non Goods Issue Days", "Yes"]] : []), ["Demand Adjustment", S.daf[id] || 1], ["Adjusted ADU", (aduRun * (S.daf[id] || 1)).toFixed(1)], ["Horizon for Past / Future (in Days)", `${S.hz[id].p} / ${S.hz[id].f}`], ["ADU Interval", x ? `Based on ${x.aduMode} Interval` : "–"]])}
-      <div class="fb"><button class="btn ${S.showAdj ? "e" : ""}" id="sa" aria-pressed="${!!S.showAdj}">Show Adjustments</button></div>
+      ${dataLinks(id, ["mdo", "pir"])}<div class="fb"><button class="btn ${S.showAdj ? "e" : ""}" id="sa" aria-pressed="${!!S.showAdj}">Show Adjustments</button></div>
       ${S.showAdj ? `<div class="card" style="box-shadow:none;border:1px solid var(--line)"><div class="tb"><h2>Demand Adjustments</h2></div><div class="panel fb"><label class="fld">Period From<input id="dpf" type="date" value="${iso(0)}"></label><label class="fld">To<input id="dpt" type="date" value="${iso(30)}"></label>${num("dfa", "Demand Adjustment", S.daf[id] || 1, 0.1)}<button class="btn" id="dsim" ${susp ? "disabled" : ""}>Simulate Changes</button><button class="btn e" id="dsav" ${susp ? "disabled" : ""}>Save and Adopt</button></div></div>` : ""}`;
   } else if (S.mtab === "Decoupled Lead Time") {
     const lp = longest(id);
     body = kv([["BOM Explosion Date", day(0)], ["DLT for Current Buffer", (S.dltPM[id] ?? dlt(id)) + " d"], ["DLT for Proposed Buffer", (x ? x.D : dlt(id)) + " d"], ["Change in DLT", x ? (x.D - x.prevDlt) + " d" : "–"], ["Individual Lead Time", ltOf(id) + " d"], ["ILT Calc. Method", S.ilt[id]]]) +
       `<div><b style="font-size:13px">Longest Path in Buffer's Replenishment Network</b><div class="fb" style="margin-top:8px">${lp.map(n => `<span class="chip n">${n} · ${ltOf(n)} d</span>`).join(" → ")}</div></div>
       <div class="tw"><table><tr><th>Product</th><th>ILT Calc. Method</th><th class="n">Current Lead Time</th><th class="n">Proposed Lead Time</th><th>How the proposed lead time is found</th><th>Buffered</th></tr>${lp.map(n => { const c = iltCalc(n); return `<tr><td>${oid(n)}</td><td>${S.ilt[n] || "–"}</td><td class="n">${ltMM(n)} d</td><td class="n">${c.v} d</td><td style="white-space:normal;min-width:240px">${c.src}</td><td>${dd(n) ? chip("g", "Yes") : chip("n", "No")}</td></tr>`; }).join("")}</table></div>
-      ${lp.filter(n => ORDH[n] && (S.ilt[n] === "HCRE" || S.ilt[n] === "HREL")).map(n => `<div><b style="font-size:13px">Orders for ${n} (${S.ilt[n] === "HREL" ? "release" : "creation"} date to goods receipt)</b></div><div class="tw"><table><tr><th>Order</th><th>Created</th><th>Released</th><th>Goods Receipt</th><th>Status</th><th class="n">Days</th><th>Used</th></tr>${iltOrders(n).map(o => `<tr><td>${o.no}</td><td>${day(-o.cr)}</td><td>${day(-o.rel)}</td><td>${o.gr == null ? "–" : day(-o.gr)}</td><td>${o.st}</td><td class="n">${o.days == null ? "–" : o.days}</td><td style="white-space:normal">${o.use ? chip("g", "Yes") : chip("n", "No") + " " + o.why}</td></tr>`).join("")}</table></div>`).join("")}${lp.some(n => S.ilt[n] === "PCRE" && by[n].pt === "Transfer") ? `<label class="chk"><input type="checkbox" id="pact" ${S.predAct ? "checked" : ""}>Active model version for INDIV_LEADTIME_STO2 (set in Intelligent Scenario Management; scenario deprecated in 2608)</label>` : ""}<div><button class="btn" id="pf">Product Flow</button></div>`;
+      ${lp.filter(n => ORDH[n] && (S.ilt[n] === "HCRE" || S.ilt[n] === "HREL")).map(n => `<div><b style="font-size:13px">Orders for ${n} (${S.ilt[n] === "HREL" ? "release" : "creation"} date to goods receipt)</b></div><div class="tw"><table><tr><th>Order</th><th>Created</th><th>Released</th><th>Goods Receipt</th><th>Status</th><th class="n">Days</th><th>Used</th></tr>${iltOrders(n).map(o => `<tr><td>${o.no}</td><td>${day(-o.cr)}</td><td>${day(-o.rel)}</td><td>${o.gr == null ? "–" : day(-o.gr)}</td><td>${o.st}</td><td class="n">${o.days == null ? "–" : o.days}</td><td style="white-space:normal">${o.use ? chip("g", "Yes") : chip("n", "No") + " " + o.why}</td></tr>`).join("")}</table></div>`).join("")}${lp.some(n => S.ilt[n] === "PCRE" && by[n].pt === "Transfer") ? `<label class="chk"><input type="checkbox" id="pact" ${S.predAct ? "checked" : ""}>Active model version for INDIV_LEADTIME_STO2 (set in Intelligent Scenario Management; scenario deprecated in 2608)</label>` : ""}<div><button class="btn" id="pf">Product Flow</button></div>${dataLinks(id, ["pmd"])}`;
   } else {
     body = kv([["Buffer Profile (Current)", x ? x.prof : profileOf(id)], ["Buffer Profile (Proposed)", profileOf(id)], ["DLT Factor / Variability Factor", `${LTF[iv(id, "efg")]} / ${VF[iv(id, "xyz")]}`], ["Minimum Order Quantity", p.mol ? f(p.mol) : "–"], ["Order Cycle (days)", p.oc || "–"], ["Green Zone", x ? x.gKey : "–"]]) +
-      `<div class="tw"><table><tr><th>Classification</th><th>Current</th><th>Proposed</th></tr>${[["Value", "abc"], ["DLT", "efg"], ["BOM Usage", "pqr"], ["Variability", "xyz"]].map(([n, k]) => `<tr><td>${n}</td><td>${indTxt(id, k)}</td><td>${indTxt(id, k)}</td></tr>`).join("")}</table></div>`;
+      `<div class="tw"><table><tr><th>Classification</th><th>Current</th><th>Proposed</th></tr>${[["Value", "abc"], ["DLT", "efg"], ["BOM Usage", "pqr"], ["Variability", "xyz"]].map(([n, k]) => `<tr><td>${n}</td><td>${indTxt(id, k)}</td><td>${indTxt(id, k)}</td></tr>`).join("")}</table></div>${dataLinks(id, ["pmd", "mdo"])}`;
   }
   box.innerHTML = `<div class="card"><div class="tb"><h2>${oid(id)}</h2>${x && x.badi ? chip("b", "BAdI proposal") : ""}<span class="sp"></span><button class="btn e" id="ad" ${open ? "" : "disabled"}>Adopt</button><button class="btn" id="di" ${open ? "" : "disabled"}>Discard</button><button class="btn" id="pr">Proposal Runs ▾</button></div>
     <div class="panel">${kv([["Max.Stock Deviation", x ? (x.dev >= 0 ? "+" : "") + x.dev.toFixed(1) + " %" : "–"], ["Change in ADU", x ? (x.prevAdu ? ((x.adu / x.prevAdu - 1) * 100).toFixed(0) + " %" : "–") : "–"], ["Change in DLT", x ? (x.D - x.prevDlt) + " d" : "–"], ["Proposal Run On", x ? x.on : "–"], ["Proposal Status", stchip(pst(id))], ["Buffer Profile", profileOf(id)]])}${susp ? `<div class="strip warn">${info(id)}.</div>` : ""}${x && x.badi ? `<div class="strip info">Proposal calculated with the custom buffer level zone calculation (BAdI DD_BUFFERLEVELZONE).</div>` : ""}</div>
@@ -2390,6 +2415,7 @@ function detail(box) {
   box.querySelectorAll("[data-mv]").forEach(t => t.onclick = () => { S.mview = t.dataset.mv; go(cur); });
   box.querySelectorAll("[data-cv]").forEach(t => t.onclick = () => { S.mct = t.dataset.cv; go(cur); });
   const sa = $("#sa", box); if (sa) sa.onclick = () => { S.showAdj = !S.showAdj; go(cur); };
+  bindDataLinks(box);
   $("#ad", box).onclick = () => { adopt(id, x); toast("Proposal adopted"); go(cur); };
   $("#di", box).onclick = () => { x.st = "Discarded"; toast("Proposal discarded"); go(cur); };
   $("#pr", box).onclick = e => menuAt(e.target, [["Suspend", () => suspendDlg([id])], ["Resume", () => resumeDlg([id])]]);
@@ -2441,7 +2467,7 @@ function srl(fb, ct) {
       ${OD_CFG.map(c => `<tr><td style="white-space:normal">${c}</td><td>${chip("y", "Depends on MRP type")}</td><td class="n">${c === OD_CFG[3] && x.firm ? (S.mrp[id] === "D2" ? f(x.firm) + " (D2)" : "not included (D1)") : "–"}</td></tr>`).join("")}
       <tr><td>Planned independent requirements</td><td>${chip("r", "Excluded")}</td><td class="n">${pir ? f(pir) + " not counted" : "–"}</td></tr></table></div>`;
     const pm = S.pmv[id], pmT = pm ? kv([["Individual Lead Time", pm.ilt + " d"], ["Decoupled Lead Time", pm.dlt != null ? pm.dlt + " d" : "–"], ["Safety Stock", f(pm.ss)], ["Reorder Point", f(pm.rop)], ["Maximum Stock", f(pm.max)]]) : "";
-    body = `<div class="sub2">Net flow position</div>${nf}<div class="sub2">Buffer levels used by MRP</div>${lv}
+    body = `${dataLinks(id, ["smm", "mso", "pmd"])}<div class="sub2">Net flow position</div>${nf}<div class="sub2">Buffer levels used by MRP</div>${lv}
       <div class="strip info">Fallbacks (SAP Help): if no safety stock is maintained in Manage Buffer Levels, MRP uses the safety stock in the MRP 1 view; if no DLT is maintained, it uses the total replenishment lead time in the MRP 3 view. Both are maintained for ${id}, so no fallback applies.</div>
       <div class="sub2">Supply element</div>${sup}${gr || sf ? `<div class="strip warn">GR processing time / safety time are added on top of the DLT. SAP recommends setting them to zero for DD products so the times are not counted twice.</div>` : ""}
       <div class="sub2">Open past demand categories</div>${catT}
@@ -2452,6 +2478,7 @@ function srl(fb, ct) {
     ${note("Step 4", "The Demand-Driven Replenishment tab shows every value the planning run uses: the net flow equation (open past demand by category), the buffer levels and scheduling. || Availability date = today + DLT (calendar days) plus GR processing and safety times. || Firming type 1: planning time fence = today + DLT, so new supply is created unfirmed and tomorrow's run firms it.||N", SRC.proc)}`;
   ct.querySelectorAll("[data-st]").forEach(t => t.onclick = () => { S.srlTab = t.dataset.st; go(cur); });
   $("#srrp", ct).onclick = () => { S.rpSel = id; goT("Replenishment Planning - By Planning Priority"); };
+  bindDataLinks(ct);
   bindActs(ct, id);
 }
 
@@ -2541,6 +2568,91 @@ function ddrMap(fb, ct) {
     ${rows.map(r => `<tr><td>${r.c}</td><td><b>${r.t}</b></td><td>${tag(r.th)}</td><td>${tag(r.sap)}</td><td>${chip(MAP_V[r.v][0], MAP_V[r.v][1])}<div class="mapg">${tag(r.g)}</div></td><td>${r.a.map(k => `<button class="btn t" type="button" data-goapp="${MAP_APP[k]}">${SCR.find(s => s.t === MAP_APP[k])?.nav || MAP_APP[k]} ›</button>`).join("") || "–"}</td></tr>`).join("") || `<tr><td colspan="6">No rows match.</td></tr>`}</table></div></div>
     ${note("Start", "Each row compares one DDMRP idea with what S/4HANA Cloud Public Edition does, and gives a verdict. || Equivalent = same idea; Difference = same idea, different detail; Gap = DDMRP has it, SAP Help 2608 doesn't document it; SAP-specific = SAP adds something with no DDMRP counterpart. || Use the buttons to open the matching app in this mock-up. || Theory comes from knowledge of Ptak & Smith and the DDI website (verify against the book); SAP facts from SAP Help 2608 and the 1Y2 / 2QI test scripts.")}`;
   ct.querySelectorAll("[data-goapp]").forEach(b => b.onclick = () => { S.flt = null; goT(b.dataset.goapp); });
+}
+
+/* ============ Supporting S/4HANA Cloud apps (not DDR apps): the mock's master and transactional data ============ */
+// Read-only views of the same data the DDR calculations use, so every number can be checked. Only the fields DDR needs are shown.
+// App names and IDs from SAP Help (Public Edition 2608): Manage Product Master Data F1602, Material Documents Overview F1077,
+// Stock - Multiple Materials F1595, Manage Sales Orders F1873, Maintain PIRs F3445. Field selection and layout are the mock's own.
+const SRC5 = {
+  pmd: H + "f86dc2eb1f8b48c880a7607213104b27/0483875792f25c08e10000000a441470.html", mdo: H + "a630d57fc5004c6383e7a81efee7a8bb/6cb7d3af780a4cf2934f2bf485ab72b7.html",
+  smm: H + "32da8359c8ee4e8b8e8c5e15cacba5aa/d137e156ff2cf777e10000000a4450e5.html", mso: H + "a376cd9ea00d476b96f18dea1247e6a5/ce158e56ba281e5ee10000000a4450e5.html",
+  pir: PPC + "03c2dd11c91f4df18e65ea1886dd54e0.html"
+};
+const NOTE5 = "Supporting app: not part of Demand-Driven Replenishment, shown so the data behind the DDR numbers can be checked. Only the fields DDR uses are shown; the mock's sample values.";
+const f1 = n => (Math.round(n * 10) / 10).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const f2 = n => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// movement types of the generated goods issues: finished products leave by delivery (601), others are consumed by orders (261);
+// a product's gx shares (e.g. 201 cost center, 551 scrapping) are split off and can be excluded by the goods issue exclusion profile
+const MVT5 = { "261": "Goods issue for order", "601": "Goods issue for delivery", ...MVT };
+const qFilter = (k, ids) => ids.filter(id => qMatch(k, id));
+
+/* Manage Product Master Data (F1602): MRP fields used by DDR */
+function pmd(fb, ct) {
+  fb.innerHTML = fbQ("pmd", [{ key: "pt", label: "Procurement Type", opts: ["Make", "Buy", "Transfer"] }]); bindQ(fb, "pmd");
+  const q = qOf("pmd"), ids = qFilter("pmd", P.map(p => p.id)).filter(id => !q.pt || by[id].pt === q.pt);
+  const sp = id => by[id].phantom ? "50 (Phantom)" : by[id].pt === "Transfer" ? "Stock transfer" : "–";
+  const lt = id => `${by[id].lt} d ${by[id].pt === "Make" ? "(in-house)" : "(planned delivery)"}`;
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Products (${ids.length})</h2></div><div class="tw"><table><tr><th>Product</th><th>Product Type</th><th>Procurement Type</th><th>Special Procurement</th><th>MRP Type</th><th>Lot Sizing Procedure</th><th class="n">Minimum Lot Size</th><th class="n">Rounding Value</th><th class="n">Lead Time</th><th class="n">GR Processing Time</th><th class="n">Safety Stock</th><th class="n">Reorder Point</th><th class="n">Maximum Stock Level</th><th class="n">Standard Price (USD)</th><th>Bulk Material</th><th>MRP Status</th><th class="n">Order Cycle (days)</th></tr>
+    ${ids.map(id => { const p = by[id], b = S.buf[id]; return `<tr><td>${oid(id)}</td><td>${p.ty}</td><td>${p.pt}</td><td>${sp(id)}</td><td>${S.mrp[id]}</td><td>${S.lot[id]}</td><td class="n">${p.mol ? f(p.mol) : "–"}</td><td class="n">${p.rnd || "–"}</td><td class="n">${lt(id)}</td><td class="n">${p.grt || 0} d</td><td class="n">${b ? f(b.ss) : "–"}</td><td class="n">${b ? f(b.rop) : "–"}</td><td class="n">${b ? f(b.max) : "–"}</td><td class="n">${f2(price(id))}</td><td>${p.bulk ? "Yes" : ""}</td><td>${p.blocked ? chip("r", "Blocked for MRP") : ""}</td><td class="n">${p.oc || "–"}</td></tr>`; }).join("")}</table></div></div>
+    ${note("Data", `${NOTE5} || Used by DDR: MRP type D1 / D2 makes a product DD-relevant (procedure C); lot sizing H1 replenishes to maximum stock; minimum lot size is the MOQ in the green zone and in proposals; rounding value rounds proposals. || Lead time + GR processing time = individual lead time with method MM (and the fallback for HCRE / HREL); it drives DLT. || Safety stock / reorder point / maximum stock level = top of red / yellow / green, written by Manage Buffer Levels. || Standard price × goods issue quantity = consumption value for ABC. Bulk materials and phantoms (special procurement 50) are excluded from classification; products blocked for MRP are excluded. || Order cycle: where SAP keeps it is not stated in SAP Help (2608) [Unverified]; the mock keeps it with the product. R-302 also has MRP area 1710-02 with lead time 4 d (Buffer Positioning).`, SRC5.pmd)}`;
+}
+
+/* Material Documents Overview (F1077): goods issues behind ADU, ABC and XYZ */
+function mdo(fb, ct) {
+  const gis = P.filter(p => p.gi).map(p => p.id);
+  if (!gis.includes(S.mdoId)) S.mdoId = "S-202"; if (![10, 30, 60].includes(S.mdoD)) S.mdoD = 30;
+  fb.innerHTML = `<label class="fld">Material<select id="mdm">${gis.map(id => `<option ${id === S.mdoId ? "selected" : ""}>${id}</option>`).join("")}</select></label><label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">Posting Date<select id="mdd">${[10, 30, 60].map(d => `<option value="${d}" ${d === S.mdoD ? "selected" : ""}>Last ${d} days</option>`).join("")}</select></label>`;
+  $("#mdm", fb).onchange = e => { S.mdoId = e.target.value; go(cur); }; $("#mdd", fb).onchange = e => { S.mdoD = +e.target.value; go(cur); };
+  const id = S.mdoId, docs = giDocs(id, Math.max(S.mdoD, S.hz[id].p, 10)), shown = docs.filter(x => -x.d <= S.mdoD);
+  const sumIn = n => docs.filter(x => -x.d <= n && !x.ex).reduce((s, x) => s + x.q, 0), hp = S.hz[id].p;
+  const exM = Object.keys(by[id].gx || {}).filter(m => S.gix.plant === PLANT && S.gix.mt[m]);
+  const chk = kv([["Horizon for Past (in Days)", hp], ["Goods issues counted in that horizon", f1(sumIn(hp))], ["Average per day (past part of ADU)", hp ? f1(sumIn(hp) / hp) : "– (PIRs only)"], ["Last 10 days (classification interval)", f1(sumIn(10))], ["Consumption value, last 10 days (ABC)", "USD " + f(sumIn(10) * price(id))], ["Excluded by profile " + S.gix.prof, exM.length ? exM.map(m => m + " " + MVT5[m]).join(", ") : "none"]]);
+  let n = 0;
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Material Documents: ${oid(id)}</h2><span class="sp"></span>${dd(id) && !isBP(id) ? `<button class="btn t" id="mdmbl">Manage Buffer Levels</button>` : ""}</div><div class="panel">${chk}</div>
+    <div class="tw"><table><tr><th>Material Document</th><th>Posting Date</th><th>Movement Type</th><th class="n">Quantity (PC)</th><th>Counts for ADU / XYZ</th></tr>
+    ${shown.map(x => `<tr><td>49000${String(70000 + ++n).slice(-5)}</td><td>${day(x.d)}</td><td>${x.m} ${MVT5[x.m]}</td><td class="n">${f1(x.q)}</td><td>${x.ex ? chip("n", "No: excluded movement type") : chip("g", "Yes")}</td></tr>`).join("") || `<tr><td colspan="5">No goods issues in this period.</td></tr>`}</table></div></div>
+    ${note("Data", `${NOTE5} || Used by DDR: ADU = (goods issues in the Horizon for Past + PIRs in the Horizon for Future) ÷ days; XYZ = variation of the daily goods issues; ABC = consumption value over Number of Days (Past). || The goods issue exclusion profile (Goods Issue Selection (DD)) removes movement types such as 201 and 551 once it is assigned to the plant. || Quantities have decimals because the mock generates usage as a smooth curve that repeats every 10 days.`, SRC5.mdo)}`;
+  const mb = $("#mdmbl", ct); if (mb) mb.onclick = () => { S.mbl = id; S.mtab = "Average Daily Usage"; goT("Manage Buffer Levels"); };
+}
+
+/* Stock - Multiple Materials (F1595): on-hand stock in the net flow position */
+function smm(fb, ct) {
+  fb.innerHTML = fbQ("smm"); bindQ(fb, "smm");
+  const ids = qFilter("smm", P.map(p => p.id));
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Stock (${ids.length})</h2></div><div class="tw"><table><tr><th>Material</th><th>Plant</th><th class="n">Unrestricted-Use Stock (PC)</th><th class="n">Stock Value (USD)</th><th>MRP Type</th></tr>
+    ${ids.map(id => { const oh = STK[id] ? STK[id].oh : 0; return `<tr><td>${oid(id)}</td><td>${PLANT}</td><td class="n">${f(oh)}</td><td class="n">${f(oh * price(id))}</td><td>${S.mrp[id]}</td></tr>`; }).join("")}</table></div></div>
+    ${note("Data", `${NOTE5} || Used by DDR: unrestricted-use stock is the on-hand stock in the net flow position and in the on-hand status (on-hand ÷ safety stock). || Only DD products carry stock in the mock; the others show 0 because no DDR calculation uses their stock.`, SRC5.smm)}`;
+}
+
+/* Manage Sales Orders (F1873): customer demand inside open past demand */
+function mso(fb, ct) {
+  fb.innerHTML = fbQ("mso"); bindQ(fb, "mso");
+  const rows = soLines().filter(r => qMatch("mso", r.id));
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Sales Orders (${rows.length})</h2></div><div class="tw"><table><tr><th>Sales Order</th><th>Item</th><th>Product</th><th>Requested Delivery Date</th><th class="n">Order Quantity</th><th class="n">In Outbound Delivery</th><th class="n">Open Quantity</th><th>Overall Status</th><th>In Net Flow Position as</th></tr>
+    ${rows.map(r => `<tr><td>${r.so}</td><td>10</td><td>${oid(r.id)}</td><td>${day(r.d)}${r.d < 0 ? " (past due)" : " (today)"}</td><td class="n">${f(r.q)}</td><td class="n">${r.dlv ? f(r.dlv) : "–"}</td><td class="n">${f(r.open)}</td><td>${r.dlv ? "In Process" : "Open"}</td><td style="white-space:normal">${[r.open ? `${OD_IN[3]} ${f(r.open)}` : "", r.dlv ? `${OD_IN[2]} ${f(r.dlv)}` : ""].filter(Boolean).join(" · ")}</td></tr>`).join("")}</table></div></div>
+    ${note("Data", `${NOTE5} || Used by DDR: open sales order quantities due today or earlier count as open past demand in the net flow position; quantities already in an outbound delivery count under "Outbound deliveries". Future orders count only as qualified spikes. || Other demand (production order reservations, stock transfers) is in the Stock/Requirements List.`, SRC5.mso)}`;
+}
+
+/* Maintain PIRs (F3445): forecast demand in the future part of ADU */
+function pirs(fb, ct) {
+  fb.innerHTML = fbQ("pir"); bindQ(fb, "pir");
+  const ids = qFilter("pir", Object.keys(PIRS)), wk = 13;
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Planned Independent Requirements (${ids.length})</h2></div><div class="tw"><table><tr><th>Material</th><th>Plant</th><th>Requirements Type</th><th class="n">Horizon for Future (in Days)</th>${Array.from({ length: wk }, (_, i) => `<th class="n">Week of ${day(i * 7)}</th>`).join("")}</tr>
+    ${ids.map(id => `<tr><td>${oid(id)}</td><td>${PLANT}</td><td>Planned independent requirement</td><td class="n">${S.hz[id].f}</td>${Array.from({ length: wk }, (_, i) => `<td class="n">${f(pirDay(id, i * 7) * 7)}</td>`).join("")}</tr>`).join("")}</table></div>
+    <div class="panel">${kv(ids.map(id => [`${id}: PIRs in Horizon for Future (${S.hz[id].f} d)`, `${f(Array.from({ length: S.hz[id].f }, (_, d) => pirDay(id, d)).reduce((s, v) => s + v, 0))} = ${f(by[id].adu)} per day`]))}</div></div>
+    ${note("Data", `${NOTE5} || Used by DDR: PIRs inside the Horizon for Future are the future part of ADU (spread evenly over the days of each week). S-201 uses PIRs only, S-202 goods issues and PIRs (as in the 1Y2 test script). || PIRs are not part of the net flow position.`, SRC5.pir)}`;
+}
+
+/* "Check the data" links: from a DDR screen to the supporting app, filtered to the product (only where that data exists) */
+const DLINK = { pmd: ["Product Master Data", "Manage Product Master Data"], mdo: ["Material Documents", "Material Documents Overview"], smm: ["Stock", "Stock - Multiple Materials"], mso: ["Sales Orders", "Manage Sales Orders"], pir: ["PIRs", "Maintain PIRs"] };
+function dataLinks(id, keys) {
+  const has = { pir: () => !!PIRS[id], mdo: () => !!by[id].gi, mso: () => soLines().some(r => r.id === id) };
+  const ks = keys.filter(k => !has[k] || has[k]());
+  return ks.length ? `<div class="fb dlinks"><span class="sub" style="margin:0">Check the data for ${id}:</span>${ks.map(k => `<button class="btn t" type="button" data-dl="${k}" data-did="${id}">${DLINK[k][0]} ↗</button>`).join("")}</div>` : "";
+}
+function bindDataLinks(box) {
+  box.querySelectorAll("[data-dl]").forEach(b => b.onclick = () => { const k = b.dataset.dl, id = b.dataset.did; if (k === "mdo") S.mdoId = id; else { const q = qOf(k); Object.keys(q).forEach(x => delete q[x]); q.s = id; } goT(DLINK[k][1]); });
 }
 
 /* ============ Schedule MRP Runs (F1339) ============ */
@@ -2756,6 +2868,11 @@ SCR.push(
   { g: G5, t: "Replenishment Execution - By On-Hand Status", nav: "Replenishment Execution", id: "F6242", r: rexec },
   { g: G5, t: "Projected On-Hand Alerts", nav: "Projected On-Hand Alerts", id: "F6243", r: poa },
   { g: G5, t: "Historical Buffer Performance", id: "F7147", r: hbp },
+  { g: "Supporting S/4HANA apps (data)", t: "Manage Product Master Data", id: "F1602", nav: "Product Master Data", kind: "Master data (not a DDR app)", r: pmd },
+  { g: "Supporting S/4HANA apps (data)", t: "Material Documents Overview", id: "F1077", nav: "Material Documents", kind: "Goods issues (not a DDR app)", r: mdo },
+  { g: "Supporting S/4HANA apps (data)", t: "Stock - Multiple Materials", id: "F1595", nav: "Stock", kind: "Inventory (not a DDR app)", r: smm },
+  { g: "Supporting S/4HANA apps (data)", t: "Manage Sales Orders", id: "F1873", nav: "Sales Orders", kind: "Sales (not a DDR app)", r: mso },
+  { g: "Supporting S/4HANA apps (data)", t: "Maintain PIRs", id: "F3445", nav: "PIRs", kind: "Planned independent requirements (not a DDR app)", r: pirs },
   { g: "Review", t: "DDMRP in S/4HANA Cloud", nav: "DDMRP ↔ S/4HANA map", kind: "Learning map (theory vs SAP)", r: ddrMap }
 );
 // demo seed: set-up jobs already run with the parameter values used in the test scripts
@@ -3717,7 +3834,7 @@ function ixZoneFreq(factor, seed) {
 // Product transition: old product's DAF ramps down, new product's DAF ramps up, both positioned 'lead' days ahead of the demand change
 function ixTransition(o) {
   const down = t => ixClamp(1 - (t - o.start) / o.len, 0, 1), up = t => ixClamp((t - o.start - o.gap) / o.len, 0, 1), one = ixDynZones(o.adu, 10).tog, rows = [];
-  for (let t = 0; t < o.days; t++) { const a = down(t + o.lead), b = up(t + o.lead); rows.push({ t, a, b, sum: a + b, dA: o.adu * down(t), dB: o.adu * up(t), togA: ixDynZones(o.adu * a, 10).tog, togB: ixDynZones(o.adu * b, 10).tog }); }
+  for (let t = 0; t < o.days; t++) { const a = down(t + o.lead), b = up(t + o.lead); rows.push({ t, a, b, sum: a + b, dA: o.adu * down(t), dB: o.adu * up(t), zA: ixDynZones(o.adu * a, 10), zB: ixDynZones(o.adu * b, 10) }); rows[rows.length - 1].togA = rows[rows.length - 1].zA.tog; rows[rows.length - 1].togB = rows[rows.length - 1].zB.tog; }
   const peak = Math.max(...rows.map(r => r.togA + r.togB));
   return { rows, one, peakPct: peak / one - 1, minSum: Math.min(...rows.map(r => r.sum)), maxSum: Math.max(...rows.map(r => r.sum)) };
 }
@@ -3834,31 +3951,39 @@ function ixSignalsViz(box) {
 function ixTransitionViz(box) {
   const st = { len: 30, gap: 0, lead: 10 };
   box.innerHTML = `<div class="ix-calc-ctl ix-row-ctl">${ixFld(st, "tr", "len", "Ramp length (days)", 10, 60, 5)}${ixFld(st, "tr", "gap", "New ramp starts after old ramp (days)", -20, 20, 1)}${ixFld(st, "tr", "lead", "DAFs ahead of demand (days)", 0, 20, 1)}</div>
-    <svg id="ixTrSvg" viewBox="0 0 900 430" role="img" aria-label="Panel 1: old and new product DAFs. Panel 2: the top of green that results from each DAF."></svg>
-    <p class="ix-legend"><span><i class="ln" style="border-top:2.5px solid var(--ix-r-ink)"></i>old product</span><span><i class="ln" style="border-top:2.5px solid var(--ix-g-ink)"></i>new product</span><span><i class="ln" style="border-top:2px dashed var(--ix-ink)"></i>both together</span><span><i class="sq" style="background:var(--ix-over);opacity:.35"></i>hand-over window (both DAFs between 0 and 1)</span></p><div class="ix-calc-res" id="ixTrOut"></div>`;
+    <svg id="ixTrSvg" viewBox="0 0 900 612" role="img" aria-label="Panel 1: old and new product DAFs. Panel 2: the red, yellow and green zones of the old product's buffer, the new product's buffer and both together."></svg>
+    <p class="ix-legend"><span><i class="ln" style="border-top:2.5px solid var(--ix-steel)"></i>old product</span><span><i class="ln" style="border-top:2.5px solid var(--ix-vio)"></i>new product</span><span><i class="ln" style="border-top:2px dashed var(--ix-ink)"></i>both together</span><span><i class="sq" style="background:var(--ix-r)"></i>red zone</span><span><i class="sq" style="background:var(--ix-y)"></i>yellow zone</span><span><i class="sq" style="background:var(--ix-g)"></i>green zone</span><span><i class="sq" style="background:var(--ix-over);opacity:.35"></i>hand-over window (both DAFs between 0 and 1)</span></p><div class="ix-calc-res" id="ixTrOut"></div>`;
   const draw = () => {
     const T = ixTransition({ ...st, start: 40, days: 140, adu: 20 }), L = 70, R = 860, X = t => L + t / 139 * (R - L);
-    // panel 1 (DAF) y 36–156, panel 2 (TOG) y 244–384: separate frames, axes and titles; one link line between them
+    // panel 1 (DAF) y 36–156; panel 2: three lanes (old buffer, new buffer, both together) with stacked red / yellow / green zones, same scale
     const fMax = Math.max(1, T.maxSum), A0 = 156, A1 = 44, YA = v => A0 - v / (fMax * 1.08) * (A0 - A1);
-    const tMax = Math.max(...T.rows.map(r => r.togA + r.togB), T.one), B0 = 384, B1 = 252, YB = v => B0 - v / (tMax * 1.1) * (B0 - B1);
+    const tMax = Math.max(...T.rows.map(r => r.togA + r.togB), T.one), B1 = 262, LH = 86, LG = 104, B0 = B1 + 2 * LG + LH, YL = (k, v) => B1 + k * LG + LH - v / (tMax * 1.06) * LH;
     const hand = T.rows.filter(r => r.a > 0 && r.a < 1 || r.b > 0 && r.b < 1), h0 = hand.length ? hand[0].t : null, h1 = hand.length ? hand[hand.length - 1].t : null;
-    let s = `<rect x="${L}" y="${A1 - 8}" width="${R - L}" height="${A0 - A1 + 8}" rx="4" style="fill:var(--ix-paper)"/><rect x="${L}" y="${B1 - 8}" width="${R - L}" height="${B0 - B1 + 8}" rx="4" style="fill:var(--ix-paper)"/>`;
-    if (h0 != null) s += `<rect x="${X(h0)}" y="${A1 - 8}" width="${X(h1) - X(h0)}" height="${A0 - A1 + 8}" style="fill:var(--ix-over);opacity:.14"/><rect x="${X(h0)}" y="${B1 - 8}" width="${X(h1) - X(h0)}" height="${B0 - B1 + 8}" style="fill:var(--ix-over);opacity:.14"/>`;
+    let s = `<rect x="${L}" y="${A1 - 8}" width="${R - L}" height="${A0 - A1 + 8}" rx="4" style="fill:var(--ix-paper)"/>${[0, 1, 2].map(k => `<rect x="${L}" y="${B1 + k * LG - 4}" width="${R - L}" height="${LH + 4}" rx="4" style="fill:var(--ix-paper)"/>`).join("")}`;
+    if (h0 != null) s += `<rect x="${X(h0)}" y="${A1 - 8}" width="${X(h1) - X(h0)}" height="${A0 - A1 + 8}" style="fill:var(--ix-over);opacity:.14"/><rect x="${X(h0)}" y="${B1 - 4}" width="${X(h1) - X(h0)}" height="${B0 - B1 + 4}" style="fill:var(--ix-over);opacity:.14"/>`;
     s += `<text x="${L}" y="22" style="font:700 15px var(--ix-disp);fill:var(--ix-ink)">1 · Demand adjustment factor (DAF) of each product</text>`;
     [0, 0.5, 1].forEach(v => { s += `<line x1="${L}" x2="${R}" y1="${YA(v)}" y2="${YA(v)}" style="stroke:var(--ix-rule);stroke-dasharray:${v === 1 ? "0" : "2 4"}"/><text x="${L - 8}" y="${YA(v) + 4}" class="ax" style="text-anchor:end">${v}</text>`; });
     if (fMax > 1.005) s += `<line x1="${L}" x2="${R}" y1="${YA(fMax)}" y2="${YA(fMax)}" style="stroke:var(--ix-rule);stroke-dasharray:2 4"/><text x="${R + 6}" y="${YA(fMax) + 4}" class="ax">${fMax.toFixed(2)}</text>`;
-    s += ixPolyline(T.rows.map(r => [X(r.t), YA(r.sum)]), "stroke:var(--ix-ink);stroke-width:1.6;stroke-dasharray:6 4") + ixPolyline(T.rows.map(r => [X(r.t), YA(r.a)]), "stroke:var(--ix-r-ink);stroke-width:2.6") + ixPolyline(T.rows.map(r => [X(r.t), YA(r.b)]), "stroke:var(--ix-g-ink);stroke-width:2.6");
+    s += ixPolyline(T.rows.map(r => [X(r.t), YA(r.sum)]), "stroke:var(--ix-ink);stroke-width:1.6;stroke-dasharray:6 4") + ixPolyline(T.rows.map(r => [X(r.t), YA(r.a)]), "stroke:var(--ix-steel);stroke-width:2.6") + ixPolyline(T.rows.map(r => [X(r.t), YA(r.b)]), "stroke:var(--ix-vio);stroke-width:2.6");
     // link between the panels
-    s += `<text x="${(L + R) / 2}" y="${(A0 + B1) / 2 - 6}" class="ax" style="text-anchor:middle;fill:var(--ix-ink)">↓  each product's zones are sized from ADU 20 × its DAF (DLT 10), so its top of green follows its DAF  ↓</text>`;
-    s += `<text x="${(L + R) / 2}" y="${(A0 + B1) / 2 + 12}" class="ax" style="text-anchor:middle">DAF 1 → TOG ${Math.round(T.one)} · DAF 0.5 → TOG ${Math.round(T.one / 2)} · DAF 0 → no buffer</text>`;
-    s += `<text x="${L}" y="${B1 - 18}" style="font:700 15px var(--ix-disp);fill:var(--ix-ink)">2 · Resulting top of green (TOG)</text>`;
-    [0, T.one / 2, T.one].forEach(v => { s += `<line x1="${L}" x2="${R}" y1="${YB(v)}" y2="${YB(v)}" style="stroke:var(--ix-rule);stroke-dasharray:${Math.abs(v - T.one) < 1e-9 ? "0" : "2 4"}"/><text x="${L - 8}" y="${YB(v) + 4}" class="ax" style="text-anchor:end">${Math.round(v)}</text>`; });
-    if (tMax > T.one * 1.005) s += `<line x1="${L}" x2="${R}" y1="${YB(tMax)}" y2="${YB(tMax)}" style="stroke:var(--ix-rule);stroke-dasharray:2 4"/><text x="${R + 6}" y="${YB(tMax) + 4}" class="ax">${Math.round(tMax)}</text>`;
-    s += ixPolyline(T.rows.map(r => [X(r.t), YB(r.togA + r.togB)]), "stroke:var(--ix-ink);stroke-width:1.6;stroke-dasharray:6 4") + ixPolyline(T.rows.map(r => [X(r.t), YB(r.togA)]), "stroke:var(--ix-r-ink);stroke-width:2.6") + ixPolyline(T.rows.map(r => [X(r.t), YB(r.togB)]), "stroke:var(--ix-g-ink);stroke-width:2.6");
+    s += `<text x="${(L + R) / 2}" y="${A0 + 30}" class="ax" style="text-anchor:middle;fill:var(--ix-ink)">↓  each product's zones are sized from ADU 20 × its DAF (DLT 10), so its whole buffer follows its DAF  ↓</text>`;
+    s += `<text x="${(L + R) / 2}" y="${A0 + 48}" class="ax" style="text-anchor:middle">DAF 1 → TOG ${Math.round(T.one)} · DAF 0.5 → TOG ${Math.round(T.one / 2)} · DAF 0 → no buffer</text>`;
+    s += `<text x="${L}" y="${B1 - 30}" style="font:700 15px var(--ix-disp);fill:var(--ix-ink)">2 · Resulting buffer zones (red · yellow · green)</text>`;
+    // each lane: stacked zones from 0 to TOR (red), TOR to TOY (yellow), TOY to TOG (green); outline = TOG in the product's colour
+    const zs = [r => r.zA, r => r.zB, r => ({ tor: r.zA.tor + r.zB.tor, toy: r.zA.toy + r.zB.toy, tog: r.zA.tog + r.zB.tog })];
+    const lane = [["Old product buffer", "--ix-steel", ""], ["New product buffer", "--ix-vio", ""], ["Both buffers together", "--ix-ink", "6 4"]];
+    const band = (k, lo, hi, c) => `<polygon points="${T.rows.map(r => `${X(r.t)},${YL(k, hi(zs[k](r)))}`).concat(T.rows.slice().reverse().map(r => `${X(r.t)},${YL(k, lo(zs[k](r)))}`)).join(" ")}" style="fill:var(${c});opacity:.85"/>`;
+    lane.forEach(([name, col, dash], k) => {
+      s += band(k, () => 0, z => z.tor, "--ix-r") + band(k, z => z.tor, z => z.toy, "--ix-y") + band(k, z => z.toy, z => z.tog, "--ix-g");
+      [0, T.one].forEach(v => { s += `<line x1="${L}" x2="${R}" y1="${YL(k, v)}" y2="${YL(k, v)}" style="stroke:var(--ix-rule);stroke-dasharray:${v ? "2 4" : "0"}"/><text x="${L - 8}" y="${YL(k, v) + 4}" class="ax" style="text-anchor:end">${Math.round(v)}</text>`; });
+      s += ixPolyline(T.rows.map(r => [X(r.t), YL(k, zs[k](r).tog)]), `stroke:var(${col});stroke-width:2.2${dash ? ";stroke-dasharray:" + dash : ""}`);
+      s += `<text x="${L}" y="${B1 + k * LG - 9}" class="ax" style="font-weight:700;fill:var(--ix-ink)"><tspan style="fill:var(${col})">■ </tspan>${name}</text>`;
+    });
+    if (tMax > T.one * 1.005) s += `<text x="${R + 6}" y="${YL(2, tMax) + 4}" class="ax">${Math.round(tMax)}</text>`;
     [0, 20, 40, 60, 80, 100, 120, 139].forEach(t => { s += `<line x1="${X(t)}" x2="${X(t)}" y1="${B0}" y2="${B0 + 5}" style="stroke:var(--ix-mute)"/><text x="${X(t)}" y="${B0 + 20}" class="ax" style="text-anchor:middle">${t === 139 ? "140" : t}</text>`; });
     s += `<text x="${R}" y="${B0 + 38}" class="ax" style="text-anchor:end">days</text>`;
     // hover: values of both panels for the day
-    s += T.rows.map(r => `<rect x="${X(r.t) - (R - L) / 280}" y="${A1 - 8}" width="${(R - L) / 140}" height="${B0 - A1 + 8}" style="fill:transparent"><title>Day ${r.t}\nDAF old ${r.a.toFixed(2)} · new ${r.b.toFixed(2)} · together ${r.sum.toFixed(2)}\nTOG old ${Math.round(r.togA)} · new ${Math.round(r.togB)} · together ${Math.round(r.togA + r.togB)}</title></rect>`).join("");
+    s += T.rows.map(r => `<rect x="${X(r.t) - (R - L) / 280}" y="${A1 - 8}" width="${(R - L) / 140}" height="${B0 - A1 + 8}" style="fill:transparent"><title>Day ${r.t}\nDAF old ${r.a.toFixed(2)} · new ${r.b.toFixed(2)} · together ${r.sum.toFixed(2)}\nOld TOR / TOY / TOG ${Math.round(r.zA.tor)} / ${Math.round(r.zA.toy)} / ${Math.round(r.zA.tog)}\nNew TOR / TOY / TOG ${Math.round(r.zB.tor)} / ${Math.round(r.zB.toy)} / ${Math.round(r.zB.tog)}\nTogether TOG ${Math.round(r.togA + r.togB)}</title></rect>`).join("");
     box.querySelector("#ixTrSvg").innerHTML = s;
     box.querySelector("#ixTrOut").innerHTML = `<div><span>DAFs together (lowest · highest)</span><b>${T.minSum.toFixed(2)} · ${T.maxSum.toFixed(2)}</b></div><div><span>Extra stock at the peak (both buffers vs one product)</span><b>${T.peakPct >= 0 ? "+" : ""}${Math.round(T.peakPct * 100)} %</b></div><div><span>Reading</span><b>${T.minSum < 0.95 ? "coverage gap" : T.maxSum > 1.05 ? "overlap: extra stock" : "1:1 hand-over"}</b></div>`;
   };
@@ -4308,6 +4433,27 @@ const IX_ORDER = ["positioning", "adu", "dlt", "profile", "ltf", "vf", "red", "y
     if (!pop.hidden && !pop.contains(e.target)) closePop();
   }, true);
   document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if (!pop.hidden) closePop(); else if (!det.hidden) closeDetail(); });
+})();
+
+/* ============ Sun / moon theme toggle (GitHub Pages build only) ============ */
+// Only the stand-alone site (site/index.html, marked by <meta name="ddr-build">) shows the toggle: it opens dark and
+// remembers each visitor's choice. The claude.ai artifact follows the viewer's theme, so the buttons stay hidden there.
+(function () {
+  if (!document.querySelector('meta[name="ddr-build"]')) return;
+  const root = document.documentElement;
+  const SUN = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.2" style="fill:currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3" style="stroke:currentColor;stroke-width:1.5;stroke-linecap:round"/></svg>';
+  const MOON = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 10.2A5.8 5.8 0 0 1 5.8 2.5a5.8 5.8 0 1 0 7.7 7.7z" style="fill:currentColor"/></svg>';
+  const set = t => {
+    root.dataset.theme = t;
+    try { localStorage.setItem("ddr-theme", t); } catch (e) { /* storage blocked: choice lasts for this visit only */ }
+    document.querySelectorAll("[data-theme-tg]").forEach(b => {
+      b.hidden = false; b.innerHTML = t === "dark" ? SUN : MOON;
+      const lbl = t === "dark" ? "Switch to light mode" : "Switch to dark mode"; b.setAttribute("aria-label", lbl); b.title = lbl;
+    });
+  };
+  let t = "dark"; try { t = localStorage.getItem("ddr-theme") || "dark"; } catch (e) { /* default dark */ }
+  set(t === "light" ? "light" : "dark");
+  document.querySelectorAll("[data-theme-tg]").forEach(b => b.onclick = () => set(root.dataset.theme === "dark" ? "light" : "dark"));
 })();
 
 </script>
