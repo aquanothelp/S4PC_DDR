@@ -1,6 +1,11 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="ddr-build" content="20261009190350">
+<script>(function(){var B="20261009190350";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>S4PC DDR Walkthrough</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
@@ -263,6 +268,15 @@ nav .apps button[aria-current="true"]::before { content: ""; position: absolute;
 .montbl th { white-space: normal; vertical-align: bottom; }
 .shell .t { flex-shrink: 0; }
 @media (max-width: 1300px) { .shell .mock { white-space: normal; max-width: 300px; line-height: 1.25; } }
+/* phones: header title shrinks with an ellipsis instead of widening the page */
+@media (max-width: 820px) { .shell { gap: 8px; padding-inline: 10px; } .shell .t { flex-shrink: 1; min-width: 0; font-size: 15px; } .shell .theory { white-space: nowrap; flex-shrink: 0; } }
+@media (max-width: 820px) {
+  .seg { flex-wrap: wrap; max-width: 100%; }
+  .stepper li.now .lbl { white-space: normal; width: 110px; text-align: center; }
+  .stepper li.now:last-child .lbl { right: 0; }
+  .pager .btn { white-space: normal; text-align: left; min-width: 0; }
+}
+@media (max-width: 820px) { .tabs { overflow-x: auto; max-width: 100%; } .tabs button { flex-shrink: 0; } }
 
 /* ===== DDMRP theory page (shown before the mock-up) =====
    Layout: engineering field notes — a long single column with a buffer diagram as the hero, two-column component spreads, a live buffer lab. */
@@ -762,6 +776,15 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
 /* wide screens: charts drawn for ~1000 px stay at that size, centred */
 #ixTrSvg { display: block; width: 100%; max-width: 1100px; height: auto; margin-inline: auto; }
 .ix-disc { font-size: 13px; color: var(--ix-mute); font-style: italic; }
+/* component 1: the six positioning criteria fill the left column */
+.ix-crit { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ix-crit > div { border: 1px solid var(--ix-rule); border-radius: 8px; padding: 10px 12px; background: var(--ix-sheet); display: flex; flex-direction: column; gap: 4px; }
+.ix-crit dt { font-weight: 600; color: var(--ix-ink); display: flex; gap: 8px; align-items: baseline; }
+.ix-crit dt span { font: 700 12px var(--ix-mono, monospace); color: var(--ix-steel); }
+.ix-crit dd { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ix-mute); }
+.ix-crit dd.q { color: var(--ix-ink); font-style: italic; margin-top: auto; }
+.ix-crit-how { margin-top: 18px; }
+@media (max-width: 600px) { .ix-crit { grid-template-columns: minmax(0, 1fr); } }
 </style>
 
 <!-- DDMRP theory page shown before the mock-up (theory only: Ptak & Smith, Demand Driven Institute) -->
@@ -845,10 +868,19 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
         <h2 id="ix-c1">Strategic decoupling</h2>
         <p>A decoupling point is an inventory position that separates supply variability from demand variability. Between decoupling points, planning and execution run independently, so the bullwhip effect is dampened and the lead time the customer sees is the decoupled lead time, not the full cumulative lead time.</p>
         <p class="ix-sub" data-ip="positioning">Six positioning criteria</p>
-        <ul class="ix-chips">
-          <li>Customer tolerance time</li><li>Market potential lead time</li><li>Sales order visibility horizon</li>
-          <li>External variability (demand and supply)</li><li>Inventory leverage and flexibility</li><li>Critical operation protection</li>
-        </ul>
+        <dl class="ix-crit">
+          <div><dt><span>1</span>Customer tolerance time</dt><dd>How long a typical customer will wait before looking elsewhere. Anything the customer won't wait for has to come from a buffer.</dd><dd class="q">Ask: how fast must we deliver?</dd></div>
+          <div><dt><span>2</span>Market potential lead time</dt><dd>A shorter lead time that would let you charge more or win business you lose today.</dd><dd class="q">Ask: would being faster pay?</dd></div>
+          <div><dt><span>3</span>Sales order visibility horizon</dt><dd>How far ahead real orders are known. Work inside this window can be made to order; work beyond it has to be anticipated.</dd><dd class="q">Ask: how far ahead do we see actual demand?</dd></div>
+          <div><dt><span>4</span>External variability</dt><dd>Where demand swings and spikes come in from customers, and where supply disruptions come in from suppliers.</dd><dd class="q">Ask: where does variability enter the system?</dd></div>
+          <div><dt><span>5</span>Inventory leverage and flexibility</dt><dd>Points in the bill of material or distribution network where one buffer serves many parents or locations, such as common components and divergence points.</dd><dd class="q">Ask: where does one buffer protect the most?</dd></div>
+          <div><dt><span>6</span>Critical operation protection</dt><dd>Operations with limited capacity, or where quality problems could stop the flow, should not run short of material.</dd><dd class="q">Ask: which resource must never starve?</dd></div>
+        </dl>
+        <div class="ix-crit-how">
+          <p class="ix-sub">What a decoupling point changes</p>
+          <ul class="ix-plain"><li><b>Lead time compresses:</b> items above the buffer only count the lead time down to it (the DLT), not the full cumulative lead time.</li><li><b>Variability stops spreading:</b> upstream sees steady replenishment orders instead of every swing in customer demand (less bullwhip).</li><li><b>Horizons separate:</b> each segment between decoupling points is planned and scheduled on its own.</li></ul>
+          <p class="ix-note ix-who">Criteria and effects paraphrased from knowledge of Ptak &amp; Smith (strategic inventory positioning); check the exact wording in the book.</p>
+        </div>
       </div>
       <div class="ix-panel">
         <p class="ix-sub" data-ip="dlt">Decoupled lead time (DLT)</p>
