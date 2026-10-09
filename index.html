@@ -4,8 +4,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ddr-build" content="20261009190350">
-<script>(function(){var B="20261009190350";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+<meta name="ddr-build" content="20261009191621">
+<script>(function(){var B="20261009191621";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>S4PC DDR Walkthrough</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
@@ -277,6 +277,7 @@ nav .apps button[aria-current="true"]::before { content: ""; position: absolute;
   .pager .btn { white-space: normal; text-align: left; min-width: 0; }
 }
 @media (max-width: 820px) { .tabs { overflow-x: auto; max-width: 100%; } .tabs button { flex-shrink: 0; } }
+@media (max-width: 820px) { .dlg { max-width: calc(100vw - 24px); } .dlg .b > * { min-width: 0; max-width: 100%; } }
 
 /* ===== DDMRP theory page (shown before the mock-up) =====
    Layout: engineering field notes — a long single column with a buffer diagram as the hero, two-column component spreads, a live buffer lab. */
@@ -785,6 +786,10 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
 .ix-crit dd.q { color: var(--ix-ink); font-style: italic; margin-top: auto; }
 .ix-crit-how { margin-top: 18px; }
 @media (max-width: 600px) { .ix-crit { grid-template-columns: minmax(0, 1fr); } }
+/* wide screens: buffer lab sliders in two columns so the three lab columns end together */
+@media (min-width: 1400px) { .ix-labgrid { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); } .ix-labgrid .ix-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; align-content: start; } .ix-labgrid .ix-controls hr { grid-column: 1 / -1; width: 100%; } }
+/* wide screens: the dynamic lab results table runs full width under the chart and the scenario column */
+@media (min-width: 1400px) { .ix-dyn-grid { grid-template-areas: "side chart" "side legend" "kpi kpi"; } .ix-dyn-grid > .ix-dyn-side { grid-area: side; } .ix-dyn-grid > .ix-dyn-main { display: contents; } .ix-dyn-main > svg { grid-area: chart; } .ix-dyn-main > .ix-legend { grid-area: legend; } .ix-dyn-main > .ix-tw { grid-area: kpi; } }
 </style>
 
 <!-- DDMRP theory page shown before the mock-up (theory only: Ptak & Smith, Demand Driven Institute) -->
