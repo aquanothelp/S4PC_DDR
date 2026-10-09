@@ -1,0 +1,1016 @@
+<meta charset="utf-8">
+<title>S4PC DDR Walkthrough</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: Fiori Horizon-style shell bar, slim step rail on the left, one app per screen (dynamic page header + filter bar + table card). */
+:root {
+  --bg: #f5f6f7; --surface: #fff; --ink: #1d2d3e; --muted: #556b82; --line: #e5e5e5; --field: #89919a;
+  --brand: #0070f2; --brand-ink: #fff; --link: #0064d9; --sel: #ebf8ff; --hdr: #fff;
+  --ok: #188918; --ok-bg: #f5fae5; --warn: #c35500; --warn-bg: #fff8d6; --err: #d20a0a; --err-bg: #ffeaf4; --info-bg: #e1f4ff;
+  --z-r: #e5262a; --z-y: #f5c518; --z-g: #2a9d3f; --z-b: #0a6ed1; --path: #e76500; --edge: #a9b4be;
+  --f: "72", "Noto Sans", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12171c; --surface: #1d232a; --ink: #f5f6f7; --muted: #a9b4be; --line: #354a5f; --field: #8396a8;
+  --brand: #4db1ff; --brand-ink: #12171c; --link: #4db1ff; --sel: #1e3449; --hdr: #1d232a;
+  --ok: #6dd400; --ok-bg: #1f2f1c; --warn: #ffab5a; --warn-bg: #3a2c12; --err: #ff8888; --err-bg: #3d1d23; --info-bg: #13304a;
+  --edge: #6a7d8f; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #12171c; --surface: #1d232a; --ink: #f5f6f7; --muted: #a9b4be; --line: #354a5f; --field: #8396a8;
+  --brand: #4db1ff; --brand-ink: #12171c; --link: #4db1ff; --sel: #1e3449; --hdr: #1d232a;
+  --ok: #6dd400; --ok-bg: #1f2f1c; --warn: #ffab5a; --warn-bg: #3a2c12; --err: #ff8888; --err-bg: #3d1d23; --info-bg: #13304a;
+  --edge: #6a7d8f; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 var(--f); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+a { color: var(--link); }
+
+.shell { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; height: 52px; background: var(--hdr); box-shadow: 0 0 2px rgba(0,0,0,.1), 0 2px 4px rgba(0,0,0,.08); display: flex; align-items: center; gap: 12px; padding-inline: 16px; }
+.shell .home { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); font-weight: 700; font-size: 12px; }
+.shell .t { font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shell .sp { flex: 1; }
+.shell .mock { font-size: 12px; color: var(--warn); background: var(--warn-bg); padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+.shell .av { width: 32px; height: 32px; border-radius: 50%; background: var(--sel); color: var(--link); display: grid; place-items: center; font-weight: 700; font-size: 12px; flex: none; }
+
+.frame { display: grid; grid-template-columns: 230px minmax(0, 1fr); min-height: calc(100vh - 52px); }
+nav { background: var(--surface); border-right: 1px solid var(--line); padding-block: 8px; }
+nav .g { padding: 12px 16px 4px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+nav .g.step { display: flex; align-items: center; gap: 10px; margin: 10px 8px 2px; padding: 8px 10px; border-radius: 10px; background: var(--bg); color: var(--ink); text-transform: none; letter-spacing: 0; font-size: 13px; line-height: 1.25; }
+nav .g.step small { display: block; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+nav .g.step .num { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--surface); color: var(--link); border: 1.5px solid var(--link); }
+nav .g.step.on { background: var(--sel); }
+nav .g.step.on .num { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+nav button.in { padding-left: 52px; }
+nav button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 7px 16px; cursor: pointer; border-left: 3px solid transparent; }
+nav button:hover:not(:disabled) { background: var(--bg); }
+nav button[aria-current="true"] { background: var(--sel); border-left-color: var(--brand); font-weight: 600; }
+nav button:disabled { color: var(--muted); opacity: .6; cursor: default; }
+@media (max-width: 820px) {
+  .frame { grid-template-columns: minmax(0, 1fr); }
+  nav { display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 4px 8px; }
+  nav .g { display: none; }
+  nav .g.step { display: flex; margin: 0 4px; white-space: nowrap; }
+  nav .g.step small { display: none; }
+  nav button.in { padding-left: 10px; }
+  nav button { width: auto; white-space: nowrap; border-left: 0; border-bottom: 3px solid transparent; }
+  nav button[aria-current="true"] { border-bottom-color: var(--brand); }
+}
+
+main { min-width: 0; display: flex; flex-direction: column; }
+.dph { background: var(--hdr); padding: 14px 24px 12px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.dph .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.dph .sp { flex: 1; }
+.dph h1 { margin: 0; font-size: 20px; font-weight: 700; }
+.variant { color: var(--link); font-weight: 600; font-size: 14px; border: 0; background: none; padding: 0; cursor: pointer; }
+.appid { font-size: 12px; color: var(--muted); }
+.content { padding: 16px 24px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+.fb { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; }
+.fld { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; width: 180px; max-width: 100%; }
+.fld.w { width: 230px; }
+.fld input, .fld select { height: 32px; border: 1px solid var(--field); border-radius: 6px; background: var(--surface); padding: 0 8px; color: var(--ink); width: 100%; min-width: 0; }
+.fld input[readonly] { background: var(--bg); border-color: var(--line); }
+.fld .ro { height: 32px; display: flex; align-items: center; color: var(--ink); }
+.chk { display: flex; gap: 6px; align-items: center; height: 32px; color: var(--ink); font-size: 13px; }
+.btn { height: 32px; border-radius: 8px; border: 1px solid var(--field); background: var(--surface); color: var(--link); padding: 0 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn.e { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+.btn.t { border-color: transparent; background: none; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.card { background: var(--surface); border-radius: 12px; box-shadow: 0 0 2px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.08); min-width: 0; overflow: hidden; }
+.tb { display: flex; align-items: center; gap: 8px; padding: 10px 14px; flex-wrap: wrap; }
+.tb h2 { margin: 0; font-size: 15px; font-weight: 700; }
+.tb .sp { flex: 1; }
+.tw { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 8px 12px; text-align: left; border-top: 1px solid var(--line); white-space: nowrap; }
+th { font-weight: 700; color: var(--muted); font-size: 12px; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+tr.sel td { background: var(--sel); }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: var(--bg); }
+tr.x td { color: var(--muted); font-style: italic; }
+.st { font-weight: 600; font-size: 12px; }
+.st.ok { color: var(--ok); } .st.warn { color: var(--warn); } .st.neu { color: var(--muted); }
+
+.strip { border-radius: 8px; padding: 8px 12px; font-size: 13px; }
+.strip.info { background: var(--info-bg); } .strip.ok { background: var(--ok-bg); } .strip.warn { background: var(--warn-bg); } .strip.err { background: var(--err-bg); color: var(--err); }
+.panel { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+.panel.fb { flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: 10px 16px; }
+.sec { font-weight: 700; font-size: 13px; padding: 12px 14px 0; }
+
+.ovp { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.ovc { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; border: 0; text-align: left; }
+.ovc h3 { margin: 0; font-size: 15px; } .ovc .s { color: var(--muted); font-size: 13px; }
+.ovc .k { font-size: 36px; font-weight: 300; line-height: 1.1; } .ovc .k small { font-size: 13px; color: var(--muted); }
+.bars { display: flex; gap: 8px; align-items: flex-end; height: 48px; }
+.bars span { flex: 1; border-radius: 4px 4px 0 0; min-height: 3px; }
+
+.tabs { display: flex; gap: 4px; padding: 0 14px; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; background: none; padding: 9px 10px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--link); border-bottom-color: var(--brand); }
+.graph { overflow-x: auto; padding: 8px; }
+.graph svg { display: block; min-width: 620px; width: 100%; height: auto; }
+
+.note { font-size: 12px; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; align-items: baseline; }
+.tag { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: var(--sel); color: var(--link); }
+.pager { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+
+.scrim { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.dlg { background: var(--surface); border-radius: 12px; width: min(460px, 100%); box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+.dlg header { padding: 14px 16px; font-weight: 700; font-size: 16px; border-bottom: 1px solid var(--line); }
+.dlg .b { padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 10px 14px; }
+.dlg footer { padding: 10px 16px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--line); }
+.zbar { display: flex; height: 22px; border-radius: 4px; overflow: hidden; min-width: 160px; }
+.zbar span { display: block; height: 100%; }
+.cmp { display: grid; grid-template-columns: 90px minmax(0, 1fr) 90px; gap: 8px 10px; align-items: center; font-size: 13px; }
+.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px 16px; font-size: 13px; }
+.kv div span { display: block; color: var(--muted); font-size: 12px; }
+.kv div b { font-weight: 600; font-variant-numeric: tabular-nums; }
+/* polish: object identifiers, inverted status chips, buffer status bar, shell actions */
+.oid { display: flex; flex-direction: column; line-height: 1.25; }
+.oid b { color: var(--link); font-weight: 600; }
+.oid span { color: var(--muted); font-size: 12px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.chip.r { background: var(--z-r); color: #fff; } .chip.y { background: var(--z-y); color: #1d2d3e; } .chip.g { background: var(--z-g); color: #fff; }
+.chip.b { background: var(--z-b); color: #fff; } .chip.n { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.sub { color: var(--muted); font-size: 12px; margin-left: 4px; }
+.bbar { position: relative; display: flex; width: 132px; height: 10px; border-radius: 5px; overflow: visible; }
+.bbar i { display: block; height: 100%; }
+.bbar i:first-child { border-radius: 5px 0 0 5px; } .bbar i:last-child { border-radius: 0 5px 5px 0; }
+.bbar em { position: absolute; top: -4px; width: 3px; height: 18px; border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 2px var(--surface); }
+.shell .act { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); border: 0; background: none; }
+.shell .srch { display: flex; align-items: center; gap: 8px; height: 32px; width: min(280px, 30vw); border-radius: 16px; background: var(--bg); color: var(--muted); padding: 0 12px; font-size: 13px; }
+@media (max-width: 820px) { .shell .srch, .shell .mock { display: none; } }
+tr td { height: 44px; }
+th { background: var(--surface); position: sticky; top: 0; z-index: 1; }
+.note { border-top: 1px solid var(--line); padding-top: 10px; }
+.card .tb h2 { font-size: 16px; }
+.ovc .k { color: var(--ink); }
+.seg { display: inline-flex; border: 1px solid var(--field); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); color: var(--link); font-weight: 600; font-size: 13px; padding: 5px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--field); }
+.seg button[aria-pressed="true"] { background: var(--sel); color: var(--ink); }
+.ovpg { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+.ovk { display: flex; flex-direction: column; min-width: 0; }
+.ovk.drag { opacity: .45; }
+.ovk.over { outline: 2px dashed var(--brand); outline-offset: 2px; }
+.ovh { text-align: left; border: 0; background: none; padding: 16px 16px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; border-bottom: 1px solid var(--line); }
+.ovh:hover h3 { color: var(--link); }
+.ovh h3 { margin: 0; font-size: 16px; font-weight: 700; }
+.ovh .s { color: var(--muted); font-size: 13px; }
+.ovh .k { font-size: 40px; font-weight: 300; line-height: 1.1; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.ovh .kl { color: var(--muted); font-size: 12px; }
+.ovsel { padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.ovsel select { height: 32px; border: 1px solid var(--field); border-radius: 6px; background: var(--surface); color: var(--ink); padding: 0 8px; min-width: 230px; max-width: 100%; }
+.ovch { padding: 8px 12px 12px; min-height: 230px; display: grid; place-items: center; }
+.ovch svg { width: 100%; height: auto; }
+.ovch .nod { color: var(--muted); font-weight: 600; }
+.ovch rect.col { cursor: pointer; }
+.ovch rect.col:hover { opacity: 1; }
+.menu { position: fixed; top: calc(52px + env(safe-area-inset-top, 0px)); right: 12px; background: var(--surface); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.18); padding: 6px; z-index: 25; min-width: 180px; }
+.menu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+.menu button:hover { background: var(--bg); }
+.sw { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: 100%; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.sw input { width: 36px; height: 20px; accent-color: var(--brand); }
+tr.click:focus-visible td { background: var(--sel); box-shadow: inset 0 0 0 2px var(--brand); }
+[data-n]:focus-visible rect { stroke: var(--brand) !important; stroke-width: 3 !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+.toast { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: #32363a; color: #fff; padding: 9px 16px; border-radius: 8px; font-size: 13px; z-index: 30; }
+</style>
+
+<header class="shell">
+  <div class="home" aria-hidden="true">DD</div>
+  <span class="t" id="ttl">Planner Overview</span>
+  <span class="sp"></span>
+  <span class="srch" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" style="fill:none;stroke:currentColor;stroke-width:1.6"/><path d="M11 11l3.5 3.5" style="stroke:currentColor;stroke-width:1.6"/></svg>Search in Apps</span>
+  <span class="mock">Training mock-up · S/4HANA Cloud Public Edition 2608</span>
+  <span class="act" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 1.5a4 4 0 0 0-4 4v3L2.5 11h11L12 8.5v-3a4 4 0 0 0-4-4zM6.5 13a1.5 1.5 0 0 0 3 0" style="fill:none;stroke:currentColor;stroke-width:1.4"/></svg></span>
+  <button class="av" id="av" type="button" aria-label="User menu" style="border:0;cursor:pointer">PP</button>
+</header>
+<div class="frame">
+  <nav id="nav" aria-label="Steps"></nav>
+  <main id="main"></main>
+</div>
+<div id="layer"></div>
+
+<script>
+(function () {
+"use strict";
+const H = "https://help.sap.com/docs/SAP_S4HANA_CLOUD/", PPC = H + "2bba750d1e124e1ea2a039bb1cd9b6c5/";
+const SRC = {
+  ovp: PPC + "77b200dd4f0247068f29a099e66cf0ee.html",
+  pc: PPC + "cd50ad4c21424deea5aac0123a0ee187.html",
+  bp: PPC + "f39bb12ebe174860b672ec9b9bc8abb1.html",
+  mm: H + "f86dc2eb1f8b48c880a7607213104b27/aadf442406d74d7e9b556bb3e982a0b0.html"
+};
+
+/* sample data: invented */
+const PLANT = "1010";
+const P = [
+  { id: "FG-100", d: "Finished Product A", pt: "Make", lt: 3, gi: 420000, cv: 0.18, adu: 120 },
+  { id: "FG-110", d: "Finished Product B", pt: "Make", lt: 4, gi: 260000, cv: 0.42, adu: 80 },
+  { id: "SFG-200", d: "Semi-Finished Assembly", pt: "Make", lt: 6, gi: 150000, cv: 0.32, adu: 200, sc: "Buffered in Step 1; long DLT gives G" },
+  { id: "SFG-210", d: "Semi-Finished Sub-Assembly", pt: "Make", lt: 5, gi: 60000, cv: 0.61, adu: 60 },
+  { id: "RM-300", d: "Raw Material 1", pt: "Buy", lt: 14, gi: 50000, cv: 0.12, adu: 260 },
+  { id: "RM-310", d: "Raw Material 2", pt: "Buy", lt: 9, gi: 30000, cv: 0.35, adu: 140 },
+  { id: "RM-320", d: "Raw Material 3", pt: "Buy", lt: 4, gi: 20000, cv: 0.80, adu: 90 },
+  // scenario products: already DD-relevant from an earlier set-up, no BOM links in the sample network
+  { id: "FG-120", d: "Seasonal Product", pt: "Make", lt: 2, gi: 90000, cv: 0.20, adu: 150, sc: "Demand adjustment raises ADU" },
+  { id: "SFG-230", d: "Housing", pt: "Make", lt: 3, gi: 55000, cv: 0.30, adu: 90, sc: "Small change: auto-adopted" },
+  { id: "RM-330", d: "Bearing", pt: "Buy", lt: 2, gi: 40000, cv: 0.15, adu: 300, mol: 5000, sc: "MOQ drives green zone" },
+  { id: "RM-340", d: "Fastener Kit", pt: "Buy", lt: 5, gi: 35000, cv: 0.38, adu: 120, oc: 15, sc: "Order cycle drives green zone" },
+  { id: "RM-350", d: "Imported Resin", pt: "Buy", lt: 30, gi: 45000, cv: 0.90, adu: 40, sc: "Proposal run suspended" },
+  { id: "TR-500", d: "Spare Part (from DC)", pt: "Transfer", lt: 4, gi: 25000, cv: 0.72, adu: 80, sc: "Transfer product, high variability" },
+  { id: "RM-360", d: "Discontinued Part", pt: "Buy", lt: 7, gi: 15000, cv: 0.40, adu: 50, blocked: true, sc: "Product status blocked for MRP" }
+];
+const ACT = P.filter(p => !p.blocked);
+// chart display range = DLT x multiplier (DLT Multiplier for Past / Future, Mass Maintenance of Products (DD)); sample defaults 1 / 2
+const dmOf = id => ({ p: 1, f: 2, ...(S.dm && S.dm[id] || {}) }); // products not blocked for MRP
+const AREAS = { "RM-300": [{ a: "1010", lt: 14 }, { a: "1010-02", lt: 10 }] };
+const NETWORK = ["FG-100", "FG-110", "SFG-200", "SFG-210", "RM-300", "RM-310", "RM-320"];
+// SAP Help sample buffer profiles: VF by variability, LTF by lead time class (Buffer Profiles page)
+const VF = { X: 0.3, Y: 0.5, Z: 0.8 }, LTF = { E: 0.8, F: 0.5, G: 0.3 };
+const BOM = { "FG-100": ["SFG-200", "RM-310"], "FG-110": ["SFG-200", "SFG-210", "RM-300"], "SFG-200": ["RM-300", "RM-320"], "SFG-210": ["RM-300", "RM-310"] };
+const by = Object.fromEntries(P.map(p => [p.id, p]));
+const parents = id => Object.keys(BOM).filter(k => BOM[k].includes(id));
+
+const S = {
+  th: { a: 70, b: 20, x: 0.25, y: 0.5, p: 3, q: 2, alt: true }, cls: null, jobs: [],
+  buf: {}, mrp: Object.fromEntries(P.map(p => [p.id, "PD"])), lot: Object.fromEntries(P.map(p => [p.id, "EX"])),
+  area: {}, areaPend: {}, dm: {}, aor: [{ plant: "1010", mrpc: "001" }], ovF: { prod: "", plant: "" }, mmF: { v: "", e: "", b: "", x: "" }, badi: { "RM-340": true },
+  cardOrder: ["blm", "rp", "re"], cardOn: { blm: true, rp: true, re: true }, ovBd: { blm: "efg", rp: "abc", re: "xyz" }, flt: null,
+  pspk: {}, srl: "SFG-200", srlSeen: false, gview: "Longest Path", orient: "v", mview: "Comparison View",
+  sel: "SFG-200", tab: "Upstream", sim: false, chk: {}, hp: 30, hf: 30,
+  efgTh: { Make: [3, 5], Buy: [2, 6], Transfer: [3, 5] }, efgDays: 30, efg: null,
+  plantPar: { set: "SAMPLE_SET", shc: 0, shm: 1, stf: 50, ohf: 50 },
+  tol: 5, auto: true, prop: {}, bjobs: [], mbl: "SFG-200", mtab: "Buffer Levels",
+  daf: { "FG-120": 1.5 }, zaf: {}, susp: { "RM-350": true }
+};
+// scenario products start as DD-relevant with current values in the product master (sample)
+[["FG-120", 300, 600, 840], ["SFG-230", 320, 590, 800], ["RM-330", 600, 1200, 6200], ["RM-340", 400, 1000, 2000], ["RM-350", 600, 1800, 2200], ["TR-500", 250, 550, 700], ["RM-360", 300, 650, 900]]
+  .forEach(([id, ss, rop, max]) => { S.buf[id] = { ss, rop, max }; S.mrp[id] = "D1"; S.lot[id] = "H1"; });
+const NFP = { "SFG-200": { oh: 4200, os: 3500, od: 628, qs: 200 } }; // sample stock for the overview cards
+
+function classify() {
+  const tot = ACT.reduce((s, p) => s + p.gi, 0); let cum = 0; const r = {};
+  [...ACT].sort((a, b) => b.gi - a.gi).forEach(p => {
+    cum += p.gi; const pct = cum / tot * 100, n = parents(p.id).length;
+    r[p.id] = { pct, n, abc: pct <= S.th.a ? "A" : pct <= S.th.a + S.th.b ? "B" : "C", pqr: n >= S.th.p ? "P" : n >= S.th.q ? "Q" : "R", xyz: p.cv <= S.th.x ? "X" : p.cv <= S.th.y ? "Y" : "Z" };
+  });
+  return r;
+}
+const dlt = id => by[id].lt + Math.max(0, ...(BOM[id] || []).filter(c => !S.buf[c]).map(dlt));
+function longest(id) {
+  let best = []; (BOM[id] || []).forEach(c => { const p = longest(c); if (p.reduce((s, x) => s + by[x].lt, 0) > best.reduce((s, x) => s + by[x].lt, 0)) best = p; });
+  return [id, ...best];
+}
+const dd = id => S.mrp[id] === "D1" || S.mrp[id] === "D2";
+const efgOf = id => { const t = S.efgTh[by[id].pt], v = dlt(id); return v <= t[0] ? "E" : v <= t[1] ? "F" : "G"; };
+const profileOf = id => { const p = by[id], c = S.cls && S.cls[id], e = S.efg && S.efg[id]; if (!c || !e) return null; return `${p.pt[0]}-${c.xyz}-${e}${p.mol ? " (MOQ)" : ""}`; };
+// Zones as drawn in SAP Help (Demand-Driven Replenishment overview):
+// Yellow = ADU x DLT; Red Base = Yellow x LTF; Red Safety = Red Base x VF; Green = max(Yellow x LTF, MOQ, ADU x Order Cycle)
+function calc(id) {
+  const p = by[id], xyz = S.cls[id].xyz, e = S.efg[id], z = S.zaf[id] || { r: 1, y: 1, g: 1 };
+  const daf = S.daf[id] || 1, adu = p.adu * daf, D = dlt(id), ltf = LTF[e], vf = VF[xyz];
+  const yellow = adu * D, redBase = yellow * ltf, redSafety = redBase * vf;
+  const cand = { "Yellow × LTF": yellow * ltf, "MOQ": p.mol || 0, "ADU × Order Cycle": adu * (p.oc || 0) };
+  const gKey = Object.keys(cand).reduce((a, b) => cand[b] > cand[a] ? b : a);
+  let red = Math.ceil((redBase + redSafety) * z.r), yel = Math.ceil(yellow * z.y), grn = Math.ceil(cand[gKey] * z.g), badi = false, gK = gKey;
+  if (S.badi[id] && adu * 20 > grn) { grn = Math.ceil(adu * 20); gK = "BAdI: 20 × ADU"; badi = true; }
+  return { adu, daf, D, ltf, vf, xyz, e, red, yel, grn, gKey: gK, badi: !!S.badi[id], ss: red, rop: red + yel, max: red + yel + grn, prof: profileOf(id) };
+}
+const dev = (a, b) => b ? Math.abs(a - b) / b * 100 : 100;
+const f = n => Math.round(n).toLocaleString("en-US");
+const oid = id => `<span class="oid"><b>${id}</b><span>${by[id] ? by[id].d : ""}</span></span>`;
+const $ = (s, r = document) => r.querySelector(s);
+
+const SCR = [
+  { g: "Start", t: "Planner Overview", id: "F2832", r: ovp },
+  { g: "1 · Strategic Inventory Positioning", t: "Schedule Product Classification (DD)", id: "F2823", r: pclass },
+  { g: "1 · Strategic Inventory Positioning", t: "Buffer Positioning", id: "F3282", r: bpos },
+  { g: "1 · Strategic Inventory Positioning", t: "Mass Maintenance of Products (DD)", id: "F2825", r: mass },
+  { g: "2 · Buffer Profiles and Levels", t: "Schedule Lead Time Classification of Products (DD)", r: ltc },
+  { g: "2 · Buffer Profiles and Levels", t: "Buffer Profile Assignment", kind: "Configuration", r: bpa },
+  { g: "2 · Buffer Profiles and Levels", t: "Schedule Buffer Proposal Calculation", id: "F2837", r: sbp },
+  { g: "3 · Dynamic Adjustments", t: "Manage Buffer Levels", id: "F2706", r: mbl },
+  { g: "4 · Demand-Driven Planning", t: "Schedule MRP Runs", kind: "Application job", r: mrp },
+  { g: "4 · Demand-Driven Planning", t: "Replenishment Planning by Planning Priority", r: rplan },
+  { g: "4 · Demand-Driven Planning", t: "Stock/Requirements List", kind: "Demand-Driven Replenishment tab", r: srl },
+  { g: "5 · Visible & Collaborative Execution", t: "Replenishment Execution by On-Hand Status", r: rexec },
+  { g: "5 · Visible & Collaborative Execution", t: "Projected On-Hand Alerts", r: poa },
+  { g: "5 · Visible & Collaborative Execution", t: "Historical Buffer Performance", id: "F7147", r: hbp }
+];
+const NEXT = [];
+let cur = 0;
+
+function nav() {
+  let h = "", g = "";
+  SCR.forEach((s, i) => {
+    if (s.g !== g) {
+      const m = s.g.match(/^(\d) · (.*)$/), on = SCR[cur].g === s.g;
+      h += m ? `<div class="g step ${on ? "on" : ""}"><span class="num">${m[1]}</span><span><small>DDMRP Step ${m[1]}</small>${m[2]}</span></div>` : `<div class="g">${s.g}</div>`;
+      g = s.g;
+    }
+    h += `<button data-i="${i}" aria-current="${i === cur}" class="${/^\d/.test(s.g) ? "in" : ""}">${s.t}</button>`;
+  });
+  NEXT.forEach(([grp, items]) => { h += `<div class="g">${grp}</div>` + items.map(t => `<button disabled title="Next iteration">${t}</button>`).join(""); });
+  $("#nav").innerHTML = h;
+  $("#nav").querySelectorAll("[data-i]").forEach(b => b.onclick = () => { S.flt = null; go(+b.dataset.i); });
+}
+function go(i) {
+  cur = i; const s = SCR[i]; $("#ttl").textContent = s.t; nav();
+  const m = $("#main");
+  m.innerHTML = `<div class="dph"><div class="row"><h1>${s.t}</h1><button class="variant" type="button">Standard ▾</button><span class="sp"></span>${s.id ? `<span class="appid">App ID ${s.id}</span>` : s.kind ? `<span class="appid">${s.kind}</span>` : ""}</div><div class="fb" id="fb"></div></div><div class="content" id="ct"></div>`;
+  s.r($("#fb"), $("#ct"));
+  const pg = document.createElement("div"); pg.className = "pager";
+  pg.innerHTML = `<button class="btn" id="pv" ${i ? "" : "disabled"}>← Back</button><button class="btn e" id="nx" ${i < SCR.length - 1 ? "" : "disabled"}>${i < SCR.length - 1 ? "Next: " + SCR[i + 1].t : "End of walkthrough"} →</button>`;
+  $("#ct").appendChild(pg);
+  // keyboard access for clickable rows and graph nodes
+  m.querySelectorAll("tr.click").forEach(tr => { tr.tabIndex = 0; tr.setAttribute("role", "button"); });
+  m.querySelectorAll("[data-n]").forEach(g => g.setAttribute("tabindex", "0"));
+  $("#pv").onclick = () => go(cur - 1); $("#nx").onclick = () => go(cur + 1);
+  window.scrollTo(0, 0);
+}
+const note = (step, text, src) => `<div class="note"><span class="tag">${step}</span><span>${text}</span><a href="${src}" target="_blank" rel="noopener">SAP Help</a></div>`;
+const fbStd = (extra = "") => `<label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">MRP Area<input value="${PLANT}" readonly></label>${extra}<button class="btn e" type="button">Go</button><button class="btn t" type="button">Adapt Filters</button>`;
+function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.setAttribute("role", "status"); d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2200); }
+function dialog(title, body, ok) {
+  const L = $("#layer");
+  L.innerHTML = `<div class="scrim"><div class="dlg" role="dialog" aria-modal="true" aria-label="${title}"><header>${title}</header><div class="b">${body}</div><footer><button class="btn e" id="d-ok">OK</button><button class="btn" id="d-c">Cancel</button></footer></div></div>`;
+  $("#d-c").onclick = () => L.innerHTML = "";
+  $("#d-ok").onclick = () => { if (ok(L) !== false) L.innerHTML = ""; };
+  return L;
+}
+
+/* Planner Overview */
+function ovp(fb, ct) {
+  fb.innerHTML = `<label class="fld">Product<select id="ofp"><option value="">All</option>${P.filter(p => dd(p.id)).map(p => `<option ${S.ovF.prod === p.id ? "selected" : ""}>${p.id}</option>`).join("")}</select></label><label class="fld">Product Group<input></label><label class="fld">Plant<select id="ofl"><option value="">All</option><option ${S.ovF.plant === PLANT ? "selected" : ""}>${PLANT}</option></select></label><label class="fld">MRP Area<input></label><button class="btn t" type="button">Adapt Filters</button>`;
+  $("#ofp", fb).onchange = e => { S.ovF.prod = e.target.value; go(cur); };
+  $("#ofl", fb).onchange = e => { S.ovF.plant = e.target.value; go(cur); };
+  const keep = id => !S.ovF.prod || S.ovF.prod === id;
+  const bufs = Object.keys(S.buf).filter(dd).filter(keep);
+  const sets = {
+    blm: ddList().filter(keep).filter(id => S.prop[id] && S.prop[id].st === "New"),
+    rp: bufs.filter(id => STK[id] && ["Red", "Yellow"].includes(nfp(id).zone)),
+    re: bufs.filter(id => STK[id] && STK[id].oh < S.buf[id].ss)
+  };
+  const order = S.cardOrder.filter(k => S.cardOn[k]);
+  ct.innerHTML = `<div class="ovpg" id="ovpg">${order.map(k => ovCard(k, sets[k])).join("")}</div>
+  ${order.length ? "" : `<div class="strip info">All cards are hidden. Open the user menu and choose Manage Cards to show them again.</div>`}
+  ${note("Overview", "Drag cards to rearrange them; hide or show cards with Manage Cards in the user menu. The card header opens the app; a column opens it filtered by that indicator. In SAP Help, the Replenishment Planning and Replenishment Execution cards open the Monitor Demand-Driven Replenishment app; this mock opens the matching replenishment app.", SRC.ovp)}`;
+  ct.querySelectorAll(".ovh").forEach(h => h.onclick = () => { S.flt = null; goT(OVC[h.dataset.k].app); });
+  ct.querySelectorAll("[data-bd]").forEach(sel => sel.onchange = () => { S.ovBd[sel.dataset.bd] = sel.value; go(cur); });
+  ct.querySelectorAll("rect.col").forEach(r => r.onclick = () => {
+    const k = r.dataset.k, dim = S.ovBd[k], val = r.dataset.v;
+    S.flt = { label: `${DIM[dim].name.replace("Breakdown by ", "")}: ${val}`, ids: sets[k].filter(id => indOf(id, dim) === val) };
+    goT(OVC[k].app);
+  });
+  // drag and drop to rearrange
+  let dragK = null;
+  ct.querySelectorAll(".ovk").forEach(c => {
+    c.addEventListener("dragstart", e => { dragK = c.dataset.k; c.classList.add("drag"); try { e.dataTransfer.setData("text/plain", dragK); } catch (_) {} });
+    c.addEventListener("dragend", () => c.classList.remove("drag"));
+    c.addEventListener("dragover", e => { e.preventDefault(); c.classList.add("over"); });
+    c.addEventListener("dragleave", () => c.classList.remove("over"));
+    c.addEventListener("drop", e => { e.preventDefault(); const to = c.dataset.k; if (dragK && dragK !== to) { const o = S.cardOrder.filter(x => x !== dragK); o.splice(o.indexOf(to), 0, dragK); S.cardOrder = o; go(cur); } });
+  });
+}
+const OVC = {
+  blm: { t: "Buffer Level Management", s: "Supported by System Proposals", kl: "Deviations", app: "Manage Buffer Levels" },
+  rp: { t: "Replenishment Planning", s: "Based on Planning Priority", kl: "Buffers Below Reorder Point", app: "Replenishment Planning by Planning Priority" },
+  re: { t: "Replenishment Execution", s: "Based on On-Hand Stock Status", kl: "Buffers Below Safety Stock", app: "Replenishment Execution by On-Hand Status" }
+};
+const DIM = {
+  efg: { name: "Breakdown by Lead Time (EFG)", cats: ["Unclassified", "E (Short)", "F (Medium)", "G (Long)"] },
+  abc: { name: "Breakdown by Value (ABC)", cats: ["Unclassified", "A (High)", "B (Medium)", "C (Low)"] },
+  xyz: { name: "Breakdown by Variability (XYZ)", cats: ["Unclassified", "X (Low)", "Y (Medium)", "Z (High)"] }
+};
+const indOf = (id, dim) => {
+  const v = dim === "efg" ? S.efg && S.efg[id] : S.cls && S.cls[id] && S.cls[id][dim];
+  return v ? DIM[dim].cats.find(c => c[0] === v) : "Unclassified";
+};
+function ovCard(k, ids) {
+  const c = OVC[k], dim = S.ovBd[k], cats = DIM[dim].cats, cnt = cats.map(cat => ids.filter(id => indOf(id, dim) === cat).length);
+  const mx = Math.max(...cnt, 1), W = 320, H = 220, L = 34, B = 34, bw = (W - L - 10) / cats.length, y = v => 10 + (1 - v / mx) * (H - B - 10);
+  let ch = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${DIM[dim].name}">`;
+  for (let t = 0; t <= mx; t += Math.max(1, Math.ceil(mx / 4))) ch += `<line x1="${L}" x2="${W - 6}" y1="${y(t)}" y2="${y(t)}" style="stroke:var(--line)"/><text x="${L - 6}" y="${y(t) + 4}" text-anchor="end" style="fill:var(--muted);font:11px var(--f)">${t}</text>`;
+  cnt.forEach((n, i) => {
+    const x = L + i * bw + bw * 0.18, w = bw * 0.64;
+    if (n) ch += `<rect class="col" data-k="${k}" data-v="${cats[i]}" x="${x}" y="${y(n)}" width="${w}" height="${y(0) - y(n)}" rx="3" style="fill:var(--brand);opacity:.8"><title>${cats[i]}: ${n}</title></rect>`;
+    ch += `<text x="${x + w / 2}" y="${H - 14}" text-anchor="middle" style="fill:var(--muted);font:11px var(--f)">${cats[i].replace(" (", " (")}</text>`;
+  });
+  ch += `</svg>`;
+  return `<div class="card ovk" draggable="true" data-k="${k}">
+    <button class="ovh" type="button" data-k="${k}"><h3>${c.t}</h3><span class="s">${c.s}</span><span class="k">${ids.length}</span><span class="kl">${c.kl}</span></button>
+    <div class="ovsel"><select data-bd="${k}" aria-label="Breakdown">${Object.entries(DIM).map(([d, v]) => `<option value="${d}" ${d === dim ? "selected" : ""}>${v.name}</option>`).join("")}</select></div>
+    <div class="ovch">${ids.length ? ch : `<span class="nod">No data</span>`}</div></div>`;
+}
+
+/* Schedule Product Classification (DD) */
+function pclass(fb, ct) {
+  fb.innerHTML = `<label class="fld">Job Template<input value="Product Classification (DD)" readonly></label><label class="fld">Status<input placeholder="All" readonly></label><button class="btn e" type="button">Go</button>`;
+  const t = S.th, r = S.cls;
+  const num = (id, lbl, v, step = 1) => `<label class="fld">${lbl}<input id="${id}" type="number" step="${step}" min="0" value="${v}"></label>`;
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>New Job: Product Classification (DD)</h2></div>
+    <div class="sec">Selection</div><div class="panel fb">${`<label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">MRP Area<input value="${PLANT}" readonly></label><label class="fld">Product Group<input readonly></label><label class="fld">Product<input readonly></label>`}</div>
+    <div class="sec">Thresholds for Value (ABC) Classification</div><div class="panel fb">${num("a", "A (High)", t.a)}${num("b", "B (Medium)", t.b)}<label class="fld">C (Low)<span class="ro" id="c">${100 - t.a - t.b}</span></label></div>
+    <div class="sec">Thresholds for Variability (XYZ) Classification</div><div class="panel fb">${num("x", "X (Low)", t.x, .05)}${num("y", "Y (Medium)", t.y, .05)}<label class="fld">Z (High)<span class="ro" id="z">&gt; ${t.y}</span></label></div>
+    <div class="sec">Thresholds for BOM Usage Classification</div><div class="panel fb">${num("p", "P (High)", t.p)}${num("q", "Q (Medium)", t.q)}<label class="fld">R (Low)<span class="ro" id="rr">&lt; ${t.q}</span></label><label class="chk"><input type="checkbox" id="alt" ${t.alt ? "checked" : ""}>Exclude Alternate BOM</label></div>
+    ${SCHED}<div class="panel"><div id="err"></div><div><button class="btn e" id="sch">Schedule</button></div></div></div>
+  ${S.jobs.length ? `<div class="card"><div class="tb"><h2>Application Jobs (${S.jobs.length})</h2></div><div class="tw"><table><tr><th>Job Name</th><th>Status</th><th>Plant</th></tr>${S.jobs.map(j => `<tr><td>${j}</td><td>${chip("g", "Finished")}</td><td>${PLANT}</td></tr>`).join("")}</table></div></div>` : ""}
+  ${r ? `<div class="strip info">Results are stored as Value, BOM Usage and Variability Indicators. View them in Mass Maintenance of Products (DD).</div>` : ""}
+  ${note("Step 1", "First DDR app. It classifies products by goods issue value (ABC), BOM usage (PQR) and variation in demand (XYZ). Products blocked for MRP, bulk materials and phantom assemblies are excluded.", SRC.pc)}`;
+  const read = () => {
+    const v = id => parseFloat($("#" + id, ct).value);
+    const n = { a: v("a"), b: v("b"), x: v("x"), y: v("y"), p: v("p"), q: v("q"), alt: $("#alt", ct).checked };
+    $("#c", ct).textContent = Math.round(100 - n.a - n.b); $("#z", ct).textContent = "> " + n.y; $("#rr", ct).textContent = "< " + n.q;
+    const e = !(n.a > 0 && n.b > 0 && n.a + n.b < 100) ? "A + B must be below 100." : !(n.y > n.x && n.x >= 0) ? "Y must be greater than X." : !(n.p > n.q && n.q >= 1) ? "P must be greater than Q." : "";
+    $("#err", ct).innerHTML = e ? `<div class="strip err">${e}</div>` : ""; $("#sch", ct).disabled = !!e; return e ? null : n;
+  };
+  ct.querySelectorAll("input").forEach(i => i.oninput = read);
+  $("#sch", ct).onclick = () => { const n = read(); if (!n) return; S.th = n; S.cls = classify(); S.jobs.unshift(`Product Classification (DD) ${S.jobs.length + 1}${recText(ct)}`); toast("Job finished"); go(cur); };
+}
+
+/* Buffer Positioning */
+function bpos(fb, ct) {
+  if (!S.aor.length) { fb.innerHTML = ""; ct.innerHTML = `<div class="strip warn">Assign a Plant / MRP Controller combination in Area of Responsibility (user menu → App Settings) to load data.</div>`; return; }
+  fb.innerHTML = fbStd(`<label class="fld">Lead Time Indicator<select><option></option><option>E</option><option>F</option><option>G</option></select></label><label class="fld">Variability Indicator<select><option></option><option>X</option><option>Y</option><option>Z</option></select></label>`);
+  const c = S.cls, lp = longest(S.sel);
+  ct.innerHTML = `${c ? "" : `<div class="strip warn">Run Schedule Product Classification (DD) first to fill the indicators.</div>`}
+  <div class="card"><div class="tb"><h2>Products (${ACT.length})</h2><span class="sp"></span><button class="btn" id="rc" ${Object.keys(S.areaPend).length ? "" : "disabled"}>Recalculate DLT</button><button class="btn" id="sim">Simulate DLT</button><button class="btn e" id="buf" ${S.buf[S.sel] ? "disabled" : ""}>Buffer</button><button class="btn" id="unb" ${S.buf[S.sel] ? "" : "disabled"}>Unbuffer</button></div>
+  <div class="tw"><table><tr><th>Product</th><th>MRP Area</th><th>Procurement Type</th><th class="n">Individual Lead Time</th><th class="n">Simulated DLT</th><th>Variability Indicator</th><th>Buffered</th></tr>
+  ${ACT.map(p => `<tr class="click ${S.sel === p.id ? "sel" : ""}" data-id="${p.id}"><td>${oid(p.id)}</td><td>${AREAS[p.id] ? `<select data-area="${p.id}" aria-label="MRP Area of ${p.id}" style="height:28px;border:1px solid var(--field);border-radius:6px;background:var(--surface);color:var(--ink)">${AREAS[p.id].map(x => `<option ${(S.areaPend[p.id] || S.area[p.id] || AREAS[p.id][0].a) === x.a ? "selected" : ""}>${x.a}</option>`).join("")}</select>` : PLANT}</td><td>${p.pt}</td><td class="n">${p.lt}</td><td class="n">${S.sim ? dlt(p.id) : ""}</td><td>${c ? c[p.id].xyz : ""}</td><td>${S.buf[p.id] ? '<span class="st ok">Buffered</span>' : '<span class="st neu">Not Buffered</span>'}</td></tr>`).join("")}</table></div></div>
+  <div class="card"><div class="tb"><h2>Buffer Analysis: ${S.sel}</h2></div>
+  <div class="tabs" role="tablist">${["Upstream", "Downstream"].map(t => `<button role="tab" aria-selected="${S.tab === t}" data-t="${t}">${t}</button>`).join("")}</div>
+  <div class="tb">${seg(["Longest Path", "Product Flow", "BOM and BOM Usage"], S.gview, "data-gv")}<span class="sp"></span><button class="btn t" id="ori" title="Change orientation">${S.orient === "v" ? "⇄ Horizontal" : "⇅ Vertical"}</button></div>
+  <div class="graph" id="g"></div>
+  <div class="panel">${NETWORK.includes(S.sel) ? "" : `<div class="strip warn">${S.sel} has no BOM relationships in the sample network.</div>`}<div class="strip info">${S.tab === "Upstream" ? `Longest Path: ${lp.join(" → ")} = ${lp.reduce((s, x) => s + by[x].lt, 0)} days.` : `${S.sel} is used in: ${parents(S.sel).join(", ") || "none (finished product)"}.`}${S.sim ? ` DLT with current buffers: ${dlt(S.sel)} days.` : ""}</div></div></div>
+  ${note("Step 1", "Views: Longest Path, Product Flow, and BOM and BOM Usage, in vertical or horizontal orientation. For products with several MRP areas (RM-300 in the sample), change the MRP Area and choose Recalculate DLT. Upstream, the longest path (highest cumulative lead time) shows where to protect supply. Downstream, the parents, next buffers and finished products show where to protect demand. DLT is the sum of the longest lead times of non-buffered products up to a buffered product.", SRC.bp)}`;
+  ct.querySelectorAll("tr[data-id]").forEach(tr => tr.onclick = () => { S.sel = tr.dataset.id; go(cur); });
+  ct.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { S.tab = b.dataset.t; go(cur); });
+  ct.querySelectorAll("[data-gv]").forEach(b => b.onclick = () => { S.gview = b.dataset.gv; go(cur); });
+  $("#ori", ct).onclick = () => { S.orient = S.orient === "v" ? "h" : "v"; go(cur); };
+  ct.querySelectorAll("[data-area]").forEach(sel => { sel.onclick = e => e.stopPropagation(); sel.onchange = () => { S.areaPend[sel.dataset.area] = sel.value; go(cur); }; });
+  $("#rc", ct).onclick = () => {
+    Object.entries(S.areaPend).forEach(([id, a]) => { S.area[id] = a; by[id].lt = AREAS[id].find(x => x.a === a).lt; });
+    S.areaPend = {}; S.sim = true; toast("Lead time and DLT recalculated"); go(cur);
+  };
+  $("#sim", ct).onclick = () => { S.sim = true; toast("DLT calculated"); go(cur); };
+  $("#unb", ct).onclick = () => { delete S.buf[S.sel]; S.mrp[S.sel] = "PD"; S.lot[S.sel] = "EX"; go(cur); };
+  $("#buf", ct).onclick = () => dialog(`Buffer ${S.sel}`, `<label class="fld">MRP Type<select id="m"><option>D1</option><option>D2</option></select></label><label class="fld">Lot Size<select id="l"><option>H1</option><option>EX</option></select></label>
+    <label class="fld">Safety Stock<input id="ss" type="number" value="3200"></label><label class="fld">Reorder Point<input id="rop" type="number" value="7500"></label><label class="fld">Max Stock<input id="mx" type="number" value="10000"></label><div id="de" style="width:100%"></div>`, L => {
+      const m = $("#m", L).value, l = $("#l", L).value, ss = +$("#ss", L).value, rop = +$("#rop", L).value, mx = +$("#mx", L).value;
+      const e = m === "D1" && l !== "H1" ? "With MRP type D1, the lot-sizing procedure must be H1." : !(ss >= 0 && rop > ss && mx > rop) ? "Safety Stock < Reorder Point < Max Stock." : "";
+      if (e) { $("#de", L).innerHTML = `<div class="strip err">${e}</div>`; return false; }
+      S.buf[S.sel] = { ss, rop, max: mx }; S.mrp[S.sel] = m; S.lot[S.sel] = l; S.sim = true; toast(`${S.sel} buffered`); go(cur);
+    });
+  graph($("#g", ct));
+}
+function graph(box) {
+  const L = [["FG-100", "FG-110"], ["SFG-200", "SFG-210"], ["RM-300", "RM-310", "RM-320"]], V = S.orient === "v", nw = 150, nh = 54, pos = {};
+  const W = V ? 760 : 820, H = V ? 300 : 360;
+  L.forEach((lv, li) => lv.forEach((id, i) => pos[id] = V ? { x: W / (lv.length + 1) * (i + 1) - nw / 2, y: 18 + li * 108 } : { x: 20 + li * 290, y: H / (lv.length + 1) * (i + 1) - nh / 2 }));
+  const hot = new Set(), on = new Set(), gv = S.gview;
+  if (gv === "Product Flow") { Object.keys(pos).forEach(k => on.add(k)); }
+  else if (gv === "BOM and BOM Usage") { on.add(S.sel); (BOM[S.sel] || []).forEach(c => { on.add(c); hot.add(S.sel + ">" + c); }); parents(S.sel).forEach(pp => { on.add(pp); hot.add(pp + ">" + S.sel); }); }
+  else if (S.tab === "Upstream") { const lp = longest(S.sel); lp.forEach((n, i) => i && hot.add(lp[i - 1] + ">" + n)); const w = id => { on.add(id); (BOM[id] || []).forEach(w); }; w(S.sel); }
+  else { const w = id => { on.add(id); parents(id).forEach(p => { hot.add(p + ">" + id); w(p); }); }; w(S.sel); }
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Network graph: ${gv}"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--edge)"/></marker></defs>`;
+  Object.keys(BOM).forEach(p => BOM[p].forEach(c => {
+    const a = pos[p], b = pos[c], h = hot.has(p + ">" + c);
+    const [x1, y1, x2, y2] = V ? [a.x + nw / 2, a.y + nh, b.x + nw / 2, b.y] : [a.x + nw, a.y + nh / 2, b.x, b.y + nh / 2];
+    const d = V ? `M${x1},${y1} C${x1},${(y1 + y2) / 2} ${x2},${(y1 + y2) / 2} ${x2},${y2}` : `M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`;
+    s += `<path d="${d}" ${gv === "Product Flow" ? 'marker-start="url(#ah)"' : ""} style="fill:none;stroke:var(${h ? "--path" : "--edge"});stroke-width:${h ? 3 : 1.5};opacity:${on.has(p) && on.has(c) ? 1 : .2}"/>`;
+  }));
+  Object.entries(pos).forEach(([id, p]) => {
+    const sel = id === S.sel, c = S.cls && S.cls[id];
+    const line2 = gv === "BOM and BOM Usage" ? `Used in ${parents(id).length} BOMs${c ? " · " + c.pqr : ""}` : `LT ${by[id].lt} d${S.sim ? " · DLT " + dlt(id) + " d" : ""}`;
+    s += `<g data-n="${id}" style="cursor:pointer;opacity:${on.has(id) ? 1 : .3}"><rect x="${p.x}" y="${p.y}" width="${nw}" height="${nh}" rx="10" style="fill:var(--surface);stroke:var(${sel ? "--brand" : "--edge"});stroke-width:${sel ? 2.5 : 1}"/>
+      <text x="${p.x + 12}" y="${p.y + 22}" style="fill:var(--ink);font:700 13px var(--f)">${id}</text><text x="${p.x + 12}" y="${p.y + 40}" style="fill:var(--muted);font:12px var(--f)">${line2}</text>
+      ${S.buf[id] ? `<g transform="translate(${p.x + nw - 20},${p.y + 9})"><rect width="10" height="12" style="fill:var(--z-g)"/><rect y="12" width="10" height="12" style="fill:var(--z-y)"/><rect y="24" width="10" height="12" style="fill:var(--z-r)"/></g>` : ""}</g>`;
+  });
+  box.innerHTML = s + "</svg>";
+  box.querySelectorAll("[data-n]").forEach(g => g.onclick = () => { S.sel = g.dataset.n; go(cur); });
+}
+
+/* Mass Maintenance of Products (DD) */
+function mass(fb, ct) {
+  const fsel = (k, lbl, opts) => `<label class="fld">${lbl}<select data-mf="${k}"><option value="">All</option>${opts.map(o => `<option ${S.mmF[k] === o ? "selected" : ""}>${o}</option>`).join("")}</select></label>`;
+  fb.innerHTML = `<label class="fld">Plant<input value="${PLANT}" readonly></label>${fsel("v", "Value Indicator", ["A", "B", "C"])}${fsel("e", "Lead Time Indicator", ["E", "F", "G"])}${fsel("b", "BOM Usage Indicator", ["P", "Q", "R"])}${fsel("x", "Variability Indicator", ["X", "Y", "Z"])}<button class="btn t" type="button" id="mfc">Clear</button>`;
+  const ltInd = id => S.efg && S.efg[id] ? S.efg[id] : dd(id) ? "F" : "";
+  const shown = ACT.filter(p => { const c = S.cls && S.cls[p.id] || {}; return (!S.mmF.v || c.abc === S.mmF.v) && (!S.mmF.e || ltInd(p.id) === S.mmF.e) && (!S.mmF.b || c.pqr === S.mmF.b) && (!S.mmF.x || c.xyz === S.mmF.x); });
+  const c = S.cls, n = Object.values(S.chk).filter(Boolean).length;
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Products (${shown.length})</h2><span class="sp"></span><button class="btn e" id="mc" ${n ? "" : "disabled"}>Mass Change</button><button class="btn t">Export to Spreadsheet</button></div>
+  <div class="tw"><table><tr><th></th><th>Product</th><th>Plant</th><th>MRP Type</th><th>Lot Sizing Procedure</th><th>Value Indicator</th><th>Lead Time Indicator</th><th>BOM Usage Indicator</th><th>Variability Indicator</th><th class="n">Minimum Lot Size</th><th class="n">Horizon for Past (in Days)</th><th class="n">Horizon for Future (in Days)</th><th class="n">Product Spike Horizon Constant</th><th class="n">Product Spike Horizon Multiplier</th><th class="n">Product Spike Threshold Factor</th><th class="n">DLT Multiplier for Past</th><th class="n">DLT Multiplier for Future</th></tr>
+  ${shown.map(p => `<tr class="${S.chk[p.id] ? "sel" : ""}"><td><input type="checkbox" data-id="${p.id}" ${S.chk[p.id] ? "checked" : ""} aria-label="${p.id}"></td><td>${oid(p.id)}</td><td>${PLANT}</td><td>${S.mrp[p.id]}</td><td>${S.lot[p.id]}</td><td>${c ? c[p.id].abc : ""}</td><td>${S.efg && S.efg[p.id] ? S.efg[p.id] : dd(p.id) ? "F" : ""}</td><td>${c ? c[p.id].pqr : ""}</td><td>${c ? c[p.id].xyz : ""}</td><td class="n">${p.mol ? f(p.mol) : ""}</td><td class="n">${S.hp}</td><td class="n">${S.hf}</td>${["shc", "shm", "stf"].map(k => `<td class="n">${S.pspk[p.id] && S.pspk[p.id][k] != null ? S.pspk[p.id][k] : ""}</td>`).join("")}<td class="n">${dd(p.id) ? dmOf(p.id).p : ""}</td><td class="n">${dd(p.id) ? dmOf(p.id).f : ""}</td></tr>`).join("")}</table></div></div>
+  <div class="strip info">Products blocked for MRP (RM-360) are excluded from this list. Blank product spike parameters mean the plant values from Buffer Profile Assignment apply.</div>
+  ${P.some(p => dd(p.id)) ? `<div class="strip ok">${P.filter(p => dd(p.id)).map(p => p.id).join(", ")} marked as DD-relevant (MRP type with MRP procedure C). ${S.efg ? "" : "Lead Time Indicator shows the default F until Schedule Lead Time Classification of Products (DD) runs."}</div>` : ""}
+  ${note("Step 1", "Filter by Value, Lead Time, BOM Usage and Variability Indicator to select DD-relevant products. Typical candidates are A, G, P and Z; the next tier is B, F, Q and Y; the choice is a business decision. Mark products as DD-relevant by setting an MRP type, and set the averaging interval (Horizon for Past / Future). With MRP type D1, the lot-sizing procedure must be H1. Individual lead time method: creation date, release date, product master, or predictive analysis. DLT Multiplier for Past / Future sets the chart display range (DLT × multiplier) in Manage Buffer Levels, Replenishment Planning and Replenishment Execution.", SRC.mm)}`;
+  ct.querySelectorAll("[data-id]").forEach(x => x.onchange = () => { S.chk[x.dataset.id] = x.checked; go(cur); });
+  fb.querySelectorAll("[data-mf]").forEach(sl => sl.onchange = () => { S.mmF[sl.dataset.mf] = sl.value; go(cur); });
+  $("#mfc", fb).onclick = () => { S.mmF = { v: "", e: "", b: "", x: "" }; go(cur); };
+  $("#mc", ct).onclick = () => {
+    const ids = Object.keys(S.chk).filter(k => S.chk[k]);
+    dialog(`Mass Change (${ids.length})`, `<label class="fld">MRP Type<select id="m"><option value="">&lt;Leave Value Unchanged&gt;</option><option>D1</option><option>D2</option><option>PD</option></select></label>
+      <label class="fld">Lot Sizing Procedure<select id="l"><option value="">&lt;Leave Value Unchanged&gt;</option><option>H1</option><option>EX</option></select></label>
+      <label class="fld">Horizon for Past (in Days)<input id="hp" type="number" min="0" value="${S.hp}"></label><label class="fld">Horizon for Future (in Days)<input id="hf" type="number" min="0" value="${S.hf}"></label>
+      <label class="fld w">Product Spike Horizon Constant<input id="pk-shc" type="number" min="0" placeholder="Leave unchanged"></label><label class="fld w">Product Spike Horizon Multiplier<input id="pk-shm" type="number" min="0" step="0.1" placeholder="Leave unchanged"></label><label class="fld w">Product Spike Threshold Factor (%)<input id="pk-stf" type="number" min="0" placeholder="Leave unchanged"></label><label class="fld w">DLT Multiplier for Past<input id="dm-p" type="number" min="0" step="0.5" placeholder="Leave unchanged"></label><label class="fld w">DLT Multiplier for Future<input id="dm-f" type="number" min="0.5" step="0.5" placeholder="Leave unchanged"></label><div id="de" style="width:100%"></div>`, L => {
+      const m = $("#m", L).value, l = $("#l", L).value;
+      const bad = ids.filter(id => (m || S.mrp[id]) === "D1" && (l || S.lot[id]) !== "H1");
+      if (bad.length) { $("#de", L).innerHTML = `<div class="strip err">MRP type D1 needs lot-sizing procedure H1 (${bad.join(", ")}).</div>`; return false; }
+      ids.forEach(id => { if (m) S.mrp[id] = m; if (l) S.lot[id] = l;
+        ["shc", "shm", "stf"].forEach(k => { const v = $("#pk-" + k, L).value; if (v !== "") (S.pspk[id] = S.pspk[id] || {})[k] = +v; });
+        [["p", "#dm-p"], ["f", "#dm-f"]].forEach(([k, sel]) => { const v = $(sel, L).value; if (v !== "") (S.dm[id] = S.dm[id] || {})[k] = +v; }); });
+      S.hp = Math.max(0, +$("#hp", L).value || 0); S.hf = Math.max(0, +$("#hf", L).value || 0); S.chk = {}; toast("Changes saved"); go(cur);
+    });
+  };
+}
+
+
+/* ---------- Step 2 / 3 helpers ---------- */
+const SRC2 = {
+  ltc: PPC + "9736f276b3c741f992025298f1d57e38.html",
+  prof: PPC + "a75a060d01724773b5da7a4eeefb0146.html",
+  sbp: PPC + "f45a2868f36e4a92bb3f80953d6e7e45.html",
+  bpc: PPC + "94c36041662c488684e7f7d06ddabd2c.html",
+  mbl: PPC + "d1508028d8924cc5893f3fde9e8ae67c.html"
+};
+const ddList = () => ACT.filter(p => dd(p.id)).map(p => p.id);
+function makeProp(id) {
+  const c = calc(id), cur = S.buf[id] || { ss: 0, rop: 0, max: 0 };
+  if (!S.buf[id]) S.buf[id] = cur;
+  const within = dev(c.ss, cur.ss) <= S.tol && dev(c.rop, cur.rop) <= S.tol && dev(c.max, cur.max) <= S.tol;
+  return { ...c, within, st: "New", mode: "D" };
+}
+function zbar(o, scale) {
+  const w = v => (v / scale * 100).toFixed(1) + "%";
+  return `<div class="zbar" title="Red ${f(o.red)} · Yellow ${f(o.yel)} · Green ${f(o.grn)}"><span style="width:${w(o.red)};background:var(--z-r)"></span><span style="width:${w(o.yel)};background:var(--z-y)"></span><span style="width:${w(o.grn)};background:var(--z-g)"></span></div>`;
+}
+const zonesOf = b => ({ red: b.ss, yel: b.rop - b.ss, grn: b.max - b.rop });
+const stc = st => st === "Adopted" ? "ok" : st === "New" ? "warn" : "neu";
+const stchip = st => chip(st === "Adopted" ? "g" : st === "New" ? "y" : "n", st);
+
+/* Schedule Lead Time Classification of Products (DD) */
+function ltc(fb, ct) {
+  fb.innerHTML = `<label class="fld w">Job Template<input value="Lead Time Classification of Products (DD)" readonly></label><button class="btn e" type="button">Go</button>`;
+  const ids = ddList(), r = S.efg;
+  const row = (pt, lbl) => `<div class="sec">DLT Thresholds for ${lbl} (in Days)</div><div class="panel fb">
+    <label class="fld">E (Short)<input type="number" min="1" data-pt="${pt}" data-k="0" value="${S.efgTh[pt][0]}"></label>
+    <label class="fld">F (Medium)<input type="number" min="1" data-pt="${pt}" data-k="1" value="${S.efgTh[pt][1]}"></label>
+    <label class="fld">G (Long)<span class="ro">&gt; ${S.efgTh[pt][1]}</span></label></div>`;
+  ct.innerHTML = `${S.cls ? "" : `<div class="strip warn">Prerequisite: classify products with Schedule Product Classification (DD).</div>`}
+  <div class="card"><div class="tb"><h2>New Job: Lead Time Classification of Products (DD)</h2></div>
+    <div class="sec">Selection</div><div class="panel fb"><label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">MRP Area<input value="${PLANT}" readonly></label>
+    <label class="fld">Number of Days (Past)<input id="nd" type="number" min="1" value="${S.efgDays}"></label></div>
+    ${row("Make", "make")}${row("Buy", "buy")}${row("Transfer", "Transfer")}
+    ${SCHED}<div class="panel"><div id="err"></div><div><button class="btn e" id="sch" ${S.cls && ids.length ? "" : "disabled"}>Schedule</button></div></div></div>
+  ${S.jobs.some(j => j.startsWith("Lead Time")) ? `<div class="card"><div class="tb"><h2>Application Jobs</h2></div><div class="tw"><table><tr><th>Job Name</th><th>Status</th><th>Plant</th></tr>${S.jobs.filter(j => j.startsWith("Lead Time")).map(j => `<tr><td>${j}</td><td>${chip("g", "Finished")}</td><td>${PLANT}</td></tr>`).join("")}</table></div></div>` : ""}
+  ${r ? `<div class="strip info">Results are stored as Lead Time Indicators on DD-relevant products. View them in Mass Maintenance of Products (DD).</div>` : ""}
+  ${note("Step 2", "Third DDR app. It classifies DD-relevant products by decoupled lead time (EFG), with separate thresholds for Make, Buy and Transfer. Bulk products and phantom assemblies are excluded.", SRC2.ltc)}`;
+  ct.querySelectorAll("[data-pt]").forEach(i => i.oninput = () => {
+    const pt = i.dataset.pt, k = +i.dataset.k, v = parseInt(i.value, 10);
+    if (v > 0) S.efgTh[pt][k] = v;
+    const bad = Object.entries(S.efgTh).find(([, t]) => !(t[1] > t[0]));
+    $("#err", ct).innerHTML = bad ? `<div class="strip err">${bad[0]}: F must be greater than E.</div>` : "";
+    $("#sch", ct).disabled = !!bad || !S.cls;
+  });
+  $("#nd", ct).oninput = e => S.efgDays = Math.max(1, +e.target.value || 30);
+  $("#sch", ct).onclick = () => { S.efg = Object.fromEntries(ddList().map(id => [id, efgOf(id)])); S.jobs.unshift(`Lead Time Classification of Products (DD) ${S.jobs.length + 1}${recText(ct)}`); toast("Job finished"); go(cur); };
+}
+
+/* Buffer Profile Assignment (configuration) */
+function bpa(fb, ct) {
+  fb.innerHTML = `<label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">Procurement Type<select id="pf"><option value="">All</option><option>Make</option><option>Buy</option><option>Transfer</option></select></label>`;
+  const used = new Set(ddList().map(profileOf).filter(Boolean)), pp = S.plantPar;
+  const all = [];
+  ["Make", "Buy", "Transfer"].forEach(pt => ["X", "Y", "Z"].forEach(x => ["E", "F", "G"].forEach(e => [true, false].forEach(m =>
+    all.push({ n: `${pt[0]}-${x}-${e}${m ? " (MOQ)" : ""}`, pt, x, e, m })))));
+  const lbl = { X: "Low", Y: "Medium", Z: "High", E: "Short", F: "Medium", G: "Long" };
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Assign a Set of Buffer Profiles to a Plant</h2></div><div class="panel fb">
+    <label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">Set of Buffer Profiles<input id="set" value="${pp.set}"></label>
+    <label class="fld w">Spike Horizon Constant (SHC)<input id="shc" type="number" min="0" value="${pp.shc}"></label>
+    <label class="fld w">Spike Horizon DLT Multiplier (SHM)<input id="shm" type="number" min="0" step="0.1" value="${pp.shm}"></label>
+    <label class="fld w">Spike Threshold Factor (%)<input id="stf" type="number" min="0" value="${pp.stf}"></label>
+    <label class="fld w">On-Hand Alert Threshold Factor (%)<input id="ohf" type="number" min="0" value="${pp.ohf}"></label>
+    <button class="btn e" id="save">Save</button></div></div>
+  <div class="card"><div class="tb"><h2>Buffer Profiles: ${pp.set} (<span id="cnt"></span>)</h2></div><div class="tw"><table><thead><tr><th>Buffer Profile</th><th>Procurement Type</th><th>Variability (XYZ)</th><th>Lead Time (EFG)</th><th>Minimum Order Considered</th><th class="n">Variability Factor</th><th class="n">Lead Time Factor</th></tr></thead><tbody id="rows"></tbody></table></div></div>
+    ${note("Step 2", "Buffer profiles combine procurement type, variability, lead time class and the MOQ flag, and give each product a Variability Factor and a Lead Time Factor. The Buffer Profile Assignment configuration replaced the Buffer Profile Maintenance app. The factor values shown are SAP Help's sample set; the plant parameter values are dummy data.", SRC2.prof)}`;
+  const draw = () => {
+    const pt = $("#pf", fb).value;
+    const rows = all.filter(r => !pt || r.pt === pt);
+    $("#cnt", ct).textContent = rows.length;
+    $("#rows", ct).innerHTML = rows.map(r => `<tr><td>${r.n}</td><td>${r.pt}</td><td>${lbl[r.x]}</td><td>${lbl[r.e]}</td><td>${r.m ? "Yes" : "No"}</td><td class="n">${VF[r.x].toFixed(2)}</td><td class="n">${LTF[r.e].toFixed(2)}</td></tr>`).join("") || `<tr><td colspan="7">No profiles match.</td></tr>`;
+  };
+  $("#pf", fb).onchange = draw; draw();
+  $("#save", ct).onclick = () => { S.plantPar = { set: $("#set", ct).value || "SAMPLE_SET", shc: +$("#shc", ct).value, shm: +$("#shm", ct).value, stf: +$("#stf", ct).value, ohf: +$("#ohf", ct).value }; toast("Configuration saved"); go(cur); };
+}
+
+/* Schedule Buffer Proposal Calculation */
+function sbp(fb, ct) {
+  fb.innerHTML = `<label class="fld w">Job Template<input value="Buffer Proposal Calculation" readonly></label><button class="btn e" type="button">Go</button>`;
+  const ready = S.cls && S.efg, ids = ddList();
+  const res = Object.keys(S.prop);
+  ct.innerHTML = `${ready ? "" : `<div class="strip warn">Prerequisites: Schedule Product Classification (DD), DD-relevant products, and Schedule Lead Time Classification of Products (DD).</div>`}
+  <div class="card"><div class="tb"><h2>New Job: Buffer Proposal Calculation</h2></div>
+    <div class="sec">Selection</div><div class="panel fb"><label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">MRP Area<input value="${PLANT}" readonly></label><label class="fld">Product<input placeholder="All DD-relevant (${ids.length})" readonly></label></div>
+    <div class="sec">Custom buffer level zone calculation for products</div><div class="panel"><div class="note" style="border:0;padding:0">Shown because Business Add-In <b>DD_BUFFERLEVELZONE</b> (Buffer Level Zone Update) is implemented in Custom Logic. Sample implementation: green zone at least 20 days of ADU.</div>
+      <div class="fb">${ids.filter(id => !S.susp[id]).map(id => `<label class="chk"><input type="checkbox" data-bd2="${id}" ${S.badi[id] ? "checked" : ""}>${id}</label>`).join("")}</div></div>
+    <div class="sec">Automatic Adoption</div><div class="panel fb"><label class="chk"><input type="checkbox" id="auto" ${S.auto ? "checked" : ""}>Adopt proposals automatically within tolerance</label>
+      <label class="fld">Tolerance (%)<input id="tol" type="number" min="0" value="${S.tol}"></label></div>
+    ${SCHED}<div class="panel"><div><button class="btn e" id="sch" ${ready ? "" : "disabled"}>Schedule</button></div></div></div>
+  ${S.bjobs.length ? `<div class="card"><div class="tb"><h2>Application Jobs (${S.bjobs.length})</h2></div><div class="tw"><table><tr><th>Job Name</th><th>Status</th><th>Log</th></tr>${S.bjobs.map(j => `<tr><td>${j.n}</td><td>${chip("g", "Finished")}</td><td>${j.log}</td></tr>`).join("")}</table></div></div>` : ""}
+  ${res.length ? `<div class="strip info">Proposals are inputs to Manage Buffer Levels, where you review, adopt or discard them.</div>` : ""}
+  ${note("Step 2", "Fourth DDR app. It calculates ADU over the averaging interval and DLT, then creates buffer level proposals for Manage Buffer Levels. It can adopt proposals automatically within custom tolerance limits. Zones: Yellow = ADU × DLT; Red Base = Yellow × LTF; Red Safety = Red Base × VF; Green = max(Yellow × LTF, MOQ, ADU × Order Cycle). In this mock, the tolerance check compares Safety Stock, Reorder Point and Max Stock; SAP Help doesn't say which values it compares.", SRC2.bpc)}`;
+  $("#auto", ct).onchange = e => S.auto = e.target.checked;
+  ct.querySelectorAll("[data-bd2]").forEach(c => c.onchange = () => { if (c.checked) S.badi[c.dataset.bd2] = true; else delete S.badi[c.dataset.bd2]; });
+  $("#tol", ct).oninput = e => S.tol = Math.max(0, +e.target.value || 0);
+  $("#sch", ct).onclick = () => { const rt = recText(ct), m = runProposals(); S.bjobs[0].n += rt; toast(m); go(cur); };
+}
+function runProposals() {
+    const ids = ddList();
+    let n = 0, a = 0, s = 0;
+    let u = 0;
+    ids.forEach(id => {
+      if (S.susp[id]) { s++; return; }
+      if (!S.efg[id]) { u++; return; }
+      const x = makeProp(id);
+      if (S.auto && x.within) { x.st = "Adopted"; x.mode = "A"; S.buf[id] = { ss: x.ss, rop: x.rop, max: x.max }; a++; } else n++;
+      S.prop[id] = x;
+    });
+    S.bjobs.unshift({ n: `Buffer Proposal Calculation ${S.bjobs.length + 1}`, log: `${n} new, ${a} adopted automatically, ${s} suspended${u ? `, ${u} skipped (no lead time classification)` : ""}` });
+    return `${n + a} proposals created`;
+}
+
+/* Manage Buffer Levels */
+function mbl(fb, ct) {
+  fb.innerHTML = fbStd(`<label class="fld">Proposal Status<select><option></option><option>New</option><option>Adopted</option><option>Discarded</option></select></label><label class="fld">Lead Time Indicator<select><option></option><option>E</option><option>F</option><option>G</option></select></label>`);
+  const ids = fltIds(ddList().filter(id => S.prop[id] || S.susp[id]));
+  if (!Object.keys(S.prop).length) { ct.innerHTML = `${fltStrip()}<div class="strip warn">No buffer proposals yet. Run Schedule Buffer Proposal Calculation first.</div>` + note("Step 3", "Proposals come from the Schedule Buffer Proposal Calculation job.", SRC2.mbl); return; }
+  if (!ids.includes(S.mbl)) S.mbl = ids[0];
+  if (!ids.length) { ct.innerHTML = fltStrip() + `<div class="strip warn">No buffers match the filter.</div>`; bindClr(ct); return; }
+  const scale = Math.max(...ids.map(id => Math.max((S.buf[id] || {}).max || 0, (S.prop[id] || {}).max || 0)), 1);
+  const st = id => S.susp[id] ? "Suspended" : S.prop[id] ? S.prop[id].st : "–";
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Buffers (${ids.length})</h2></div><div class="tw"><table><tr><th>Product</th><th>Procurement Type</th><th>Proposal Status</th><th>Value</th><th>Lead Time</th><th>Variability</th><th class="n">ADU</th><th class="n">DLT</th><th class="n">Safety Stock</th><th class="n">Reorder Point</th><th class="n">Max Stock</th><th>Proposed Buffer</th></tr>
+    ${ids.map(id => { const b = S.buf[id], x = S.prop[id], arrow = (o, k) => x && x.st === "New" && x[k] !== o[k] ? `${f(o[k])} → <b>${f(x[k])}</b>` : f(o[k]); return `<tr class="click ${S.mbl === id ? "sel" : ""}" data-id="${id}"><td>${oid(id)}</td><td>${by[id].pt}</td><td>${stchip(st(id))}</td><td>${S.cls[id].abc}</td><td>${S.efg[id] || ""}</td><td>${S.cls[id].xyz}</td><td class="n">${x ? f(x.adu) : ""}</td><td class="n">${x ? x.D : ""}</td><td class="n">${arrow(b, "ss")}</td><td class="n">${arrow(b, "rop")}</td><td class="n">${arrow(b, "max")}</td><td>${x ? zbar(x, scale) : ""}</td></tr>`; }).join("")}</table></div></div>
+  <div id="det"></div>
+  ${note("Step 3", "Manage safety stock, reorder point and max stock through buffer proposals: adopt or discard them, adjust zones or demand, suspend or resume proposal runs, and compare current with proposed values. The status names shown are the mock's labels.", SRC2.mbl)}`;
+  ct.querySelectorAll("tr[data-id]").forEach(tr => tr.onclick = () => { S.mbl = tr.dataset.id; go(cur); });
+  detail($("#det", ct));
+  bindClr(ct);
+}
+function detail(box) {
+  const id = S.mbl, x = S.prop[id], b = S.buf[id], p = by[id], z = S.zaf[id] || { r: 1, y: 1, g: 1 };
+  const tabs = ["Buffer Levels", "Average Daily Usage", "Decoupled Lead Time", "Classifications"];
+  const susp = !!S.susp[id], open = x && x.st === "New" && !susp;
+  const scale = Math.max(b.max, x ? x.max : 0, 1);
+  let body = "";
+  if (S.mtab === "Buffer Levels") {
+    body = `<div>${seg(["Planning View", "Execution View", "Comparison View"], S.mview, "data-mv")}</div>`;
+    if (S.mview === "Planning View") body += planView(id);
+    else if (S.mview === "Execution View") body += STK[id] ? tdChart(id) + `<div class="note" style="border:0;padding:0">Projected on-hand stock against the buffer zones (replenishment operations).</div>` : `<div class="strip info">No stock situation in the sample data.</div>`;
+    else body += `<div class="cmp"><b>Current</b>${zbar(zonesOf(b), scale)}<span>${f(b.max)}</span>${x ? `<b>Proposed</b>${zbar(x, scale)}<span>${f(x.max)}</span>` : ""}</div>
+      <div class="tw"><table><tr><th></th><th class="n">Safety Stock</th><th class="n">Reorder Point</th><th class="n">Max Stock</th></tr>
+      <tr><td>Current</td><td class="n">${f(b.ss)}</td><td class="n">${f(b.rop)}</td><td class="n">${f(b.max)}</td></tr>
+      ${x ? `<tr><td>Proposed</td><td class="n">${f(x.ss)}</td><td class="n">${f(x.rop)}</td><td class="n">${f(x.max)}</td></tr>` : ""}</table></div>
+      <div class="kv"><div><span>Adjustment Factor for Red Zone</span><b>${z.r}</b></div><div><span>Adjustment Factor for Yellow Zone</span><b>${z.y}</b></div><div><span>Adjustment Factor for Green Zone</span><b>${z.g}</b></div>${x ? `<div><span>Green Zone</span><b>${x.gKey}</b></div>` : ""}</div>${x && x.badi ? `<div class="strip info">Proposal calculated with the custom buffer level zone calculation (BAdI DD_BUFFERLEVELZONE).</div>` : ""}`;
+  } else if (S.mtab === "Average Daily Usage") {
+    const adu90 = Array.from({ length: 90 }, (_, t) => Math.max(0, p.adu * (1 + 0.25 * Math.sin(t / 9 + id.length) + 0.15 * Math.sin(t * 1.3))));
+    const mx = Math.max(...adu90);
+    body = `<div><svg viewBox="0 0 900 90" style="width:100%;height:90px" role="img" aria-label="Daily usage, last 90 days">${adu90.map((v, t) => `<rect x="${t * 10 + 1}" y="${86 - v / mx * 80}" width="8" height="${v / mx * 80}" rx="1.5" style="fill:var(--link);opacity:.55"/>`).join("")}<line x1="0" x2="900" y1="${86 - p.adu / mx * 80}" y2="${86 - p.adu / mx * 80}" style="stroke:var(--ink);stroke-dasharray:5 4"/></svg><div class="note" style="border:0;padding:0">Daily usage, last 90 days · dashed line = ADU (generated history)</div></div>
+    <div class="kv"><div><span>Average Daily Usage (base)</span><b>${f(p.adu)}</b></div><div><span>Demand Adjustment Factor</span><b>${S.daf[id] || 1}</b></div><div><span>Adjusted ADU</span><b>${f(p.adu * (S.daf[id] || 1))}</b></div><div><span>Horizon for Past / Future (in Days)</span><b>${S.hp} / ${S.hf}</b></div></div>`;
+  } else if (S.mtab === "Decoupled Lead Time") {
+    const lp = longest(id);
+    body = `<div class="kv"><div><span>Individual Lead Time</span><b>${p.lt} days</b></div><div><span>Decoupled Lead Time</span><b>${dlt(id)} days</b></div><div><span>Procurement Type</span><b>${p.pt}</b></div><div><span>Longest Path in Buffer's Replenishment Network</span><b>${lp.join(" → ")}</b></div></div>`;
+  } else {
+    body = `<div class="kv"><div><span>Value Indicator</span><b>${S.cls[id].abc}</b></div><div><span>Lead Time Indicator</span><b>${S.efg[id]}</b></div><div><span>BOM Usage Indicator</span><b>${S.cls[id].pqr}</b></div><div><span>Variability Indicator</span><b>${S.cls[id].xyz}</b></div><div><span>Buffer Profile</span><b>${profileOf(id)}</b></div><div><span>Lead Time Factor / Variability Factor</span><b>${LTF[S.efg[id]]} / ${VF[S.cls[id].xyz]}</b></div><div><span>Minimum Lot Size</span><b>${p.mol ? f(p.mol) : "–"}</b></div><div><span>Order Cycle (days)</span><b>${p.oc || "–"}</b></div></div>`;
+  }
+  box.innerHTML = `<div class="card"><div class="tb"><h2>${id} · ${p.d}</h2>${x && x.badi ? chip("b", "BAdI proposal") : ""}<span class="sp"></span>
+    <button class="btn e" id="ad" ${open ? "" : "disabled"}>Adopt</button><button class="btn" id="di" ${open ? "" : "disabled"}>Discard</button>
+    <button class="btn" id="za" ${susp ? "disabled" : ""}>Zone Adjustment</button><button class="btn" id="da" ${susp ? "disabled" : ""}>Demand Adjustment</button>
+    <button class="btn t" id="su">${susp ? "Resume Proposal Run" : "Suspend Proposal Run"}</button><button class="btn t" id="pf">Product Flow</button></div>
+    <div class="tabs" role="tablist">${tabs.map(t => `<button role="tab" aria-selected="${S.mtab === t}" data-t="${t}">${t}</button>`).join("")}</div>
+    <div class="panel" style="padding-top:12px">${susp ? `<div class="strip warn">Proposal run suspended. Resume it to get new proposals.</div>` : ""}${body}</div></div>`;
+  box.querySelectorAll("[data-t]").forEach(t => t.onclick = () => { S.mtab = t.dataset.t; go(cur); });
+  const redo = () => { S.prop[id] = makeProp(id); go(cur); };
+  $("#ad", box).onclick = () => { S.buf[id] = { ss: x.ss, rop: x.rop, max: x.max }; x.st = "Adopted"; toast("Proposal adopted"); go(cur); };
+  $("#di", box).onclick = () => { x.st = "Discarded"; toast("Proposal discarded"); go(cur); };
+  box.querySelectorAll("[data-mv]").forEach(b => b.onclick = () => { S.mview = b.dataset.mv; go(cur); });
+  $("#pf", box).onclick = () => { S.sel = NETWORK.includes(id) ? id : S.sel; S.gview = "Product Flow"; goT("Buffer Positioning"); if (!NETWORK.includes(id)) toast(`${id} has no BOM relationships in the sample network`); };
+  $("#su", box).onclick = () => { if (susp) { delete S.susp[id]; redo(); toast("Proposal run resumed"); } else { S.susp[id] = true; toast("Proposal run suspended"); go(cur); } };
+  $("#za", box).onclick = () => dialog(`Zone Adjustment: ${id}`, `<label class="fld w">Adjustment Factor for Red Zone<input id="zr" type="number" step="0.1" min="0" value="${z.r}"></label><label class="fld w">Adjustment Factor for Yellow Zone<input id="zy" type="number" step="0.1" min="0" value="${z.y}"></label><label class="fld w">Adjustment Factor for Green Zone<input id="zg" type="number" step="0.1" min="0" value="${z.g}"></label><label class="fld">Valid From<input type="date" value="2026-11-01"></label><label class="fld">Valid To<input type="date" value="2026-12-31"></label>`, L => {
+    S.zaf[id] = { r: +$("#zr", L).value || 1, y: +$("#zy", L).value || 1, g: +$("#zg", L).value || 1 }; redo(); toast("Zone adjustment applied; new proposal created");
+  });
+  $("#da", box).onclick = () => dialog(`Demand Adjustment: ${id}`, `<label class="fld">Demand Adjustment Factor<input id="df" type="number" step="0.1" min="0" value="${S.daf[id] || 1}"></label><label class="fld">Valid From<input type="date" value="2026-11-01"></label><label class="fld">Valid To<input type="date" value="2026-12-31"></label>`, L => {
+    S.daf[id] = +$("#df", L).value || 1; redo(); toast("Demand adjustment applied; new proposal created");
+  });
+}
+
+/* ---------- Steps 4 / 5: stock situation (dummy) ---------- */
+const SRC3 = {
+  proc: PPC + "52387dd9452c4365941ab16eb059e816.html",
+  rp: PPC + "6c019769c0e0489582de0ba0958b7aec.html",
+  re: PPC + "0446fe8f301d49ffbeb08889d5e0b917.html",
+  poa: PPC + "86baa34cf44e4bcfb3e803bb9ca49bee.html",
+  hbp: PPC + "c5eeea81817942cfb47e56b5f8ea314b.html"
+};
+const TODAY = new Date(2026, 9, 12);
+const day = n => { const d = new Date(TODAY); d.setDate(d.getDate() + n); return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }); };
+// oh = on-hand, od = open past + today's demand, rec = open supply {d: day, q}, dem = future daily open demand {day: qty}
+const STK = {
+  "SFG-200": { oh: 4200, od: 628, rec: [{ d: 8, q: 5100 }], dem: { 5: 1800, 25: 1700 }, sc: "SAP Help example: NFP 6,872 → supply 3,128" },
+  "RM-330": { oh: 300, od: 100, rec: [], dem: {}, sc: "Red: no open supply" },
+  "RM-340": { oh: 1500, od: 50, rec: [{ d: 3, q: 500 }], dem: {}, sc: "Green: no action" },
+  "TR-500": { oh: 400, od: 30, rec: [{ d: 3, q: 200 }], dem: { 2: 150 }, sc: "Qualified spike pushes into yellow" },
+  "FG-120": { oh: 900, od: 20, rec: [{ d: 1, q: 100 }], dem: {}, sc: "Above max stock" },
+  "RM-350": { oh: 500, od: 100, rec: [{ d: 25, q: 1500 }], dem: {}, sc: "Planning green, on-hand below safety stock" },
+  "SFG-230": { oh: 200, od: 40, rec: [{ d: 2, q: 300 }], dem: {}, sc: "Yellow: replenish" },
+  "RM-360": { oh: 100, od: 20, rec: [], dem: {}, sc: "Blocked for MRP: no supply can be created" }
+};
+const SUPPLY = { Make: "Planned Order", Buy: "Purchase Requisition", Transfer: "Stock Transfer Requisition" };
+S.created = []; S.mjobs = []; S.hor = 30; S.rpTab = "Time-Dependent Buffer Levels"; S.hbSel = null; S.reSel = null; S.poSel = null; S.hbView = "Month-Wise"; S.hbTbl = false; S.rpSel = "SFG-200";
+const planIds = () => P.filter(p => dd(p.id) && STK[p.id]).map(p => p.id);
+const blk = id => by[id].blocked ? ` <span title="Product status blocked for MRP" style="color:var(--link)">ⓘ</span>` : "";
+// Net flow equation (SAP Help, Planning Procedure): On-Hand + Open Supply − Open Past (incl. Today's) Demand − Qualified Spike Demand
+function nfp(id) {
+  const k = STK[id], b = S.buf[id], ps = S.pspk[id] || {}, D = dlt(id);
+  const pp = { shc: ps.shc ?? S.plantPar.shc, shm: ps.shm ?? S.plantPar.shm, stf: ps.stf ?? S.plantPar.stf, prod: Object.keys(ps).length > 0 };
+  const thr = pp.stf / 100 * b.ss, hz = Math.ceil(pp.shm * D + pp.shc);
+  const os = k.rec.reduce((s, r) => s + r.q, 0);
+  const spikes = Object.entries(k.dem).map(([d, q]) => ({ d: +d, q, ok: q > thr && +d <= hz }));
+  const qs = spikes.filter(x => x.ok).reduce((s, x) => s + x.q, 0);
+  const n = k.oh + os - k.od - qs;
+  const zone = n <= b.ss ? "Red" : n <= b.rop ? "Yellow" : n <= b.max ? "Green" : "Above Max";
+  return { ...k, os, thr, hz, spikes, qs, n, zone, pr: n / b.max * 100, prop: n < b.rop ? b.max - n : 0, D, b, pp };
+}
+const zc = z => z === "Red" ? "--z-r" : z === "Yellow" ? "--z-y" : z === "Green" ? "--z-g" : "--z-b";
+const zk = z => z === "Red" ? "r" : z === "Yellow" ? "y" : z === "Green" ? "g" : "b";
+const zpill = z => `<span class="chip ${zk(z)}">${z}</span>`;
+const seg = (opts, val, attr) => `<span class="seg">${opts.map(o => `<button type="button" ${attr}="${o}" aria-pressed="${o === val}">${o}</button>`).join("")}</span>`;
+const chip = (k, t) => `<span class="chip ${k}">${t}</span>`;
+// buffer status bar: red / yellow / green zones (+ room above max) with the net flow position marker
+function bbar(b, v) {
+  const top = b.max * 1.2, w = q => (q / top * 100).toFixed(1) + "%";
+  return `<span class="bbar" title="NFP ${f(v)}"><i style="width:${w(b.ss)};background:var(--z-r)"></i><i style="width:${w(b.rop - b.ss)};background:var(--z-y)"></i><i style="width:${w(b.max - b.rop)};background:var(--z-g)"></i><i style="width:${w(top - b.max)};background:var(--z-b);opacity:.35"></i><em style="left:calc(${Math.max(0, Math.min(v, top)) / top * 100}% - 1px)"></em></span>`;
+}
+function createSupply(id, q, d) {
+  const x = nfp(id); if (!x.prop || by[id].blocked) return false;
+  q = q || x.prop; d = d || x.D;
+  STK[id].rec.push({ d, q, created: true });
+  S.created.unshift({ id, t: SUPPLY[by[id].pt], q, d: day(d), from: x.n });
+  return true;
+}
+// projected on-hand: on-hand − daily demand (open demand on that day, else ADU) + receipts
+function project(id, days) {
+  const k = STK[id], adu = by[id].adu * (S.daf[id] || 1); let v = k.oh; const out = [];
+  for (let d = 1; d <= days; d++) { v += k.rec.filter(r => r.d === d).reduce((s, r) => s + r.q, 0) - (k.dem[d] || adu); out.push(v); }
+  return out;
+}
+function spark(vals, ss, w = 140, h = 30) {
+  const mx = Math.max(...vals, ss, 1), mn = Math.min(...vals, 0), sx = w / Math.max(vals.length - 1, 1), sy = v => h - 2 - (v - mn) / (mx - mn || 1) * (h - 4);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><line x1="0" x2="${w}" y1="${sy(ss)}" y2="${sy(ss)}" style="stroke:var(--z-r);stroke-dasharray:3 2"/><line x1="0" x2="${w}" y1="${sy(0)}" y2="${sy(0)}" style="stroke:var(--line)"/><polyline points="${vals.map((v, i) => `${(i * sx).toFixed(1)},${sy(v).toFixed(1)}`).join(" ")}" style="fill:none;stroke:var(--link);stroke-width:1.5"/></svg>`;
+}
+
+/* Schedule MRP Runs (planning run; DD products use MRP procedure C) */
+function mrp(fb, ct) {
+  fb.innerHTML = `<label class="fld w">Job Template<input value="MRP Run" readonly></label><button class="btn e" type="button">Go</button>`;
+  const ids = planIds();
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>New Job: MRP Run</h2></div>
+    <div class="sec">Selection</div><div class="panel fb"><label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">MRP Area<input value="${PLANT}" readonly></label><label class="fld">MRP Controller<input value="001" readonly></label><label class="fld">Product<input placeholder="All" readonly></label></div>
+    ${SCHED}<div class="panel"><div><button class="btn e" id="run">Schedule</button></div></div></div>
+  ${S.mjobs.length ? `<div class="card"><div class="tb"><h2>Application Jobs (${S.mjobs.length})</h2></div><div class="tw"><table><tr><th>Job Name</th><th>Status</th><th>Log</th></tr>${S.mjobs.map(j => `<tr><td>${j.n}</td><td>${chip("g", "Finished")}</td><td>${j.log}</td></tr>`).join("")}</table></div></div>` : ""}
+  ${S.mjobs.length ? `<div class="strip info">Check the new supply elements in Replenishment Planning by Planning Priority or the Stock/Requirements List.</div>` : ""}
+  ${note("Step 4", `For DD products (MRP procedure C), the planning run creates supply when NFP = On-Hand + Open Supply − Open Past (incl. Today's) Demand − Qualified Spike Demand is below the reorder point, up to max stock with lot size H1, available today + DLT in calendar days. Planned independent requirements are not counted. Demo date ${day(0)}.`, SRC3.proc)}`;
+  $("#run", ct).onclick = () => { const c = ids.filter(createSupply); S.mjobs.unshift({ n: `MRP Run ${S.mjobs.length + 1}${recText(ct)}`, log: c.length ? `${c.length} supply element(s) created: ${c.join(", ")}` : "No buffer below reorder point" }); toast("Job finished"); go(cur); };
+}
+
+const SOS = { Buy: ["Supplier 10300", "Supplier 10400"], Make: ["Production Version 0001"], Transfer: ["Supplying Plant 1710"] };
+const iso = n => { const d = new Date(TODAY); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+function csDialog(id) {
+  const x = nfp(id), pt = by[id].pt;
+  dialog(`Create Supply: ${id}`, `<label class="fld">Supply Element<input value="${SUPPLY[pt]}" readonly></label>
+    <label class="fld">Quantity<input id="cq" type="number" min="1" value="${x.prop}"></label>
+    <label class="fld">Availability Date<input id="cd" type="date" min="${iso(1)}" value="${iso(x.D)}"></label>
+    <label class="fld w">Source of Supply<select id="cs">${SOS[pt].map(o => `<option>${o}</option>`).join("")}</select></label>
+    <div class="strip info" style="width:100%">Proposed quantity refills the buffer to max stock (${f(x.b.max)}). Default date = today + DLT (${x.D} days).</div>`, L => {
+    const q = +$("#cq", L).value, d = Math.round((new Date($("#cd", L).value) - TODAY) / 864e5);
+    if (!(q > 0) || !(d >= 1)) return false;
+    createSupply(id, q, d); toast(`${SUPPLY[pt]} ${f(q)} created for ${id} (${$("#cs", L).value})`); go(cur);
+  });
+}
+// BOM components down to the next buffered material (phantoms excluded)
+function bomRows(id, lvl = 1, out = []) {
+  (BOM[id] || []).forEach(c => { const b = !!S.buf[c] && dd(c); out.push({ c, lvl, b }); if (!b) bomRows(c, lvl + 1, out); });
+  return out;
+}
+
+// Planning View: time-dependent max stock / reorder point / safety stock; a new proposal takes effect from today
+function planView(id) {
+  const b = S.buf[id], x = S.prop[id], nx = x && x.st === "New" ? x : b, W = 1000, H = 220, L = 8, R = 150, dm = dmOf(id), Dd = dlt(id);
+  const PA = Math.max(1, Math.round(Dd * dm.p)), FU = Math.max(1, Math.round(Dd * dm.f));
+  const top = Math.max(b.max, nx.max) * 1.15, y = v => 12 + (top - v) / top * (H - 44), X = d => L + (d + PA) / (PA + FU) * (W - L - R);
+  let s = `<div class="graph"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Planning view">`;
+  const band = (from, to, lv) => [[0, lv.ss, "--z-r"], [lv.ss, lv.rop, "--z-y"], [lv.rop, lv.max, "--z-g"]].forEach(([lo, hi, c]) => { s += `<rect x="${X(from)}" y="${y(hi)}" width="${X(to) - X(from)}" height="${y(lo) - y(hi)}" style="fill:var(${c});opacity:.25"/><line x1="${X(from)}" x2="${X(to)}" y1="${y(hi)}" y2="${y(hi)}" style="stroke:var(${c});stroke-width:1.5"/>`; });
+  band(-PA, 0, b); band(0, FU, nx);
+  s += `<line x1="${X(0)}" x2="${X(0)}" y1="6" y2="${H - 30}" style="stroke:var(--ink);stroke-dasharray:4 3"/><text x="${X(0) + 6}" y="18" style="fill:var(--muted);font:12px var(--f)">Today${nx !== b ? " · proposal" : ""}</text>`;
+  [["Max Stock", nx.max], ["Reorder Point", nx.rop], ["Safety Stock", nx.ss]].forEach(([t, v], i) => { s += `<text x="${W - R + 8}" y="${y(v) + (i === 2 ? 14 : 4)}" style="fill:var(--muted);font:12px var(--f)">${t} ${f(v)}</text>`; });
+  s += `<text x="${L}" y="${H - 10}" style="fill:var(--muted);font:12px var(--f)">${day(-PA)}</text><text x="${W - R}" y="${H - 10}" text-anchor="end" style="fill:var(--muted);font:12px var(--f)">${day(FU)}</text><text x="${(X(-PA) + X(FU)) / 2}" y="${H - 10}" text-anchor="middle" style="fill:var(--muted);font:12px var(--f)">Range: DLT ${Dd} d × ${dm.p} past / × ${dm.f} future</text>`;
+  return s + `</svg></div>`;
+}
+
+const fltIds = ids => S.flt ? ids.filter(id => S.flt.ids.includes(id)) : ids;
+const fltStrip = () => S.flt ? `<div class="strip info" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">Filtered from Planner Overview: <b>${S.flt.label}</b><button class="btn t" type="button" data-clr>Clear Filter</button></div>` : "";
+function bindClr(ct) { const b = ct.querySelector("[data-clr]"); if (b) b.onclick = () => { S.flt = null; go(cur); }; }
+
+/* Replenishment Planning by Planning Priority */
+function rplan(fb, ct) {
+  fb.innerHTML = fbStd(`<label class="fld">Planning Priority<select><option></option><option>Red</option><option>Yellow</option><option>Green</option></select></label>`);
+  const ids = fltIds(planIds()).sort((a, b) => nfp(a).pr - nfp(b).pr);
+  if (!ids.includes(S.rpSel)) S.rpSel = ids[0];
+  if (!ids.length) { ct.innerHTML = fltStrip() + `<div class="strip warn">No buffers match the filter.</div>`; bindClr(ct); return; }
+  const x = nfp(S.rpSel);
+  ct.innerHTML = `${fltStrip()}<div class="card"><div class="tb"><h2>Buffers (${ids.length})</h2><span class="sp"></span><span class="sub">Sorted by planning priority</span>${(() => { const y = nfp(S.rpSel); return `<button class="btn e" data-cs="${S.rpSel}" ${y.prop && !by[S.rpSel].blocked ? "" : "disabled"} title="Create supply for the selected buffer">Create Supply</button>`; })()}</div>
+  <div class="tw"><table><tr><th>Product</th><th>Planning Priority</th><th>Buffer Levels</th><th class="n">Net Flow Position</th><th class="n">Reorder Point</th><th class="n">Max Stock</th><th class="n">Proposed Quantity</th><th>Supply Element</th></tr>
+  ${ids.map(id => { const y = nfp(id); return `<tr class="click ${S.rpSel === id ? "sel" : ""}" data-id="${id}"><td>${oid(id)}${blk(id)}</td><td>${zpill(y.zone)}<span class="sub">${y.pr.toFixed(1)}%</span></td><td>${bbar(y.b, y.n)}</td><td class="n">${f(y.n)}</td><td class="n">${f(y.b.rop)}</td><td class="n">${f(y.b.max)}</td><td class="n">${y.prop ? f(y.prop) : ""}</td><td>${SUPPLY[by[id].pt]}</td></tr>`; }).join("")}</table></div></div>
+  <div class="card"><div class="tb"><h2>${oid(S.rpSel)}</h2></div><div class="tabs" role="tablist">${["Time-Dependent Buffer Levels", "BOM"].map(t => `<button role="tab" aria-selected="${S.rpTab === t}" data-rt="${t}">${t}</button>`).join("")}</div><div class="panel" style="padding-top:12px">${by[S.rpSel].blocked ? `<div class="strip warn">Product status is blocked for MRP. Create Supply and Expedite Supply are not available.</div>` : ""}${x.pp.prod ? `<div class="strip info">Product-specific spike parameters apply (Mass Maintenance of Products (DD)).</div>` : ""}
+    ${S.rpTab === "BOM" ? bomTable(S.rpSel) : tdChart(S.rpSel)}</div></div>
+  ${note("Step 4", "Buffers sorted by planning priority. Buffers below the reorder point (yellow or red) show the quantity needed to refill to max stock. Create Supply creates the order; you can change quantity, date or source of supply. Phantom and bulk products and MRP-blocked products are handled separately. Column labels follow SAP Help terms.", SRC3.rp)}`;
+  ct.querySelectorAll("tr[data-id]").forEach(tr => tr.onclick = e => { if (e.target.dataset.cs) return; S.rpSel = tr.dataset.id; go(cur); });
+  ct.querySelectorAll("[data-cs]").forEach(b => b.onclick = () => csDialog(b.dataset.cs));
+  ct.querySelectorAll("[data-rt]").forEach(t => t.onclick = () => { S.rpTab = t.dataset.rt; go(cur); });
+  bindClr(ct);
+}
+function rDetail(id) {
+  return `<div class="card"><div class="tb"><h2>${oid(id)}</h2></div><div class="tabs" role="tablist">${["Time-Dependent Buffer Levels", "BOM"].map(t => `<button role="tab" aria-selected="${S.rpTab === t}" data-rt="${t}">${t}</button>`).join("")}</div><div class="panel" style="padding-top:12px">${by[id].blocked ? `<div class="strip warn">Product status is blocked for MRP. Create Supply and Expedite Supply are not available.</div>` : ""}${S.rpTab === "BOM" ? bomTable(id) : tdChart(id)}</div></div>`;
+}
+function bomTable(id) {
+  const r = bomRows(id);
+  if (!r.length) return `<div class="strip info">${id} has no BOM components in the sample data (purchased or transferred product).</div>`;
+  return `<div class="tw"><table><tr><th>Level</th><th>Component</th><th>Procurement Type</th><th class="n">Lead Time</th><th>Buffered</th></tr>${r.map(x => `<tr><td>${"·".repeat(x.lvl)} ${x.lvl}</td><td>${oid(x.c)}</td><td>${by[x.c].pt}</td><td class="n">${by[x.c].lt} d</td><td>${x.b ? chip("g", "Buffered") : chip("n", "Not Buffered")}</td></tr>`).join("")}</table></div>
+  <div class="strip info">The BOM is shown down to the next buffered material; phantom assemblies are excluded.</div>`;
+}
+function tdChart(id, days) {
+  const b = S.buf[id], n = days || Math.max(Math.round(dlt(id) * dmOf(id).f), 5), pr = [STK[id].oh, ...project(id, n)], W = 1000, H = 240, L = 8, R = 120;
+  const top = Math.max(b.max * 1.2, ...pr), bot = Math.min(0, ...pr), y = v => 12 + (top - v) / (top - bot) * (H - 44), x = i => L + i / n * (W - L - R);
+  let s = `<div class="graph"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Time-dependent buffer levels with projected stock">`;
+  [[b.max, top, "--z-b", ""], [b.rop, b.max, "--z-g", "Max Stock " + f(b.max)], [b.ss, b.rop, "--z-y", "Reorder Point " + f(b.rop)], [bot, b.ss, "--z-r", "Safety Stock " + f(b.ss)]].forEach(([lo, hi, c, t]) => {
+    s += `<rect x="${L}" y="${y(hi)}" width="${W - L - R}" height="${Math.max(0, y(lo) - y(hi))}" style="fill:var(${c});opacity:.18"/>`;
+    if (t) s += `<line x1="${L}" x2="${W - R}" y1="${y(hi)}" y2="${y(hi)}" style="stroke:var(${c});stroke-width:1.5"/><text x="${W - R + 8}" y="${y(hi) + 4}" style="fill:var(--muted);font:12px var(--f)">${t}</text>`;
+  });
+  s += `<path d="M${x(0)},${y(pr[0])} ${pr.map((v, i) => `L${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ")} L${x(n)},${y(bot)} L${x(0)},${y(bot)} Z" style="fill:var(--link);opacity:.08"/>`;
+  s += `<polyline points="${pr.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ")}" style="fill:none;stroke:var(--link);stroke-width:2.5;stroke-linejoin:round"/>`;
+  s += `<circle cx="${x(0)}" cy="${y(pr[0])}" r="4.5" style="fill:var(--link);stroke:var(--surface);stroke-width:2"/>`;
+  for (let d = 0; d <= n; d += (n > 12 ? 5 : 1)) s += `<line x1="${x(d)}" x2="${x(d)}" y1="${H - 30}" y2="${H - 26}" style="stroke:var(--muted)"/><text x="${x(d)}" y="${H - 12}" text-anchor="${d ? "middle" : "start"}" style="fill:var(--muted);font:12px var(--f)">${d ? day(d) : "Today"}</text>`;
+  return s + `</svg></div>`;
+}
+
+/* Replenishment Execution by On-Hand Status */
+function rexec(fb, ct) {
+  fb.innerHTML = fbStd(`<label class="fld">Value Indicator<select><option></option><option>A</option><option>B</option><option>C</option></select></label>`);
+  const ids = fltIds(planIds()).sort((a, b) => STK[a].oh / S.buf[a].ss - STK[b].oh / S.buf[b].ss);
+  ct.innerHTML = `${fltStrip()}<div class="card"><div class="tb"><h2>Buffers (${ids.length})</h2></div><div class="tw"><table><tr><th>Product</th><th>On-Hand Status</th><th class="n">On-Hand Stock</th><th class="n">Safety Stock</th><th class="n">Open Supply</th><th>Contact</th><th></th></tr>
+  ${ids.map(id => { const k = STK[id], b = S.buf[id], pct = k.oh / b.ss * 100, nx = [...k.rec].sort((a, c) => a.d - c.d)[0], st = k.oh <= 0 ? "Stockout" : k.oh < b.ss ? "Below Safety Stock" : "OK";
+    return `<tr class="click ${S.reSel === id ? "sel" : ""}" data-id="${id}"><td>${oid(id)}${blk(id)}</td><td>${chip(st === "OK" ? "g" : "r", st)}<span class="sub">${pct.toFixed(0)}% of SS</span></td><td class="n">${f(k.oh)}</td><td class="n">${f(b.ss)}</td><td class="n">${f(k.rec.reduce((s, r) => s + r.q, 0))}${nx ? `<span class="sub">next ${day(nx.d)}</span>` : ""}</td><td>${by[id].pt === "Buy" ? "Supplier 10300 · purchasing@supplier.example" : by[id].pt === "Make" ? "Production Supervisor 001" : "Distribution Center DC01"}</td><td>${(nx && nx.d > 1 && st !== "OK") || by[id].blocked ? `<button class="btn" data-ex="${id}" ${by[id].blocked || !nx ? "disabled" : ""}>Expedite Supply</button>` : ""}</td></tr>`; }).join("")}</table></div></div>
+  ${S.reSel ? rDetail(S.reSel) : ""}
+  ${note("Step 5", "Today's stock situation for each buffer, checking that enough on-hand stock is available for production. Planners can expedite supply directly or contact the supplier or production supervisor. RM-350 shows why this view exists: its net flow is green, but on-hand stock is below safety stock today.", SRC3.re)}`;
+  ct.querySelectorAll("tr[data-id]").forEach(tr => tr.onclick = e => { if (e.target.dataset.ex) return; S.reSel = tr.dataset.id; go(cur); });
+  ct.querySelectorAll("[data-rt]").forEach(t => t.onclick = () => { S.rpTab = t.dataset.rt; go(cur); });
+  ct.querySelectorAll("[data-ex]").forEach(b => b.onclick = () => { const r = [...STK[b.dataset.ex].rec].sort((a, c) => a.d - c.d)[0]; r.d = 1; toast(`Receipt for ${b.dataset.ex} expedited to ${day(1)}`); go(cur); });
+  bindClr(ct);
+}
+
+/* Projected On-Hand Alerts */
+function poa(fb, ct) {
+  fb.innerHTML = fbStd(`<label class="fld">Alert<select><option></option><option>Stockout Alert</option><option>Safety Stock Alert</option><option>Threshold Alert</option></select></label>`);
+  const rows = [];
+  planIds().forEach(id => {
+    const b = S.buf[id], D = dlt(id), pr = project(id, D), thr = S.plantPar.ohf / 100 * b.ss;
+    const first = test => { const i = pr.findIndex(test); return i < 0 ? null : i + 1; };
+    [["Stockout Alert", v => v <= 0], ["Threshold Alert", v => v < thr], ["Safety Stock Alert", v => v < b.ss]].some(([t, fn]) => {
+      const d = first(fn); if (d) { rows.push({ id, t, d, v: pr[d - 1], b, thr, D, pr }); return true; } return false;
+    });
+  });
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Projected On-Hand Alerts (${rows.length})</h2></div><div class="tw"><table><tr><th>Product</th><th>Alert</th><th>First Date</th><th class="n">Number of Days</th><th class="n">Projected Stock</th><th class="n">Safety Stock</th><th class="n">Threshold Quantity</th><th class="n">DLT</th><th>Projection until DLT</th></tr>
+  ${rows.map(r => `<tr class="click ${S.poSel === r.id ? "sel" : ""}" data-id="${r.id}"><td>${oid(r.id)}</td><td>${chip(r.t === "Safety Stock Alert" ? "y" : "r", r.t)}</td><td>${day(r.d)}</td><td class="n">${r.d}</td><td class="n">${f(r.v)}</td><td class="n">${f(r.b.ss)}</td><td class="n">${r.t === "Stockout Alert" ? "" : f(r.thr)}</td><td class="n">${r.D}</td><td>${spark(r.pr, r.b.ss)}</td></tr>`).join("") || `<tr><td colspan="9">No projected alerts within DLT.</td></tr>`}</table></div></div>
+  ${S.poSel && rows.some(r => r.id === S.poSel) ? `<div class="card"><div class="tb"><h2>${oid(S.poSel)}</h2><span class="sp"></span>${chip("n", "Alert chart: today to DLT")}</div><div class="panel">${tdChart(S.poSel, dlt(S.poSel))}</div></div>` : ""}
+  ${note("Step 5", `Shows stock alerts before replenishment happens, within the DLT: the first date stock falls below safety stock, below the threshold, or out of stock. In this mock the threshold is ${S.plantPar.ohf}% × Safety Stock (On-Hand Alert Threshold Factor); SAP Help doesn't define the formula. Only the most severe alert per product is listed.`, SRC3.poa)}`;
+  ct.querySelectorAll("tr[data-id]").forEach(tr => tr.onclick = () => { S.poSel = tr.dataset.id; go(cur); });
+}
+
+/* Historical Buffer Performance */
+function hbp(fb, ct) {
+  if (!S.aor.length) { fb.innerHTML = ""; ct.innerHTML = `<div class="strip warn">Assign a Plant / MRP Controller combination in Area of Responsibility (user menu → App Settings) to load data.</div>`; return; }
+  fb.innerHTML = `<label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">Evaluation Horizon<select id="hz">${[30, 60, 92].map(n => `<option value="${n}" ${S.hor === n ? "selected" : ""}>Last ${n} days</option>`).join("")}</select></label><button class="btn e" type="button">Go</button>`;
+  const Z = ["Low Red", "Low Yellow", "Green", "High Yellow", "High Red", "Above High Red"], ZC = ["--z-r", "--z-y", "--z-g", "--z-y", "--z-r", "--z-b"];
+  const shape = { "SFG-200": [0.75, 0.25], "RM-330": [0.25, 0.3], "RM-340": [0.8, 0.15], "TR-500": [0.6, 0.5], "FG-120": [1.15, 0.25], "RM-350": [0.45, 0.35], "SFG-230": [0.7, 0.2] };
+  const hist = id => { const b = S.buf[id], yel = b.rop - b.ss, [lvl, amp] = shape[id] || [0.7, 0.3];
+    return Array.from({ length: S.hor }, (_, t) => { const v = b.max * (lvl + amp * Math.sin(t / 6 + id.length) + 0.12 * Math.sin(t * 1.7 + id.charCodeAt(3))); return { v, z: v <= b.ss ? 0 : v <= b.rop ? 1 : v <= b.max ? 2 : v <= b.max + yel / 2 ? 3 : v <= b.max + yel ? 4 : 5 }; }); };
+  const rows = planIds().map(id => { const h = hist(id), cnt = Z.map((_, i) => h.filter(d => d.z === i).length); return { id, h, cnt, out: cnt[0] + cnt[4] + cnt[5] }; });
+  ct.innerHTML = `<div class="card"><div class="tb"><h2>Buffers (${rows.length})</h2></div><div class="tw"><table><tr><th>Product</th><th>Stock Zone Overview</th>${Z.map(z => `<th class="n">${z}</th>`).join("")}<th class="n">Total Outliers</th></tr>
+  ${rows.map(r => `<tr class="click ${S.hbSel === r.id ? "sel" : ""}" data-id="${r.id}"><td>${oid(r.id)}</td><td><div class="zbar">${r.cnt.map((c, i) => `<span style="width:${c / S.hor * 100}%;background:var(${ZC[i]})"></span>`).join("")}</div></td>${r.cnt.map(c => `<td class="n">${c}</td>`).join("")}<td class="n"><b>${r.out}</b></td></tr>`).join("")}</table></div></div>
+  ${S.hbSel ? hbDetail(rows.find(r => r.id === S.hbSel), Z, ZC) : ""}
+  ${note("Step 5", "Data loads for the Plant / MRP Controller combinations in your Area of Responsibility (App Settings). Days the stock was in each zone over the evaluation horizon (maximum 92 days). Total Outliers counts days in Low Red, High Red and Above High Red, and feeds back into buffer sizing. The history here is generated, and the boundaries of the upper zones are the mock's assumption.", SRC3.hbp)}`;
+  $("#hz", fb).onchange = e => { S.hor = +e.target.value; go(cur); };
+  ct.querySelectorAll("tr[data-id]").forEach(tr => tr.onclick = () => { S.hbSel = tr.dataset.id; go(cur); });
+  ct.querySelectorAll("[data-hv]").forEach(b => b.onclick = () => { S.hbView = b.dataset.hv; go(cur); });
+  ct.querySelectorAll("[data-ht]").forEach(b => b.onclick = () => { S.hbTbl = b.dataset.ht === "Table"; go(cur); });
+}
+function hbDetail(r, Z, ZC) {
+  const legend = `<div class="legend note" style="border:0;padding:0">${Z.map((z, i) => `<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(${ZC[i]});margin-right:4px"></i>${z} ${r.cnt[i]}</span>`).join(" · ")}</div>`;
+  let body;
+  if (S.hbView === "Day-Wise") {
+    body = `<div>${seg(["Chart", "Table"], S.hbTbl ? "Table" : "Chart", "data-ht")}</div>` + (S.hbTbl ? dayTable(r, Z) : dayWise(r, Z, ZC));
+  } else {
+    // group days into calendar months or 7-day weeks, stacked by zone
+    const groups = [];
+    r.h.forEach((d, i) => {
+      const dt = new Date(TODAY); dt.setDate(dt.getDate() - (r.h.length - i));
+      const key = S.hbView === "Month-Wise" ? dt.toLocaleDateString("en-GB", { month: "short", year: "numeric" }) : "Week of " + (() => { const m = new Date(dt); m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return m.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }); })();
+      let g = groups.find(x => x.k === key); if (!g) groups.push(g = { k: key, c: Z.map(() => 0) }); g.c[d.z]++;
+    });
+    const mx = Math.max(...groups.map(g => g.c.reduce((a, b) => a + b, 0)));
+    body = `<div class="tw"><table><tr><th>${S.hbView === "Month-Wise" ? "Month" : "Week"}</th><th>Stock Zone Overview</th>${Z.map(z => `<th class="n">${z}</th>`).join("")}<th class="n">Outliers</th></tr>${groups.map(g => { const t = g.c.reduce((a, b) => a + b, 0); return `<tr><td>${g.k}</td><td><div class="zbar" style="width:${Math.max(30, t / mx * 220)}px">${g.c.map((c, i) => `<span style="width:${c / t * 100}%;background:var(${ZC[i]})"></span>`).join("")}</div></td>${g.c.map(c => `<td class="n">${c}</td>`).join("")}<td class="n"><b>${g.c[0] + g.c[4] + g.c[5]}</b></td></tr>`; }).join("")}</table></div>`;
+  }
+  return `<div class="card"><div class="tb"><h2>Outliers Occurrence Details: ${r.id}</h2><span class="sp"></span>${seg(["Month-Wise", "Week-Wise", "Day-Wise"], S.hbView, "data-hv")}</div><div class="panel">${body}${legend}</div></div>`;
+}
+function dayTable(r, Z) {
+  const b = S.buf[r.id];
+  return `<div class="tw" style="max-height:320px;overflow-y:auto"><table><tr><th>Date</th><th>Stock Status</th><th class="n">Stock</th><th class="n">Max Stock</th><th class="n">Reorder Point</th><th class="n">Safety Stock</th></tr>${r.h.map((d, i) => `<tr><td>${day(i - r.h.length)}</td><td>${chip(["r", "y", "g", "y", "r", "b"][d.z], Z[d.z])}</td><td class="n">${f(d.v)}</td><td class="n">${f(b.max)}</td><td class="n">${f(b.rop)}</td><td class="n">${f(b.ss)}</td></tr>`).join("")}</table></div>`;
+}
+function dayWise(r, Z, ZC) {
+  const b = S.buf[r.id], mx = Math.max(...r.h.map(d => d.v), b.max * 1.1), W = 1000, H = 200, bw = W / r.h.length, y = v => H - 24 - Math.max(0, v) / mx * (H - 40);
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Day-wise stock levels">`;
+  [[b.ss, "--z-r", "Safety Stock"], [b.rop, "--z-y", "Reorder Point"], [b.max, "--z-g", "Max Stock"]].forEach(([v, c, t]) => { s += `<line x1="0" x2="${W}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(${c});stroke-dasharray:5 4"/><text x="${W - 4}" y="${t === "Safety Stock" ? y(v) + 14 : y(v) - 4}" text-anchor="end" style="fill:var(--muted);font:12px var(--f)">${t}</text>`; });
+  r.h.forEach((d, i) => { s += `<rect x="${i * bw + 1}" y="${y(d.v)}" width="${Math.max(1, bw - 2)}" height="${H - 24 - y(d.v)}" rx="1.5" style="fill:var(${ZC[d.z]})"><title>Day ${i + 1 - r.h.length}: ${f(d.v)} (${Z[d.z]})</title></rect>`; });
+  s += `<text x="0" y="${H - 6}" style="fill:var(--muted);font:12px var(--f)">${day(-r.h.length)}</text><text x="${W}" y="${H - 6}" text-anchor="end" style="fill:var(--muted);font:12px var(--f)">${day(-1)}</text></svg>`;
+  return s;
+}
+
+/* Stock/Requirements List: Demand-Driven Replenishment tab */
+function srl(fb, ct) {
+  const ids = planIds(); if (!ids.includes(S.srl)) S.srl = ids[0]; S.srlSeen = S.srlSeen || S.srl === "SFG-200";
+  fb.innerHTML = `<label class="fld">Product<select id="sp">${ids.map(i => `<option ${i === S.srl ? "selected" : ""}>${i}</option>`).join("")}</select></label><label class="fld">Plant<input value="${PLANT}" readonly></label><button class="btn e" type="button">Go</button>`;
+  const x = nfp(S.srl), b = x.b, p = by[S.srl];
+  const el = [{ d: 0, t: "Stock", q: x.oh }, { d: 0, t: "Open demand (past + today)", q: -x.od },
+    ...x.rec.map(r => ({ d: r.d, t: r.created ? SUPPLY[p.pt] + " (new)" : "Open supply", q: r.q })),
+    ...x.spikes.map(sp => ({ d: sp.d, t: sp.ok ? "Demand (qualified spike)" : "Demand", q: -sp.q }))].sort((a, c) => a.d - c.d);
+  let avail = 0;
+  ct.innerHTML = `<div class="card"><div class="tabs" role="tablist"><button role="tab" aria-selected="false" data-n>Elements</button><button role="tab" aria-selected="true">Demand-Driven Replenishment</button></div>
+  <div class="panel" style="padding-top:12px"><div class="kv">
+    <div><span>Average Daily Usage</span><b>${f(p.adu * (S.daf[S.srl] || 1))}</b></div><div><span>Decoupled Lead Time</span><b>${x.D} days</b></div>
+    <div><span>Safety Stock</span><b>${f(b.ss)}</b></div><div><span>Reorder Point</span><b>${f(b.rop)}</b></div><div><span>Maximum Stock</span><b>${f(b.max)}</b></div>
+    <div><span>On-Hand Stock</span><b>${f(x.oh)}</b></div><div><span>Open Supply</span><b>${f(x.os)}</b></div><div><span>Open Demand (past + today)</span><b>${f(x.od)}</b></div>
+    <div><span>Qualified Spike Demand</span><b>${f(x.qs)}</b></div><div><span>Net Flow Position</span><b>${f(x.n)}</b></div><div><span>Planning Priority</span><b>${zpill(x.zone)} ${x.pr.toFixed(1)}%</b></div>
+    <div><span>Spike Threshold / Horizon</span><b>${f(x.thr)} / ${x.hz} days ${x.pp.prod ? "(product)" : "(plant)"}</b></div></div></div></div>
+  <div class="card"><div class="tb"><h2>Elements</h2></div><div class="tw"><table><tr><th>Date</th><th>MRP Element</th><th class="n">Receipt / Requirement</th><th class="n">Available Quantity</th></tr>
+  ${el.map(e => { avail += e.q; return `<tr><td>${e.d ? day(e.d) : day(0) + " (today)"}</td><td>${e.t}</td><td class="n">${e.q > 0 ? "+" : ""}${f(e.q)}</td><td class="n">${f(avail)}</td></tr>`; }).join("")}</table></div></div>
+  ${note("Step 4", "The stock/requirements list shows every value the planning run uses for MRP procedure C on its Demand-Driven Replenishment tab. Average daily consumption is not listed as an element; it only drives the buffer zones.", SRC3.proc)}`;
+  $("#sp", fb).onchange = e => { S.srl = e.target.value; go(cur); };
+}
+
+const SCHED = `<div class="sec">Scheduling Options</div><div class="panel fb"><label class="chk"><input type="checkbox" checked disabled>Start Immediately</label><label class="fld">Recurrence Pattern<select data-rec><option>Single Run</option><option>Daily</option><option>Weekly</option><option>Monthly</option></select></label></div>`;
+function recText(ct) {
+  const r = (ct.querySelector("[data-rec]") || {}).value || "Single Run";
+  if (r === "Single Run") return "";
+  const n = { Daily: 1, Weekly: 7, Monthly: 30 }[r];
+  return ` · ${r}, next run ${day(n)}`;
+}
+const goT = t => go(SCR.findIndex(s => s.t === t));
+
+$("#av").onclick = e => {
+  e.stopPropagation();
+  const m = document.createElement("div"); m.className = "menu"; m.innerHTML = `<button type="button" id="mcards">Manage Cards</button><button type="button" id="aset">App Settings</button>`;
+  document.body.appendChild(m);
+  const close = () => { m.remove(); document.removeEventListener("click", close); };
+  setTimeout(() => document.addEventListener("click", close), 0);
+  $("#aset", m).onclick = () => {
+    close();
+    dialog("App Settings", `<div style="width:100%"><b>Area of Responsibility</b><div class="note" style="border:0;padding:4px 0 8px">Plant / MRP Controller combinations used by Buffer Positioning and Historical Buffer Performance.</div>
+      <div class="tw"><table><tr><th>Plant</th><th>MRP Controller</th><th>Assigned</th></tr><tr><td>${PLANT}</td><td>001</td><td><input type="checkbox" id="aor1" ${S.aor.length ? "checked" : ""} aria-label="Assign plant ${PLANT}, MRP controller 001"></td></tr></table></div></div>`, L => {
+      S.aor = $("#aor1", L).checked ? [{ plant: PLANT, mrpc: "001" }] : []; toast("App settings saved"); go(cur);
+    });
+  };
+  $("#mcards", m).onclick = () => {
+    close();
+    const L = dialog("Manage Cards", `<div style="width:100%">${S.cardOrder.map(k => `<label class="sw"><span>${OVC[k].t}</span><input type="checkbox" data-sw="${k}" ${S.cardOn[k] ? "checked" : ""}></label>`).join("")}</div><button class="btn t" type="button" id="restore">Restore</button>`, Lr => {
+      Lr.querySelectorAll("[data-sw]").forEach(c => S.cardOn[c.dataset.sw] = c.checked);
+      if (SCR[cur].t === "Planner Overview") go(cur); else goT("Planner Overview");
+    });
+    $("#restore", L).onclick = () => { S.cardOrder = ["blm", "rp", "re"]; S.cardOn = { blm: true, rp: true, re: true }; S.ovBd = { blm: "efg", rp: "abc", re: "xyz" }; L.innerHTML = ""; goT("Planner Overview"); toast("Default view restored"); };
+  };
+};
+
+/* demo seed: all set-up jobs already run, so every screen shows data */
+S.cls = classify(); S.jobs.unshift("Product Classification (DD) 1");
+S.buf["SFG-200"] = { ss: 3200, rop: 7500, max: 10000 }; S.mrp["SFG-200"] = "D1"; S.lot["SFG-200"] = "H1"; S.sim = true;
+S.efg = Object.fromEntries(ddList().map(id => [id, efgOf(id)])); S.jobs.unshift("Lead Time Classification of Products (DD) 2");
+runProposals();
+document.addEventListener("keydown", e => {
+  const t = e.target;
+  if ((e.key === "Enter" || e.key === " ") && t && (t.matches && (t.matches("tr.click") || t.matches("[data-n]")))) { e.preventDefault(); t.dispatchEvent(new MouseEvent("click", { bubbles: true })); }
+  if (e.key === "Escape" && $("#layer").innerHTML) $("#layer").innerHTML = "";
+});
+go(0);
+})();
+</script>
