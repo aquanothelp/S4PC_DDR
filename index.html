@@ -4,9 +4,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ddr-build" content="20261010133110">
+<meta name="ddr-build" content="20261010133558">
 <script>try{var t=localStorage.getItem("ddr-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
-<script>(function(){var B="20261010133110";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+<script>(function(){var B="20261010133558";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>S4PC DDR Walkthrough</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
@@ -4933,7 +4933,9 @@ function ixSimViz(box) {
     { const N = P.days, L = 62, R = 900, sw = (R - L) / N, X = d => L + (d - 0.5) * sw, T = 10, B = 124, F0 = 192, FH = 46;
       const lo = Math.min(0, ...run.map(x => Math.min(x.nfp, x.ohStart))), hi = Math.max(Z.tog * 1.1, ...run.map(x => Math.max(x.nfp, x.ohStart)));
       const Y = v => B - (v - lo) / (hi - lo) * (B - T), fmax = Math.max(1, ...run.map(x => Math.max(x.qd, x.recv.reduce((a, r) => a + r.q, 0)))), FY = v => v / fmax * FH;
-      let g = `<rect x="${L}" y="${Y(Z.tor)}" width="${R - L}" height="${Y(Math.max(lo, 0)) - Y(Z.tor)}" style="fill:var(--ix-r);opacity:.16"/><rect x="${L}" y="${Y(Z.toy)}" width="${R - L}" height="${Y(Z.tor) - Y(Z.toy)}" style="fill:var(--ix-y);opacity:.16"/><rect x="${L}" y="${Y(Z.tog)}" width="${R - L}" height="${Y(Z.toy) - Y(Z.tog)}" style="fill:var(--ix-g);opacity:.16"/>`;
+      let g = "";
+      for (let d = 2; d <= N; d += 2) g += `<rect x="${L + (d - 1) * sw}" y="${T}" width="${sw}" height="${F0 + 18 - T}" style="fill:var(--ix-ink);opacity:.06"/>`;
+      g += `<rect x="${L}" y="${Y(Z.tor)}" width="${R - L}" height="${Y(Math.max(lo, 0)) - Y(Z.tor)}" style="fill:var(--ix-r);opacity:.16"/><rect x="${L}" y="${Y(Z.toy)}" width="${R - L}" height="${Y(Z.tor) - Y(Z.toy)}" style="fill:var(--ix-y);opacity:.16"/><rect x="${L}" y="${Y(Z.tog)}" width="${R - L}" height="${Y(Z.toy) - Y(Z.tog)}" style="fill:var(--ix-g);opacity:.16"/>`;
       if (lo < 0) g += `<line x1="${L}" x2="${R}" y1="${Y(0)}" y2="${Y(0)}" style="stroke:var(--ix-mute);stroke-dasharray:2 3"/><text x="${L - 6}" y="${Y(0) + 4}" class="ax" style="text-anchor:end;font-size:10px">0</text>`;
       [[Z.tor, "TOR"], [Z.toy, "TOY"], [Z.tog, "TOG"]].forEach(([v, t]) => { g += `<line x1="${L}" x2="${R}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--ix-rule)"/><text x="${L - 6}" y="${Y(v) + 4}" class="ax" style="text-anchor:end;font-size:10px">${t} ${v}</text>`; });
       g += `<line x1="${X(st.day) + sw / 2}" x2="${X(st.day) + sw / 2}" y1="${T}" y2="${F0}" style="stroke:var(--ix-mute);stroke-dasharray:3 3"/>`;
@@ -4945,7 +4947,7 @@ function ixSimViz(box) {
           g += `<path d="M${X(x.d)},${yy - 8} L${X(x.d) + 6},${yy + 3} L${X(x.d) - 6},${yy + 3} Z" style="fill:${done ? "var(--ix-steel)" : "none"};stroke:var(--ix-steel);stroke-width:1.5"><title>Day ${x.d}: ${done ? `${x.no} placed for ${x.placed}, due day ${x.due}` : `recommended ${x.rec}, not released`}</title></path><text x="${X(x.d)}" y="${yy + 15}" class="ax" style="text-anchor:middle;font-size:10px;font-weight:700;fill:var(--ix-steel)">${done ? "+" + x.placed : "skip"}</text>`; } });
       // flows: received (left half of the day) and qualified demand (right half), on their own scale
       g += `<line x1="${L}" x2="${R}" y1="${F0}" y2="${F0}" style="stroke:var(--ix-mute)"/><text x="${L - 6}" y="${F0 - FH / 2 + 4}" class="ax" style="text-anchor:end;font-size:10px">flows</text>`;
-      run.forEach(x => { const got = x.recv.reduce((a, r) => a + r.q, 0), bw = sw / 2 - 3;
+      run.forEach(x => { const got = x.recv.reduce((a, r) => a + r.q, 0), bw = Math.round(sw * 0.3);
         if (got) g += `<rect x="${X(x.d) - bw - 1}" y="${F0 - FY(got)}" width="${bw}" height="${FY(got)}" style="fill:var(--ix-g)"><title>Day ${x.d}: received ${x.recv.map(r => r.no + " " + r.q).join(", ")}</title></rect><text x="${X(x.d) - bw / 2 - 1}" y="${F0 - FY(got) - 3}" class="ax" style="text-anchor:middle;font-size:9px;fill:var(--ix-ink)">${got}</text>`;
         g += `<rect x="${X(x.d) + 1}" y="${F0 - FY(x.qd)}" width="${bw}" height="${FY(x.qd)}" style="fill:var(--ix-over)"><title>Day ${x.d}: qualified demand ${x.qd} = past due ${x.back} + today ${x.today} + spikes ${x.qs}</title></rect>`;
         if (x.qs) g += `<text x="${X(x.d) + bw / 2 + 1}" y="${F0 - FY(x.qd) - 3}" class="ax" style="text-anchor:middle;font-size:9px;fill:var(--ix-ink)">${x.qd}</text>`;
