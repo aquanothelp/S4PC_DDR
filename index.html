@@ -4,9 +4,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ddr-build" content="20261010142829">
+<meta name="ddr-build" content="20261010144503">
 <script>try{var t=localStorage.getItem("ddr-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
-<script>(function(){var B="20261010142829";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+<script>(function(){var B="20261010144503";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>S4PC DDR Walkthrough</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
@@ -899,6 +899,28 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
 .ix-fld input[aria-invalid] + .ix-hint { color: var(--ix-r-ink); font-weight: 600; }
 /* buffer lab: the typed fields sit two per row on desktop (one column only on narrow screens) */
 @media (min-width: 1000px) { .ix-labgrid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); } .ix-labgrid .ix-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; align-content: start; } .ix-labgrid .ix-controls hr { grid-column: 1 / -1; width: 100%; } }
+/* round 30: profile grid and comparison, recalculated adjustments, filling a truck */
+.ix-fld[hidden] { display: none; }
+.ix-prof-top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; }
+.ix-prof-top > .ix-calc-ctl { flex: 2 1 480px; margin: 0; }
+.ix-prof-g { flex: 1 1 220px; display: flex; flex-direction: column; gap: 6px; }
+.ix-prof-f summary { cursor: pointer; font-weight: 600; margin: 8px 0; color: var(--ix-ink); }
+#intro .ix-prof-grid th, #intro .ix-prof-grid td { padding: 3px 4px; font-size: 12px; }
+#intro .ix-prof-grid .c { text-align: center; }
+.ix-pf-b { font: 700 12px var(--ix-mono); padding: 3px 6px; border: 1px solid var(--ix-rule); border-radius: 5px; background: var(--ix-sheet); color: var(--ix-ink); cursor: pointer; }
+.ix-pf-b[aria-pressed="true"] { background: var(--ix-steel); border-color: var(--ix-steel); color: var(--ix-sheet); }
+.ix-prof-cmp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; align-items: start; margin-top: 12px; }
+.ix-prof-cmp > div { min-width: 0; } #ixPfSvg, #ixRclSvg, #ixTkSvg { display: block; width: 100%; height: auto; }
+.ix-rcl-opts { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-bottom: 8px; }
+#intro .ix-rcl-ch { background: color-mix(in srgb, var(--ix-steel) 18%, transparent); font-weight: 700; }
+.ix-trk-bar { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+.ix-trk-bar .ix-calc-ctl { margin: 0; }
+.ix-trk-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 10px; }
+.ix-trk-grid > div { min-width: 0; }
+@media (max-width: 1100px) { .ix-prof-cmp, .ix-trk-grid { grid-template-columns: minmax(0, 1fr); } }
+#intro #ixRclTbl th, #intro #ixRclTbl td, #intro #ixTkTbl th, #intro #ixTkTbl td, #intro #ixPfTbl th, #intro #ixPfTbl td { padding: 4px 6px; font-size: 13px; }
+#intro #ixTkTbl th { white-space: normal; vertical-align: bottom; }
+#intro #ixPfTbl th { white-space: normal; vertical-align: bottom; } #intro #ixPfTbl td small { white-space: normal; }
 </style>
 
 <!-- DDMRP theory page shown before the mock-up (theory only: Ptak & Smith, Demand Driven Institute) -->
@@ -1046,6 +1068,12 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
         </div>
         <p class="ix-note">Type names and uses are from knowledge of Ptak &amp; Smith; verify the min-max trigger rule against the book.</p>
       </div>
+      <div class="ix-dyn" id="ix-prof">
+        <div class="ix-dyn-head"><p class="ix-sub">Buffer profiles in detail</p><h3>Profile codes, the profile grid, and one part under different profiles</h3>
+          <ul class="ix-plain"><li><b>Profile code:</b> item type (P purchased, M manufactured, D distributed, I intermediate) + lead time category (S, M, L) + variability category (L, M, H). For example MLH = manufactured, long lead time, high variability. Four item types × three lead time × three variability categories give 36 profiles.</li><li><b>Factors:</b> the lead time category sets the LTF, the variability category the VF. The item type doesn't change the maths here; it groups parts so each group can get its own factor values.</li><li><b>Red and green can use different LTFs:</b> the LTF for the red base and the LTF for green don't have to be the same. Tick the box to give green its own.</li><li><b>Profile assignment matters:</b> the same part (same ADU, DLT, MOQ) gets a very different buffer, average stock and order frequency under another profile. Click codes in the grid to compare up to four.</li></ul>
+          <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, for a made-up part (brass valve body BV-6: ADU 15, DLT 20 days) with factor values inside the usual ranges. Profile codes, categories and the separate green LTF are DDI concepts (verify with Ptak &amp; Smith). In SAP S/4HANA Cloud the buffer profile combines procurement type, variability indicator (X / Y / Z), lead time indicator (E / F / G) and an MOQ flag [SAP Help].</p></div>
+        <div id="ixProfViz"></div>
+      </div>
       <p class="ix-note">ADU can be past-based, forward-looking (forecast or orders) or blended. The rolling horizon chosen for ADU changes how quickly buffers react.</p>
     </section>
 
@@ -1189,6 +1217,12 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
           <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, from sample inputs and the formulas shown (the overlapping-DAF mechanics are from knowledge of Ptak &amp; Smith; verify). They are not data from Ptak &amp; Smith or DDI.</p></div>
         <div id="ixTrViz"></div>
       </div>
+      <div class="ix-span ix-dyn" id="ix-rcl">
+        <div class="ix-dyn-head"><p class="ix-sub">Recalculated adjustments · week by week</p><h3>Zones follow ADU, lead time, profile and MOQ changes</h3>
+          <ul class="ix-plain"><li>Every week the zones are recalculated from that week's inputs. While ADU climbs and settles, all three zones move with it.</li><li><b>MOQ floor:</b> with an MOQ from week 1, green stays flat at the MOQ while the lead-time green is smaller; red and yellow still move.</li><li><b>Lead time cut:</b> a shorter lead time shrinks yellow (ADU × DLT) and moves the part into another lead time category, so the LTF changes too.</li><li><b>MOQ added later:</b> green jumps to the new MOQ the week it applies.</li></ul>
+          <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, for a made-up part (cycle crankset CK-8: weekly ADU 20 to 47, lead time 12 days, LTF 40 %, VF 50 %). The rule that every buffer input triggers a recalculation is a DDI concept (verify with Ptak &amp; Smith).</p></div>
+        <div id="ixRclViz"></div>
+      </div>
     </section>
 
     <!-- 4 -->
@@ -1214,7 +1248,7 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
       </div>
       <div class="ix-span ix-dyn" id="ix-xp">
         <div class="ix-dyn-head"><p class="ix-sub">Supply order generation in detail</p><h3>Decoupled explosion and order sizing</h3>
-          <ul class="ix-plain"><li><b>Explosion:</b> a supply order for a buffered item passes its requirements down the BOM only until the next buffered component; there it becomes demand on that buffer and stops.</li><li><b>Dates:</b> the explosion starts when the NFP falls to TOY or below and the order is due today + DLT. Each item is needed when its parent starts and released its own lead time earlier; the table compares this with a full MRP explosion of the same order, which runs through the buffers and ends up with releases in the past.</li><li><b>Order sizing bar:</b> grey = today's net flow position, green = TOG − NFP, yellow = extra to reach the minimum order quantity, blue = extra from rounding up to the order multiple.</li><li>If NFP is above TOY (116), no order is placed. Rounding can push NFP above TOG; the last result shows by how much.</li><li>The buffer is the worked example (TOY 116, TOG 140).</li></ul>
+          <ul class="ix-plain"><li><b>Explosion:</b> a supply order for a buffered item passes its requirements down the BOM only until the next buffered component; there it becomes demand on that buffer and stops.</li><li><b>Dates:</b> the explosion starts when the NFP falls to TOY or below and the order is due today + DLT. Each item is needed when its parent starts and released its own lead time earlier; the table compares this with a full MRP explosion of the same order, which runs through the buffers and ends up with releases in the past.</li><li><b>Can MRP decouple too?</b> Only partly. Leftover stock stops an explosion by chance, not by plan (MRP aims to net to zero). Safety stock doesn't absorb variation; touching it raises expedites. A stop-explosion setting ends the explosion but nothing restarts it further down. Several master schedule levels can stop and restart it, but are hard to keep up and don't use the net flow equation [DDI concept, own words].</li><li><b>Order sizing bar:</b> grey = today's net flow position, green = TOG − NFP, yellow = extra to reach the minimum order quantity, blue = extra from rounding up to the order multiple.</li><li>If NFP is above TOY (116), no order is placed. Rounding can push NFP above TOG; the last result shows by how much.</li><li>The buffer is the worked example (TOY 116, TOG 140).</li></ul>
           <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, from sample inputs and the formulas shown (formulas from knowledge of Ptak &amp; Smith; verify). They are not data from Ptak &amp; Smith or DDI.</p></div>
         <div id="ixXpViz"></div>
       </div>
@@ -1223,6 +1257,12 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
           <ul class="ix-plain"><li><b>Same order book, three thresholds:</b> 50 % of the total red zone (the default), the red base, or a multiple of ADU. A lower threshold lets more days qualify, pulls the NFP down and orders earlier and more; a higher one ignores more of the order book.</li><li><b>Judged per day:</b> each day's total counts, not single order lines (day +6 has two lines, 70 and 50).</li><li><b>Long-range horizon:</b> some items get large, known orders far out (a seasonal event, a project). A second horizon of about the cumulative lead time, with its own higher threshold, pulls such an order into the NFP early enough to buy the components behind it. Only that order qualifies; the normal order lines out there still don't.</li></ul>
           <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, for a made-up item (solar lantern SL-7: ADU 20, DLT 10 days, LTF 0.5, VF 0.6, on-hand 260, on-order 320) and a made-up order book. The threshold methods and the long-range horizon are DDI concepts (verify with Ptak &amp; Smith); the long-range threshold of 250 is our choice.</p></div>
         <div id="ixSpkViz"></div>
+      </div>
+      <div class="ix-span ix-dyn" id="ix-trk">
+        <div class="ix-dyn-head"><p class="ix-sub">Prioritized share for a better price or freight</p><h3>Filling a truck, or reaching a minimum order value, across one supplier's items</h3>
+          <ul class="ix-plain"><li><b>First the buffers' own needs:</b> every item at or below TOY gets its order up to TOG (rounded up to whole pallets).</li><li><b>Then the top-up:</b> the space left on the truck (or the value still missing for the discount) is added one pallet at a time, always to the item with the lowest planning priority (NFP ÷ TOG) after what is already on the order. Positions end up close to the same percentage, some above TOG.</li><li>The same top-up fills a container or meets a freight minimum.</li></ul>
+          <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, for a made-up supplier (Coastal Fittings) and eight made-up plumbing fittings. The discount and freight uses of prioritized share are DDI concepts (verify with Ptak &amp; Smith); the pallet-by-pallet top-up is our implementation of it.</p></div>
+        <div id="ixTkViz"></div>
       </div>
     </section>
 
@@ -4611,6 +4651,164 @@ function ixSpkViz(box) {
 }
 (function () { const b = document.getElementById("ixSpkViz"); if (b) ixSpkViz(b); })();
 
+/* ============ Buffer profiles: codes, the profile grid and a side-by-side comparison (theory page) ============ */
+// Concepts (DDI; verify with Ptak & Smith): a profile = item type + lead time category + variability category, written as a code such as
+// "MLH" (manufactured, long lead time, high variability). The lead time category gives the LTF, the variability category the VF; the red
+// base LTF and the green LTF need not be the same. Factor defaults sit inside the usual ranges (LTF short 61–100 %, medium 41–60 %,
+// long 20–40 %; VF low 0–40 %, medium 41–60 %, high 61–100 %). Our own part: brass valve body BV-6.
+const IX_PROF_T = { P: "Purchased", M: "Manufactured", D: "Distributed", I: "Intermediate" };
+const IX_PROF_L = { S: "Short", M: "Medium", L: "Long" }, IX_PROF_V = { L: "Low", M: "Medium", H: "High" };
+const IX_PROF_RNG = { S: [0.61, 1], M: [0.41, 0.6], L: [0.2, 0.4], vL: [0, 0.4], vM: [0.41, 0.6], vH: [0.61, 1] };
+const IX_PROF_F0 = { S: 0.8, M: 0.5, L: 0.3, vL: 0.2, vM: 0.5, vH: 0.8 };
+function ixProfZones(code, p, f, gltf) {
+  const ltf = f[code[1]], vf = f["v" + code[2]], gl = gltf == null ? ltf : gltf, yel = p.adu * p.dlt, rb = yel * ltf, rs = rb * vf, red = rb + rs;
+  const cand = [["lead time", yel * gl], ["order cycle", p.adu * (p.doc || 0)], ["MOQ", p.moq || 0]], [gBy, grn] = cand.reduce((a, b) => b[1] > a[1] ? b : a);
+  return { code, ltf, vf, gl, yel, rb, rs, red, grn, gBy, tor: red, toy: red + yel, tog: red + yel + grn, avg: red + grn / 2, every: p.adu ? grn / p.adu : 0 };
+}
+const ixProfName = c => `${IX_PROF_T[c[0]].toLowerCase()}, ${IX_PROF_L[c[1]].toLowerCase()} lead time, ${IX_PROF_V[c[2]].toLowerCase()} variability`;
+function ixProfViz(box) {
+  const st = { adu: 15, dlt: 20, moq: 0, doc: 0, sel: ["MLL", "MLH", "MML"], gsep: false, gltf: 0.3, f: { ...IX_PROF_F0 } };
+  const r1 = v => Math.round(v).toLocaleString("en-US"), pc = v => Math.round(v * 100) + " %";
+  const fslide = (k, t) => `<div class="ix-fld"><label for="ix-pff-${k}">${t} <output id="o-pff-${k}">${pc(st.f[k])}</output></label><input id="ix-pff-${k}" data-pf="${k}" type="range" min="${IX_PROF_RNG[k][0]}" max="${IX_PROF_RNG[k][1]}" step="0.01" value="${st.f[k]}"><span class="ix-rng" aria-hidden="true"><i>${pc(IX_PROF_RNG[k][0])}</i><i>${pc(IX_PROF_RNG[k][1])}</i></span></div>`;
+  box.innerHTML = `<div class="ix-prof-top"><div class="ix-calc-ctl ix-row-ctl">${ixFld(st, "pf", "adu", "ADU (units a day)", 1, 100, 1)}${ixFld(st, "pf", "dlt", "DLT (days)", 1, 40, 1)}${ixFld(st, "pf", "moq", "Minimum order quantity", 0, 600, 10)}${ixFld(st, "pf", "doc", "Desired order cycle (days)", 0, 30, 1)}</div>
+      <div class="ix-prof-g"><label class="ix-chk"><input type="checkbox" id="ixPfSep"> Use a different LTF for green</label><div class="ix-fld"><label for="ix-pfg">Green LTF <output id="o-pfg">${pc(st.gltf)}</output></label><input id="ix-pfg" type="range" min="0.2" max="1" step="0.01" value="${st.gltf}" disabled><span class="ix-rng" aria-hidden="true"><i>20 %</i><i>100 %</i></span></div></div></div>
+    <details class="ix-prof-f"><summary>Factor values per category (within the usual ranges)</summary><div class="ix-calc-ctl ix-row-ctl">${fslide("S", "LTF · short lead time")}${fslide("M", "LTF · medium lead time")}${fslide("L", "LTF · long lead time")}${fslide("vL", "VF · low variability")}${fslide("vM", "VF · medium variability")}${fslide("vH", "VF · high variability")}</div></details>
+    <p class="ix-sub">Profile grid · click up to four codes to compare them for the same part</p>
+    <div class="ix-tw"><table class="ix-prof-grid" id="ixPfGrid"></table></div>
+    <div class="ix-prof-cmp"><div><svg id="ixPfSvg" viewBox="0 0 640 230" role="img" aria-label="The same part's buffer under each selected profile: red base, red safety, yellow and green"></svg>
+      <p class="ix-legend"><span><i class="sq" style="background:var(--ix-dr)"></i>red base</span><span><i class="sq" style="background:var(--ix-r)"></i>red safety</span><span><i class="sq" style="background:var(--ix-y)"></i>yellow</span><span><i class="sq" style="background:var(--ix-g)"></i>green</span></p></div>
+      <div class="ix-tw"><table class="ix-dyn-kpi" id="ixPfTbl"></table></div></div>`;
+  const draw = () => {
+    const part = { adu: st.adu, dlt: st.dlt, moq: st.moq, doc: st.doc }, gl = st.gsep ? st.gltf : null, Zs = st.sel.map(c => ixProfZones(c, part, st.f, gl));
+    // grid: item types down, lead time × variability across
+    const cols = ["S", "M", "L"].flatMap(l => ["L", "M", "H"].map(v => l + v));
+    box.querySelector("#ixPfGrid").innerHTML = `<tr><th rowspan="2">Item type</th>${["S", "M", "L"].map(l => `<th colspan="3" class="c">${IX_PROF_L[l]} lead time · LTF ${pc(st.f[l])}</th>`).join("")}</tr><tr>${cols.map(c => `<th class="c">${IX_PROF_V[c[1]]} · VF ${pc(st.f["v" + c[1]])}</th>`).join("")}</tr>`
+      + Object.keys(IX_PROF_T).map(t => `<tr><th>${IX_PROF_T[t]} (${t})</th>${cols.map(c => { const code = t + c, on = st.sel.includes(code); return `<td class="c"><button type="button" class="ix-pf-b" data-pc="${code}" aria-pressed="${on}" title="${ixProfName(code)}">${code}</button></td>`; }).join("")}</tr>`).join("");
+    box.querySelectorAll("[data-pc]").forEach(b => b.onclick = () => { const c = b.dataset.pc, i = st.sel.indexOf(c); if (i >= 0) { if (st.sel.length > 1) st.sel.splice(i, 1); } else { st.sel.push(c); if (st.sel.length > 4) st.sel.shift(); } draw(); });
+    // comparison bars on one scale
+    const L = 70, R = 560, mx = Math.max(...Zs.map(z => z.tog), 1) * 1.05, X = v => L + v / mx * (R - L), bh = 26;
+    let s = `<text x="${L}" y="14" class="ax">same part, same ADU and DLT · only the profile changes</text>`;
+    Zs.forEach((z, i) => { const y = 30 + i * 48;
+      [[0, z.rb, "--ix-dr"], [z.rb, z.red, "--ix-r"], [z.red, z.toy, "--ix-y"], [z.toy, z.tog, "--ix-g"]].forEach(([a, b, c]) => { s += `<rect x="${X(a)}" y="${y}" width="${Math.max(0, X(b) - X(a))}" height="${bh}" style="fill:var(${c})"/>`; });
+      s += `<text x="${L - 8}" y="${y + 17}" class="ax" style="text-anchor:end;font-weight:700;fill:var(--ix-ink)">${z.code}</text><text x="${X(z.tog) + 6}" y="${y + 17}" class="ax" style="fill:var(--ix-ink)">TOG ${r1(z.tog)}</text>`;
+      s += `<line x1="${X(z.avg)}" x2="${X(z.avg)}" y1="${y - 4}" y2="${y + bh + 4}" style="stroke:var(--ix-ink);stroke-width:2;stroke-dasharray:3 2"><title>average on-hand ${r1(z.avg)}</title></line>`; });
+    s += `<text x="${L}" y="${30 + Zs.length * 48 + 4}" class="ax">dashed mark = average on-hand (TOR + green ÷ 2)</text>`;
+    box.querySelector("#ixPfSvg").setAttribute("viewBox", `0 0 640 ${40 + Zs.length * 48}`); box.querySelector("#ixPfSvg").innerHTML = s;
+    box.querySelector("#ixPfTbl").innerHTML = `<tr><th>Profile</th><th class="n">LTF${st.gsep ? " red · green" : ""} · VF</th><th class="n">Red · yellow · green</th><th class="n">TOG</th><th class="n">Average on-hand</th><th class="n">Order every</th></tr>`
+      + Zs.map(z => `<tr><td><b>${z.code}</b><br><small>${ixProfName(z.code)}</small></td><td class="n">${pc(z.ltf)}${st.gsep ? " · " + pc(z.gl) : ""} · ${pc(z.vf)}</td><td class="n">${r1(z.red)} · ${r1(z.yel)} · ${r1(z.grn)}<br><small>green by ${z.gBy}</small></td><td class="n"><b>${r1(z.tog)}</b></td><td class="n">${r1(z.avg)}</td><td class="n">${z.every.toFixed(1)} d</td></tr>`).join("");
+  };
+  ixBind(box, "pf", st, draw);
+  box.querySelectorAll("[data-pf]").forEach(i => i.oninput = () => { st.f[i.dataset.pf] = +i.value; box.querySelector("#o-pff-" + i.dataset.pf).textContent = pc(+i.value); draw(); });
+  box.querySelector("#ix-pfg").oninput = e => { st.gltf = +e.target.value; box.querySelector("#o-pfg").textContent = pc(st.gltf); draw(); };
+  box.querySelector("#ixPfSep").onchange = e => { st.gsep = e.target.checked; box.querySelector("#ix-pfg").disabled = !st.gsep; draw(); };
+  draw();
+}
+(function () { const b = document.getElementById("ixProfViz"); if (b) ixProfViz(b); })();
+
+/* ============ Recalculated adjustments, week by week (theory page) ============ */
+// Concepts (DDI; verify with Ptak & Smith): zones are recalculated whenever an input of the buffer equation changes: ADU, lead time,
+// the profile (its factors) or the MOQ. An MOQ floor keeps green flat while ADU moves; a shorter lead time shrinks yellow and moves the
+// part to another lead time category (another LTF); an MOQ added later lifts green at once.
+// Our own example (made up): cycle crankset CK-8, weekly ADU, lead time 12 days (long: LTF 40 %), VF 50 %.
+const IX_RCL = { adu: [20, 23, 27, 33, 40, 44, 47, 45, 42, 44], dlt: [12, 6], ltf: [0.4, 0.6], vf: 0.5, moqA: 250, moqB: 300, cutWk: 6, moqWk: 8 };
+function ixRecalc(o) {
+  const P = IX_RCL;
+  return P.adu.map((adu, i) => { const w = i + 1, cut = o.cut && w >= P.cutWk, dlt = P.dlt[cut ? 1 : 0], ltf = P.ltf[cut ? 1 : 0], vf = P.vf;
+    const moq = o.moqLater && w >= P.moqWk ? P.moqB : o.moqStart ? P.moqA : 0, yel = adu * dlt, rb = yel * ltf, rs = rb * vf, red = rb + rs, gl = yel * ltf, grn = Math.max(gl, moq);
+    return { w, adu, dlt, ltf, vf, moq, yel, rb, rs, red, gl, grn, gBy: moq > gl ? "MOQ" : "lead time", tor: red, toy: red + yel, tog: red + yel + grn }; });
+}
+function ixRecalcViz(box) {
+  const st = { moqStart: false, cut: true, moqLater: true }, r1 = v => Math.round(v).toLocaleString("en-US");
+  box.innerHTML = `<div class="ix-rcl-opts"><label class="ix-chk"><input type="checkbox" data-ro="moqStart"> MOQ of ${IX_RCL.moqA} from week 1 (floor under green)</label>
+      <label class="ix-chk"><input type="checkbox" data-ro="cut" checked> Lead time cut ${IX_RCL.dlt[0]} → ${IX_RCL.dlt[1]} days in week ${IX_RCL.cutWk} (profile change: LTF ${IX_RCL.ltf[0] * 100} % → ${IX_RCL.ltf[1] * 100} %)</label>
+      <label class="ix-chk"><input type="checkbox" data-ro="moqLater" checked> MOQ of ${IX_RCL.moqB} added in week ${IX_RCL.moqWk}</label></div>
+    <svg id="ixRclSvg" viewBox="0 0 900 280" role="img" aria-label="Red, yellow and green zones recalculated every week, with ADU"></svg>
+    <p class="ix-legend"><span><i class="sq" style="background:var(--ix-r)"></i>red</span><span><i class="sq" style="background:var(--ix-y)"></i>yellow</span><span><i class="sq" style="background:var(--ix-g)"></i>green</span><span><i class="ln" style="border-top:3px solid var(--ix-steel)"></i>ADU (right axis)</span><span><i class="ln" style="border-top:2px dashed var(--ix-mute)"></i>a change to the inputs</span></p>
+    <div class="ix-tw"><table class="ix-dyn-kpi" id="ixRclTbl"></table></div>`;
+  const draw = () => {
+    const rows = ixRecalc(st), L = 60, R = 830, T = 26, B = 238, n = rows.length, sw = (R - L) / n, X = i => L + i * sw, mx = Math.max(...rows.map(r => r.tog)) * 1.08, Y = v => B - v / mx * (B - T);
+    const amx = Math.max(...rows.map(r => r.adu)) * 1.25, YA = v => B - v / amx * (B - T);
+    let s = "";
+    [0, 0.25, 0.5, 0.75, 1].forEach(k => { const v = mx * k; s += `<line x1="${L}" x2="${R}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--ix-rule)"/><text x="${L - 6}" y="${Y(v) + 4}" class="ax" style="text-anchor:end">${r1(v)}</text>`; });
+    [0, 0.5, 1].forEach(k => { const v = amx * k; s += `<text x="${R + 6}" y="${YA(v) + 4}" class="ax" style="fill:var(--ix-steel)">${r1(v)}</text>`; });
+    rows.forEach((r, i) => { const x = X(i) + sw * 0.18, w = sw * 0.64;
+      [[0, r.tor, "--ix-r"], [r.tor, r.toy, "--ix-y"], [r.toy, r.tog, "--ix-g"]].forEach(([a, b, c]) => { s += `<rect x="${x}" y="${Y(b)}" width="${w}" height="${Y(a) - Y(b)}" style="fill:var(${c})"><title>Week ${r.w}: red ${r1(r.red)}, yellow ${r1(r.yel)}, green ${r1(r.grn)} (by ${r.gBy}), TOG ${r1(r.tog)}</title></rect>`; });
+      s += `<text x="${X(i) + sw / 2}" y="${B + 16}" class="ax" style="text-anchor:middle">wk ${r.w}</text>`; });
+    const ev = []; if (st.cut) ev.push([IX_RCL.cutWk, `lead time ${IX_RCL.dlt[1]} d, LTF ${IX_RCL.ltf[1] * 100} %`]); if (st.moqLater) ev.push([IX_RCL.moqWk, `MOQ ${IX_RCL.moqB}`]);
+    ev.forEach(([w, t], k) => { const x = X(w - 1); s += `<line x1="${x}" x2="${x}" y1="${T - 6}" y2="${B}" style="stroke:var(--ix-mute);stroke-dasharray:4 3"/><text x="${x + 4}" y="${T - 10 + k * 13}" class="ax" style="font-size:11px">${t}</text>`; });
+    s += ixPolyline(rows.map((r, i) => [X(i) + sw / 2, YA(r.adu)]), "stroke:var(--ix-steel);stroke-width:3");
+    rows.forEach((r, i) => { s += `<circle cx="${X(i) + sw / 2}" cy="${YA(r.adu)}" r="3.5" style="fill:var(--ix-steel)"/>`; });
+    s += `<text x="${L}" y="${B + 34}" class="ax">units</text><text x="${R + 6}" y="${B + 34}" class="ax" style="fill:var(--ix-steel)">ADU</text>`;
+    box.querySelector("#ixRclSvg").innerHTML = s;
+    box.querySelector("#ixRclTbl").innerHTML = `<tr><th>Week</th><th class="n">ADU</th><th class="n">DLT</th><th class="n">LTF</th><th class="n">VF</th><th class="n">MOQ</th><th class="n">Red base</th><th class="n">Red safety</th><th class="n">Red</th><th class="n">Yellow</th><th class="n">Green (lead time)</th><th class="n">Green</th><th class="n">TOG</th></tr>`
+      + rows.map((r, i) => { const p = rows[i - 1], ch = k => p && p[k] !== r[k] ? ' class="n ix-rcl-ch"' : ' class="n"';
+        return `<tr><td>${r.w}</td><td${ch("adu")}>${r.adu}</td><td${ch("dlt")}>${r.dlt}</td><td${ch("ltf")}>${Math.round(r.ltf * 100)} %</td><td class="n">${Math.round(r.vf * 100)} %</td><td${ch("moq")}>${r.moq || "–"}</td><td class="n">${r1(r.rb)}</td><td class="n">${r1(r.rs)}</td><td class="n">${r1(r.red)}</td><td class="n">${r1(r.yel)}</td><td class="n">${r1(r.gl)}</td><td class="n"><b>${r1(r.grn)}</b>${r.gBy === "MOQ" ? " <small>(MOQ)</small>" : ""}</td><td class="n"><b>${r1(r.tog)}</b></td></tr>`; }).join("");
+  };
+  box.querySelectorAll("[data-ro]").forEach(c => c.onchange = () => { st[c.dataset.ro] = c.checked; draw(); });
+  draw();
+}
+(function () { const b = document.getElementById("ixRclViz"); if (b) ixRecalcViz(b); })();
+
+/* ============ Filling a truck or reaching a minimum order value: prioritized share across one supplier's items (theory page) ============ */
+// Concept (DDI's discount and freight uses of prioritized share; verify with Ptak & Smith): when a supplier gives a better price or freight
+// for a full truck or a minimum order value, first order what the buffers need (every item at or below TOY, up to TOG), then top up the
+// rest one pallet at a time, always on the item with the lowest planning priority (NFP ÷ TOG) after what is already on the order.
+// Our own example (made up): plumbing fittings from Coastal Fittings, ordered in whole pallets.
+const IX_TRK = [
+  { id: "Elbow ½ in", tor: 120, toy: 360, tog: 480, nfp: 300, upp: 60, price: 1.2 },
+  { id: "Tee ¾ in", tor: 80, toy: 240, tog: 320, nfp: 250, upp: 40, price: 2.0 },
+  { id: "Ball valve ½ in", tor: 50, toy: 150, tog: 200, nfp: 90, upp: 20, price: 9.5 },
+  { id: "Union ¾ in", tor: 60, toy: 180, tog: 260, nfp: 210, upp: 30, price: 4.0 },
+  { id: "Reducer 1 in", tor: 40, toy: 120, tog: 160, nfp: 140, upp: 25, price: 3.5 },
+  { id: "Nipple ½ in", tor: 150, toy: 450, tog: 600, nfp: 520, upp: 100, price: 0.8 },
+  { id: "Cap ¾ in", tor: 70, toy: 210, tog: 280, nfp: 95, upp: 50, price: 1.0 },
+  { id: "Adapter 1 in", tor: 30, toy: 90, tog: 120, nfp: 100, upp: 15, price: 6.0 }
+];
+// mode "truck": fill cap pallets per truck (as many trucks as the needed pallets take); mode "value": reach at least min in order value
+function ixTruck(items, mode, cap, min) {
+  const rows = items.map(x => { const base = x.nfp <= x.toy ? Math.ceil((x.tog - x.nfp) / x.upp) : 0; return { ...x, base, top: 0 }; });
+  const pal = () => rows.reduce((s, r) => s + r.base + r.top, 0), val = () => rows.reduce((s, r) => s + (r.base + r.top) * r.upp * r.price, 0);
+  const basePal = pal(), trucks = mode === "truck" ? Math.max(1, Math.ceil(basePal / cap)) : 0, target = trucks * cap;
+  const more = () => mode === "truck" ? pal() < target : val() < min;
+  for (let guard = 0; more() && guard < 100000; guard++) {
+    let best = 0; rows.forEach((r, i) => { const pr = q => (q.nfp + (q.base + q.top) * q.upp) / q.tog; if (pr(r) < pr(rows[best])) best = i; });
+    rows[best].top++;
+  }
+  rows.forEach(r => { r.q = (r.base + r.top) * r.upp; r.after = r.nfp + r.q; r.pB = r.nfp / r.tog; r.pA = r.after / r.tog; });
+  return { rows, basePal, pallets: pal(), value: val(), trucks, target, baseValue: rows.reduce((s, r) => s + r.base * r.upp * r.price, 0) };
+}
+function ixTruckViz(box) {
+  const st = { mode: "truck", cap: 24, min: 4000 }, r1 = v => Math.round(v).toLocaleString("en-US"), usd = v => "$" + r1(v);
+  box.innerHTML = `<div class="ix-trk-bar"><span class="ix-seg" id="ixTkM"><button type="button" data-tm="truck">Full truck</button><button type="button" data-tm="value">Minimum order value</button></span>
+      <div class="ix-calc-ctl ix-row-ctl">${ixFld(st, "tk", "cap", "Truck capacity (pallets)", 6, 60, 1)}${ixFld(st, "tk", "min", "Minimum order value ($)", 0, 20000, 100)}</div></div>
+    <div class="ix-trk-grid"><div><svg id="ixTkSvg" viewBox="0 0 620 400" role="img" aria-label="Each item's net flow position as % of TOG: before the order, after the buffers' own orders and after the top-up"></svg>
+      <p class="ix-legend"><span><i class="ln" style="border-top:3px solid var(--ix-mute)"></i>NFP before</span><span><i class="sq" style="background:var(--ix-steel)"></i>the buffer's own order (NFP ≤ TOY)</span><span><i class="sq" style="background:var(--ix-vio)"></i>top-up</span></p></div>
+      <div><div class="ix-calc-res" id="ixTkOut"></div><div class="ix-tw"><table class="ix-dyn-kpi" id="ixTkTbl"></table></div></div></div>`;
+  const draw = () => {
+    const R = ixTruck(IX_TRK, st.mode, st.cap, st.min), L = 132, W = 600, top = Math.max(1.2, ...R.rows.map(r => r.pA * 1.04)), X = v => L + Math.max(0, v) * (W - L - 6) / top, bh = 16;
+    box.querySelectorAll("#ixTkM [data-tm]").forEach(b => b.setAttribute("aria-pressed", b.dataset.tm === st.mode));
+    box.querySelector("#ix-tk-cap").closest(".ix-fld").hidden = st.mode !== "truck"; box.querySelector("#ix-tk-min").closest(".ix-fld").hidden = st.mode !== "value";
+    let s = `<text x="${L}" y="12" class="ax">net flow position as % of TOG</text>`;
+    R.rows.forEach((r, i) => { const y = 24 + i * 46, zr = r.tor / r.tog, zy = r.toy / r.tog, mid = (r.nfp + r.base * r.upp) / r.tog;
+      s += `<text x="${L - 8}" y="${y + 13}" class="ax" style="text-anchor:end;font-weight:700;fill:var(--ix-ink)">${r.id}</text>`;
+      s += `<rect x="${X(0)}" y="${y}" width="${X(zr) - X(0)}" height="${bh}" style="fill:var(--ix-r);opacity:var(--ix-band)"/><rect x="${X(zr)}" y="${y}" width="${X(zy) - X(zr)}" height="${bh}" style="fill:var(--ix-y);opacity:var(--ix-band)"/><rect x="${X(zy)}" y="${y}" width="${X(1) - X(zy)}" height="${bh}" style="fill:var(--ix-g);opacity:var(--ix-band)"/>`;
+      if (r.base) s += `<rect x="${X(r.pB)}" y="${y + 3}" width="${X(mid) - X(r.pB)}" height="${bh - 6}" style="fill:var(--ix-steel)"><title>${r.id}: own order ${r.base} pallets (${r.base * r.upp})</title></rect>`;
+      if (r.top) s += `<rect x="${X(mid)}" y="${y + 3}" width="${X(r.pA) - X(mid)}" height="${bh - 6}" style="fill:var(--ix-vio)"><title>${r.id}: top-up ${r.top} pallets (${r.top * r.upp})</title></rect>`;
+      s += `<line x1="${X(r.pB)}" x2="${X(r.pB)}" y1="${y - 3}" y2="${y + bh + 3}" style="stroke:var(--ix-mute);stroke-width:3"/><line x1="${X(1)}" x2="${X(1)}" y1="${y - 2}" y2="${y + bh + 2}" style="stroke:var(--ix-ink)"/>`;
+      s += `<text x="${X(0)}" y="${y + bh + 14}" class="ax">${Math.round(r.pB * 100)} % → <tspan style="font-weight:700;fill:var(--ix-ink)">${Math.round(r.pA * 100)} %</tspan>${r.base + r.top ? ` · ${r.base + r.top} pallets` : ""}</text>`; });
+    s += `<text x="${X(1)}" y="${24 + R.rows.length * 46 + 4}" class="ax" style="text-anchor:middle">TOG</text>`;
+    box.querySelector("#ixTkSvg").setAttribute("viewBox", `0 0 620 ${36 + R.rows.length * 46}`); box.querySelector("#ixTkSvg").innerHTML = s;
+    box.querySelector("#ixTkOut").innerHTML = (st.mode === "truck" ? `<div><span>Pallets the buffers need</span><b>${R.basePal}</b></div><div><span>Trucks · pallets loaded</span><b>${R.trucks} · ${R.pallets} of ${R.target}</b></div>` : `<div><span>Value the buffers need</span><b>${usd(R.baseValue)}</b></div><div><span>Order value · minimum</span><b>${usd(R.value)} · ${usd(st.min)}</b></div>`)
+      + `<div><span>Top-up</span><b>${R.pallets - R.basePal} pallets</b></div><div><span>Order value</span><b>${usd(R.value)}</b></div>`;
+    box.querySelector("#ixTkTbl").innerHTML = `<tr><th>Item</th><th class="n">NFP</th><th class="n">TOY · TOG</th><th class="n">Own order<br><small>pallets (units)</small></th><th class="n">Top-up<br><small>pallets (units)</small></th><th class="n">NFP after</th></tr>`
+      + R.rows.map(r => `<tr><td>${r.id}<br><small>${r.upp} a pallet</small></td><td class="n">${r.nfp}</td><td class="n">${r.toy} · ${r.tog}</td><td class="n">${r.base ? `${r.base} (${r.base * r.upp})` : "–"}</td><td class="n">${r.top ? `${r.top} (${r.top * r.upp})` : "–"}</td><td class="n"><b>${r.after}</b><br><small>${Math.round(r.pA * 100)} % of TOG</small></td></tr>`).join("");
+  };
+  box.querySelectorAll("#ixTkM [data-tm]").forEach(b => b.onclick = () => { st.mode = b.dataset.tm; draw(); });
+  ixBind(box, "tk", st, draw);
+  draw();
+}
+(function () { const b = document.getElementById("ixTkViz"); if (b) ixTruckViz(b); })();
+
 /* ============ Distribution: network positioning and prioritized share (theory page) ============ */
 // Network: supplier → central DC (lead time 20 d) → four regional DCs (transfer 3 d) → customers. ADU 10 per region.
 const IX_NET = { sup: 20, tr: 3, adu: 10, regions: 4, ctt: 5 };
@@ -5459,6 +5657,8 @@ const IX_NUM = {
   // explosion and order sizing, distribution, spike methods
   "ix-xp-qty": ["pos", 0, null], "ix-os-nfp": ["num", null, null], "ix-os-moq": ["nn", 0, null], "ix-os-mult": ["int", 1, null],
   "ix-ds-avail": ["nn", 0, null], "ix-spk-k": ["pos", 0, null],
+  // profile comparison, filling a truck
+  "ix-pf-adu": ["pos", 0, null], "ix-pf-dlt": ["pos", 0, null], "ix-pf-moq": ["nn", 0, null], "ix-pf-doc": ["nn", 0, null], "ix-tk-cap": ["int", 1, null], "ix-tk-min": ["nn", 0, null],
   // execution visuals (short timelines)
   "ix-ex-oh": ["num", null, null], "ix-ex-oo": ["nn", 0, null], "ix-ex-d1": ["int", 0, 30], "ix-ex-d2": ["int", 0, 30], "ix-ex-reqDay": ["int", 1, 30], "ix-ex-supDay": ["int", 1, 30],
   "ix-ex-coh": ["nn", 0, null], "ix-ex-today": ["int", 0, 60], "ix-ex-pct": ["pos", 0, 100],
