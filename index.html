@@ -4,9 +4,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ddr-build" content="20261010133558">
+<meta name="ddr-build" content="20261010135407">
 <script>try{var t=localStorage.getItem("ddr-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
-<script>(function(){var B="20261010133558";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+<script>(function(){var B="20261010135407";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>S4PC DDR Walkthrough</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
@@ -1501,7 +1501,8 @@ const BOM = {
   "F-10A": ["S-201", "S-203"], "F-10B": ["S-201", "S-202"], "S-201": ["S-301", "R-302"], "S-301": ["R-401"],
   "F-20A": ["S-210", "S-208", "PH-220"], "S-210": ["S-310"], "S-310": ["R-410", "R-412"], "S-208": ["S-315", "R-311"], "S-315": ["R-411"],
   "PH-220": ["RM-370"],
-  "FG-130": ["SFG-240", "RM-380", "RM-390"], "SFG-240": ["RM-400", "RM-390"], "FG-150": ["RM-390", "RM-420"]
+  "FG-130": ["SFG-240", "RM-380", "RM-390"], "SFG-240": ["RM-400", "RM-390"], "FG-150": ["RM-390", "RM-420"],
+  "FG-120": ["SFG-230"], "SFG-230": ["RM-330", "RM-340", "RM-350"]
 };
 // bulk material used in S-301 (shown in BOM components with an information icon)
 BOM["S-301"] = ["R-401", "RM-370"];
@@ -1568,46 +1569,45 @@ Object.assign(S.hz, { "R-401": { p: 10, f: 0 }, "S-201": { p: 0, f: 14 }, "S-202
 // "Demand-Driven Replenishment steps" page lists "Default is MM" as an example parameter (conflict noted in the progress log)
 P.forEach(p => S.ilt[p.id] = "HCRE");
 
-// stock situation: oh on-hand, od open past + today's demand, rec open supply {d, q, t}, dem future open demand {day: qty}
+// stock situation: oh on-hand, od open past + today's demand, rec open supply {d, q, t}, fut future demand documents (sales order items;
+// component demand is added below from the parents' orders). dem = future demand per day, derived from fut (used for spikes and projections).
+// A production order that has already started carries `open`: its component reservations still open today (the rest is already issued).
 const STK = {
-  "S-201": { oh: 120, od: 40, rec: [], dem: { 3: 25 }, odTxt: "PrdOrd F-10A", firm: 30, firmTxt: "Firmed PldOrd F-10B (dependent requirement)" },
-  "S-202": { oh: 8, od: 5, rec: [{ d: 2, q: 60, t: "POitem", no: "4500000118" }], dem: {} },
-  "S-203": { oh: 0, od: 6, rec: [{ d: 1, q: 20, t: "StTrRq" }], dem: {} },
-  "R-401": { oh: 30, od: 0, rec: [], dem: {} },
-  "FG-120": { oh: 900, od: 20, rec: [{ d: 1, q: 100, t: "PrdOrd" }], dem: {} },
-  "SFG-230": { oh: 200, od: 40, rec: [{ d: 2, q: 300, t: "PrdOrd" }], dem: {} },
-  "RM-330": { oh: 300, od: 100, rec: [], dem: {} },
-  "RM-340": { oh: 1500, od: 50, rec: [{ d: 3, q: 500, t: "POitem" }], dem: {} },
-  "RM-350": { oh: 500, od: 100, rec: [{ d: 25, q: 1500, t: "POitem" }], dem: {} },
-  "RM-360": { oh: 100, od: 20, rec: [], dem: {} },
-  "FG-130": { oh: 95, od: 30, rec: [{ d: 1, q: 80, t: "PrdOrd" }], fut: [{ d: 1, q: 12, t: "SO", c: "17100001" }, { d: 2, q: 20, t: "SO", c: "17100003" }, { d: 2, q: 18, t: "SO", c: "17100002" }, { d: 3, q: 15, t: "SO", c: "17100004" }, { d: 5, q: 26, t: "SO", c: "17100001" }, { d: 8, q: 60, t: "SO", c: "17100005" }] },
-  "SFG-240": { oh: 60, od: 40, odTxt: "PrdOrd FG-130", rec: [{ d: 2, q: 120, t: "PrdOrd" }, { d: 5, q: 60, t: "PldOrd", firmOn: 3 }], fut: [{ d: 2, q: 40, t: "Res", c: "FG-130" }, { d: 4, q: 40, t: "Res", c: "FG-130" }, { d: 6, q: 40, t: "Res", c: "FG-130" }] },
-  "RM-380": { oh: 410, od: 40, odTxt: "PrdOrd FG-130", rec: [{ d: 4, q: 500, t: "POitem" }], fut: [{ d: 2, q: 40, t: "Res", c: "FG-130" }, { d: 5, q: 40, t: "Res", c: "FG-130" }, { d: 7, q: 80, t: "Res", c: "FG-130" }] },
-  "RM-390": { oh: 150, od: 95, odTxt: "PrdOrd FG-130, SFG-240, FG-150", rec: [{ d: 2, q: 300, t: "POitem" }, { d: 4, q: 400, t: "PurRqs" }], fut: [{ d: 1, q: 65, t: "Res", c: "SFG-240" }, { d: 1, q: 40, t: "Res", c: "FG-130" }, { d: 3, q: 110, t: "Res", c: "SFG-240" }, { d: 6, q: 220, t: "Res", c: "FG-150" }] },
-  "RM-400": { oh: 900, od: 60, odTxt: "PrdOrd SFG-240", rec: [{ d: 6, q: 600, t: "POitem" }], fut: [{ d: 3, q: 60, t: "Res", c: "SFG-240" }, { d: 7, q: 60, t: "Res", c: "SFG-240" }, { d: 10, q: 120, t: "Res", c: "SFG-240" }] },
+  "S-201": { oh: 120, od: 40, rec: [] },
+  "S-202": { oh: 8, od: 5, rec: [{ d: 2, q: 60, t: "POitem", no: "4500000118" }] },
+  "S-203": { oh: 0, od: 6, rec: [{ d: 1, q: 20, t: "StTrRq" }] },
+  "R-401": { oh: 30, od: 0, rec: [] },
+  "FG-120": { oh: 900, od: 20, rec: [{ d: 1, q: 100, t: "PrdOrd", open: { "SFG-230": 40 } }], fut: [{ d: 1, q: 60, t: "SO", c: "17100001" }, { d: 1, q: 45, t: "SO", c: "17100004" }, { d: 2, q: 80, t: "SO", c: "17100002" }, { d: 2, q: 50, t: "SO", c: "17100005" }, { d: 3, q: 140, t: "SO", c: "17100003" }, { d: 5, q: 210, t: "SO", c: "17100001" }] },
+  "SFG-230": { oh: 200, od: 40, rec: [{ d: 2, q: 300, t: "PrdOrd", open: { "RM-330": 70, "RM-340": 50 } }, { d: 7, q: 120, t: "PldOrd" }] },
+  "RM-330": { oh: 300, od: 100, rec: [] },
+  "RM-340": { oh: 1500, od: 50, rec: [{ d: 3, q: 500, t: "POitem" }] },
+  "RM-350": { oh: 500, od: 100, rec: [{ d: 25, q: 1500, t: "POitem" }] },
+  "RM-360": { oh: 100, od: 20, rec: [] },
+  "FG-130": { oh: 95, od: 30, rec: [{ d: 1, q: 80, t: "PrdOrd", open: { "SFG-240": 60, "RM-380": 40, "RM-390": 40 } }, { d: 6, q: 30, t: "PldOrd" }], fut: [{ d: 1, q: 12, t: "SO", c: "17100001" }, { d: 2, q: 20, t: "SO", c: "17100003" }, { d: 2, q: 18, t: "SO", c: "17100002" }, { d: 3, q: 15, t: "SO", c: "17100004" }, { d: 5, q: 26, t: "SO", c: "17100001" }, { d: 8, q: 60, t: "SO", c: "17100005" }] },
+  "SFG-240": { oh: 60, od: 60, rec: [{ d: 2, q: 120, t: "PrdOrd", open: { "RM-400": 60, "RM-390": 55 } }, { d: 5, q: 60, t: "PldOrd", firmOn: 3 }] },
+  "RM-380": { oh: 410, od: 40, rec: [{ d: 4, q: 500, t: "POitem" }] },
+  "RM-390": { oh: 150, od: 95, rec: [{ d: 2, q: 300, t: "POitem" }, { d: 4, q: 400, t: "PurRqs" }] },
+  "RM-400": { oh: 900, od: 60, rec: [{ d: 6, q: 600, t: "POitem" }] },
   "TR-410": { oh: 20, od: 25, rec: [{ d: 2, q: 75, t: "StTrRq" }], fut: [{ d: 1, q: 12, t: "SO", c: "17100002" }, { d: 3, q: 22, t: "SO", c: "17100004" }, { d: 3, q: 18, t: "SO", c: "17100001" }, { d: 5, q: 14, t: "SO", c: "17100003" }] },
   "FG-150": { oh: 130, od: 15, rec: [{ d: 3, q: 40, t: "PldOrd", firmOn: 0 }], fut: [{ d: 1, q: 10, t: "SO", c: "17100005" }, { d: 1, q: 8, t: "SO", c: "17100002" }, { d: 2, q: 12, t: "SO", c: "17100001" }, { d: 4, q: 30, t: "SO", c: "17100004" }] },
-  "RM-420": { oh: 140, od: 0, rec: [{ d: 5, q: 150, t: "POitem" }], firm: 40, firmTxt: "Firmed PldOrd FG-150 (dependent requirement)", fut: [{ d: 4, q: 25, t: "Res", c: "FG-150" }, { d: 8, q: 25, t: "Res", c: "FG-150" }] }
+  "RM-420": { oh: 140, od: 0, rec: [{ d: 5, q: 150, t: "POitem" }] }
 };
-// order books for the earlier extra samples (below the spike threshold or beyond the horizon, so their net flow positions stay as before)
-Object.assign(STK["FG-120"], { fut: [{ d: 1, q: 60, t: "SO", c: "17100001" }, { d: 1, q: 45, t: "SO", c: "17100004" }, { d: 2, q: 80, t: "SO", c: "17100002" }, { d: 2, q: 50, t: "SO", c: "17100005" }, { d: 3, q: 140, t: "SO", c: "17100003" }, { d: 5, q: 210, t: "SO", c: "17100001" }] });
-Object.assign(STK["SFG-230"], { fut: [{ d: 1, q: 90, t: "Res", c: "FG-120" }, { d: 2, q: 90, t: "Res", c: "FG-120" }, { d: 4, q: 180, t: "Res", c: "FG-120" }, { d: 6, q: 90, t: "Res", c: "FG-120" }] });
-Object.assign(STK["RM-330"], { fut: [{ d: 1, q: 280, t: "Res", c: "SFG-230" }, { d: 2, q: 300, t: "Res", c: "SFG-230" }, { d: 5, q: 900, t: "Res", c: "SFG-230" }] });
-Object.assign(STK["RM-340"], { fut: [{ d: 2, q: 120, t: "Res", c: "SFG-230" }, { d: 4, q: 150, t: "Res", c: "SFG-230" }, { d: 7, q: 400, t: "Res", c: "FG-120" }] });
-Object.assign(STK["RM-350"], { fut: [{ d: 3, q: 80, t: "Res", c: "SFG-230" }, { d: 10, q: 120, t: "Res", c: "SFG-230" }, { d: 20, q: 250, t: "Res", c: "SFG-230" }] });
-// document numbers: sales order items (one sales order per customer and date, items 10, 20 …) and reservations (one per order of the using product)
-{ let so = 2210, res = 1000400; const soOf = {};
-  Object.values(STK).forEach(k => { if (!k.fut) return; k.dem = {};
-    k.fut.forEach(l => { k.dem[l.d] = (k.dem[l.d] || 0) + l.q;
-      if (l.t === "SO") { const key = l.c + "|" + l.d; if (!soOf[key]) soOf[key] = { no: String(so += 15), n: 0 }; l.no = soOf[key].no; l.item = String(++soOf[key].n * 10); }
-      else { l.no = String(res++); l.item = "0001"; } }); }); }
+// orders of products that have no stock situation in the mock (MRP type PD): the parent orders behind S-201's demand in the test scripts.
+// to = the components whose requirements are part of the scenario (the test scripts follow S-201 only, so the orders' other components are left out)
+const PORD = [
+  { id: "F-10A", t: "PrdOrd", no: "1000290", q: 40, d: 1, to: ["S-201"], open: { "S-201": 40 } },
+  { id: "F-10B", t: "PrdOrd", no: "1000291", q: 25, d: 4, to: ["S-201"] },
+  { id: "F-10B", t: "PldOrd", no: "5000090", q: 30, d: 1, firmOn: 0, to: ["S-201"] }
+];
 // open past (including today's) demand split by the categories SAP Help 2608 lists (p.17); each list adds up to od
 const OD_IN = ["Open reservations for production orders", "SD released schedule lines", "Outbound deliveries", "Open sales order quantities", "Demand from stock transfer orders", "Stock transfer reservations (movement type 541)", "Subcontract scheduling agreements"];
 const OD_CFG = ["Scheduling agreement delivery schedules of stock transfer schedule lines", "Subcontracting requirements (parts to be provided) of subcontracting purchase requisitions", "Purchase requisition releases of stock transfer purchase requisitions", "Dependent requirements of planned orders"];
+// "Open reservations for production orders" are added below from the parents' started production orders (third element = order number);
+// the third element of a sales entry is the sold-to party
 const ODC = {
-  "S-201": [[OD_IN[0], 40]], "S-202": [[OD_IN[3], 5]], "S-203": [[OD_IN[4], 6]], "FG-120": [[OD_IN[3], 12], [OD_IN[2], 8]], "SFG-230": [[OD_IN[0], 40]],
-  "RM-330": [[OD_IN[0], 70], [OD_IN[6], 30]], "RM-340": [[OD_IN[0], 50]], "RM-350": [[OD_IN[5], 60], [OD_IN[1], 40]], "RM-360": [[OD_IN[1], 20]],
-  "FG-130": [[OD_IN[3], 14, "17100002"], [OD_IN[3], 8, "17100005"], [OD_IN[2], 8, "17100001"]], "SFG-240": [[OD_IN[0], 40]], "RM-380": [[OD_IN[0], 40]], "RM-390": [[OD_IN[0], 95]], "RM-400": [[OD_IN[0], 60]],
+  "S-202": [[OD_IN[3], 5]], "S-203": [[OD_IN[4], 6]], "FG-120": [[OD_IN[3], 12], [OD_IN[2], 8]],
+  "RM-330": [[OD_IN[6], 30]], "RM-350": [[OD_IN[5], 60], [OD_IN[1], 40]], "RM-360": [[OD_IN[1], 20]],
+  "FG-130": [[OD_IN[3], 14, "17100002"], [OD_IN[3], 8, "17100005"], [OD_IN[2], 8, "17100001"]],
   "TR-410": [[OD_IN[3], 15, "17100003"], [OD_IN[2], 10, "17100004"]], "FG-150": [[OD_IN[3], 15, "17100001"]]
 };
 const odCats = id => ODC[id] || (STK[id] && STK[id].od ? [["Open demand", STK[id].od]] : []);
@@ -1617,6 +1617,43 @@ const SUP_T = { po: ["POitem"], prd: ["PrdOrd"], pld: ["PldOrd"], pr: ["PurRqs",
 // document numbers for the starting open supply (supply created in the session gets the next number from ordNo)
 const NO0 = { POitem: 4500000200, PrdOrd: 1000300, StTrRq: 20000500, PurRqs: 20000400, PldOrd: 5000100 };
 Object.values(STK).forEach(k => k.rec.forEach(r => { if (!r.no) r.no = String(NO0[r.t]++); }));
+// every make order: open supply of a DD product, or a parent order in PORD. start = finish day − the product's lead time.
+// explode() rebuilds the component demand from the current orders; it runs at the start and after every supply change (Create Supply,
+// Edit, Delete, Convert, Expedite: the screens re-render through go(), which calls it), so new supply ripples down the BOM.
+const ORD = {}, ODC0 = Object.fromEntries(Object.entries(ODC).map(([id, l]) => [id, l.map(z => z.slice())])), RESNO = {}, SONO = {};
+let resNext = 3100001, soNext = 2210;
+Object.values(STK).forEach(k => { k.od0 = k.od; });
+function explode() {
+  Object.keys(ORD).forEach(no => delete ORD[no]);
+  // created orders start with nothing issued (open = null: the full quantity is still to issue once the order has started)
+  const addOrd = (p, r, to) => { ORD[r.no] = { p, t: r.t, q: r.q, d: r.d, start: r.d - by[p].lt, firm: r.t === "PldOrd" && r.firmOn != null && r.firmOn <= 0, open: r.created ? null : (r.open || {}), created: !!r.created, to: to || BOM[p] || [] }; };
+  Object.entries(STK).forEach(([p, k]) => k.rec.forEach(r => { if (r.t === "PrdOrd" || r.t === "PldOrd") addOrd(p, r); }));
+  PORD.forEach(o => addOrd(o.id, o, o.to));
+  // start again from the authored data: sales order items, the other open-demand categories
+  Object.keys(ODC).forEach(id => delete ODC[id]); Object.entries(ODC0).forEach(([id, l]) => { ODC[id] = l.map(z => z.slice()); });
+  Object.values(STK).forEach(k => { k.fut = (k.fut || []).filter(l => l.t === "SO"); delete k.firm; delete k.firmRefs; delete k.firmTxt; k.depNow = []; });
+  // component demand (BOM quantity 1, needed when the parent order starts): a started production order leaves the reservations still to
+  // issue (today's demand); a production order starting later reserves the component on its start day; an unfirmed planned order creates a
+  // dependent requirement on its start day (today's is shown but not counted: D1 leaves planned orders out, D2 counts only firmed ones);
+  // a firmed planned order's dependent requirement is the one MRP type D2 counts (2QI)
+  Object.entries(ORD).forEach(([no, o]) => o.to.filter(c => STK[c]).forEach(c => { const k = STK[c];
+    if (o.firm) { k.firm = (k.firm || 0) + o.q; (k.firmRefs = k.firmRefs || []).push(no); }
+    else if (o.start <= 0) {
+      if (o.t === "PrdOrd") { const q = o.open ? o.open[c] : o.q; if (q) (ODC[c] = ODC[c] || []).unshift([OD_IN[0], q, no]); }
+      else k.depNow.push({ q: o.q, ref: no, c: o.p }); }
+    else k.fut.push({ d: o.start, q: o.q, t: o.t === "PrdOrd" ? "Res" : "Dep", c: o.p, ref: no }); }));
+  Object.values(STK).forEach(k => { if (k.firmRefs) k.firmTxt = k.firmRefs.map(no => `Firmed PldOrd ${ORD[no].p} ${no}`).join(", ") + " (dependent requirement)"; });
+  // document numbers stay the same across rebuilds: sales order items (one sales order per customer and date, items 10, 20 …),
+  // reservations (per production order and component); a dependent requirement carries its planned order's number. dem = day totals.
+  Object.entries(STK).forEach(([id, k]) => { k.dem = {};
+    k.fut.sort((a, b) => a.d - b.d).forEach(l => { k.dem[l.d] = (k.dem[l.d] || 0) + l.q;
+      if (l.t === "SO") { if (!l.no) { const key = l.c + "|" + l.d; if (!SONO[key]) SONO[key] = { no: String(soNext += 15), n: 0 }; l.no = SONO[key].no; l.item = String(++SONO[key].n * 10); } }
+      else if (l.t === "Res") { const key = l.ref + ">" + id; l.no = RESNO[key] || (RESNO[key] = String(resNext++)); l.item = "0001"; }
+      else { l.no = l.ref; l.item = ""; } }); });
+  // open past and today's demand = the sum of its categories
+  Object.entries(STK).forEach(([id, k]) => { k.od = ODC[id] && ODC[id].length ? ODC[id].reduce((s, z) => s + z[1], 0) : k.od0; });
+}
+explode();
 const SUPPLY_N = { Make: "Planned Order", Buy: "Purchase Requisition", Transfer: "Stock Transfer Requisition" };
 const CONTACT = { Make: "Production Supervisor 001", Buy: "Supplier 17300001", Transfer: "Supplying Plant 1720" };
 
@@ -1851,12 +1888,13 @@ function ohStatus(id) {
   return { st, pct: b.ss ? k.oh / b.ss * 100 : 0, thr, belowThr: Math.max(0, thr - k.oh), belowSs: Math.max(0, b.ss - k.oh) };
 }
 // read-only handle for the browser data check (tests/ui_checks.js runDataCheck)
-if (typeof window !== "undefined") window.ddrData = { P, by, BOM, STK, ORDH, soLines, odCats: id => odCats(id) };
+if (typeof window !== "undefined") window.ddrData = { P, by, BOM, STK, ORDH, ORD, PORD, soLines, odCats: id => odCats(id) };
 let ordNo = 10000400;
 function createSupply(id, q, d) {
   const x = nfp(id); if (!x.prop || by[id].blocked) return false;
   const due = d || x.avail;
   STK[id].rec.push({ d: due, q: q || x.prop, t: SUPPLY[by[id].pt], no: String(++ordNo), created: true, firmOn: x.ptf != null ? Math.max(1, due - x.D + 1) : null });
+  explode(); // a new planned order creates dependent requirements on the components
   return true;
 }
 function project(id, days) {
@@ -1916,6 +1954,7 @@ function nav(keep) {
   const a = $("#nav [aria-current='true']"); if (!keep && a && a.scrollIntoView) a.scrollIntoView({ block: "nearest", inline: "center" });
 }
 function go(i) {
+  explode(); // component demand follows the current orders
   // same screen re-render (button, tab, filter): keep the page and inner scroll positions
   const same = i === cur && $("#ct"), y = window.scrollY, inner = same ? [...$("#main").querySelectorAll(".tw,.graph")].map(e => [e.scrollLeft, e.scrollTop]) : [];
   cur = i; const s = SCR[i], st = stepOf(s.g); $("#ttl").textContent = s.t; nav(same);
@@ -2860,12 +2899,17 @@ function supplyApp(k, doc, dateLbl) {
   return (fb, ct) => {
     fb.innerHTML = fbQ(k); bindQ(fb, k);
     const rows = []; Object.keys(STK).forEach(id => { if (qMatch(k, id)) STK[id].rec.forEach(r => { if (SUP_T[k].includes(r.t)) rows.push({ id, r }); }); });
+    PORD.forEach(o => { if (SUP_T[k].includes(o.t) && qMatch(k, o.id)) rows.push({ id: o.id, r: o, pd: true }); });
+    // what the order means for its components (the demand it creates there)
+    const comp = no => { const o = ORD[no]; if (!o) return ""; const cs = o.to.filter(c => STK[c]); if (!cs.length) return "";
+      return " · components: " + cs.map(c => { if (o.firm) return `${c} firmed dependent requirement`; if (o.start > 0) return `${c} ${o.t === "PrdOrd" ? "reservation" : "dependent requirement"} on ${day(o.start)}`;
+        if (o.t === "PldOrd") return `${c} dependent requirement today (not counted until firmed or converted)`; const q = o.open ? o.open[c] : o.q; return q ? `${c} ${f(q)} still to issue` : `${c} issued`; }).join(", "); };
     rows.sort((a, b) => a.r.d - b.r.d);
     // completed orders of the individual lead time history (ORDH): purchase orders for buy products, production orders for make products
     const htype = { po: "Buy", prd: "Make" }[k], hist = htype ? Object.keys(ORDH).filter(id => by[id].pt === htype && qMatch(k, id)).flatMap(id => iltOrders(id).filter(o => o.gr != null).map(o => `<tr><td>${o.no}</td><td>${oid(id)}</td><td>${day(-o.cr)}</td><td>${day(-o.rel)}</td><td>${day(-o.gr)}</td><td>${o.st}</td><td style="white-space:normal">${S.ilt[id] === "HCRE" || S.ilt[id] === "HREL" ? (o.use ? chip("g", "Yes (" + S.ilt[id] + ")") : chip("n", "No") + " " + o.why) : "No (method " + S.ilt[id] + ")"}</td></tr>`)).join("") : "";
     const st = r => [r.created ? "Created in Replenishment Planning" : "", r.exp ? "Expedited" : "", r.t === "PldOrd" && r.firmOn != null ? (r.firmOn <= 0 ? "Firmed" : `Not firmed; firmed by the planning run on ${day(r.firmOn)}`) : ""].filter(Boolean).join(" · ") || "Open";
     ct.innerHTML = `<div class="card"><div class="tb"><h2>${doc}s (${rows.length})</h2></div><div class="tw"><table class="montbl"><tr><th>${doc}</th><th>Item</th><th>Product</th><th>Type</th><th class="n">Open Quantity</th><th>${dateLbl}</th><th>Status</th><th>In Net Flow Position as</th></tr>
-      ${rows.map(({ id, r }) => `<tr><td>${r.no}</td><td>10</td><td>${oid(id)}</td><td style="white-space:normal">${SUP_N[r.t]}${r.t === "StTrRq" ? " (supplying plant 1720)" : ""}</td><td class="n">${f(r.q)}</td><td>${r.d ? day(r.d) : "today"}</td><td style="white-space:normal">${st(r)}</td><td>Open supply</td></tr>`).join("") || `<tr><td colspan="8">No open ${doc.toLowerCase()}s. Use Create Supply in Replenishment Planning${k === "prd" ? ", then Convert the planned order" : ""}.</td></tr>`}</table></div></div>
+      ${rows.map(({ id, r, pd }) => `<tr><td>${r.no}</td><td>10</td><td>${oid(id)}</td><td style="white-space:normal">${SUP_N[r.t]}${r.t === "StTrRq" ? " (supplying plant 1720)" : ""}</td><td class="n">${f(r.q)}</td><td>${r.d ? day(r.d) : "today"}</td><td style="white-space:normal">${st(r)}</td><td style="white-space:normal">${pd ? `Not DD-relevant (MRP type ${S.mrp[id]}); parent order in the test-script scenario` : "Open supply"}${comp(r.no)}</td></tr>`).join("") || `<tr><td colspan="8">No open ${doc.toLowerCase()}s. Use Create Supply in Replenishment Planning${k === "prd" ? ", then Convert the planned order" : ""}.</td></tr>`}</table></div></div>
       ${hist ? `<div class="card"><div class="tb"><h2>Completed ${doc}s (lead time history)</h2></div><div class="tw"><table class="montbl"><tr><th>${doc}</th><th>Product</th><th>Created On</th><th>Released On</th><th>Goods Receipt</th><th>Status</th><th>Used for HCRE / HREL now</th></tr>${hist}</table></div></div>` : ""}
       ${note("Data", `${NOTE5} || Used by DDR: every open supply element counts in full in the net flow position, whatever its date. Supply created in Replenishment Planning appears here at once.${htype ? ` || Completed ${doc.toLowerCase()}s are the history for the individual lead time methods HCRE (creation to goods receipt) and HREL (release to goods receipt); see Manage Buffer Levels > Decoupled Lead Time.` : ""} || The same elements are listed with their dates in the Stock/Requirements List.`, SRC5[k])}`;
   };
@@ -2893,7 +2937,7 @@ function bomApp(fb, ct) {
 function mmcApp(fb, ct) {
   const ids = Object.keys(STK);
   if (!ids.includes(S.mmcId)) S.mmcId = ids[0];
-  const sum = id => { const k = STK[id]; return { dem: odCats(id).reduce((s, z) => s + z[1], 0) + (k.firm || 0) + Object.values(k.dem).reduce((s, q) => s + q, 0), sup: k.rec.reduce((s, r) => s + r.q, 0) }; };
+  const sum = id => { const k = STK[id]; return { dem: odCats(id).reduce((s, z) => s + z[1], 0) + (k.firm || 0) + (k.depNow || []).reduce((s, z) => s + z.q, 0) + Object.values(k.dem).reduce((s, q) => s + q, 0), sup: k.rec.reduce((s, r) => s + r.q, 0) }; };
   fb.innerHTML = `<label class="fld">Plant<input value="${PLANT}" readonly></label><label class="fld">MRP Area<input value="${PLANT}" readonly></label>`;
   ct.innerHTML = `<div class="card"><div class="tb"><h2>Materials (${ids.length})</h2></div><div class="tw"><table><tr><th>Material</th><th>MRP Type</th><th class="n">Stock</th><th class="n">Demand (open and future)</th><th class="n">Open Supply</th></tr>
     ${ids.map(id => { const s = sum(id); return `<tr class="click ${id === S.mmcId ? "sel" : ""}" data-id="${id}"><td>${oid(id)}</td><td>${S.mrp[id]}</td><td class="n">${f(STK[id].oh)}</td><td class="n">${f(s.dem)}</td><td class="n">${f(s.sup)}</td></tr>`; }).join("")}</table></div></div>
@@ -2924,11 +2968,12 @@ const shortage = id => { const a = alertsOf(id); return a.so ? `<span class="chi
 const projStatus = (id, v) => { const b = S.buf[id], thr = S.pp.oht * b.ss; return v < 0 ? chip("r", "Stockout") : v < thr ? chip("r", "Below Threshold") : v < b.ss ? chip("y", "Below Safety Stock") : chip("g", "OK"); };
 function sdList(id, ddOnly, maxDay, status) {
   const k = STK[id], x = nfp(id), p = by[id], el = [{ d: 0, e: "Stock", i: "Unrestricted-use stock", q: k.oh, dd: 1 }];
-  odCats(id).forEach(([c, q]) => el.push({ d: 0, e: "OrdRes", i: `${c} (open past / today)${k.odTxt && c === OD_IN[0] ? " · " + k.odTxt : ""}`, q: -q, dd: 1 }));
+  odCats(id).forEach(([c, q, ref]) => el.push({ d: 0, e: "OrdRes", i: `${c} (open past / today)${ref ? (ORD[ref] ? ` · ${ORD[ref].t} ${ORD[ref].p} ${ref}, ${f(q)} of ${f(ORD[ref].q)} still to issue` : ` · sold-to party ${ref}`) : ""}`, q: -q, dd: 1 }));
+  (k.depNow || []).forEach(z => el.push({ d: 0, e: `DepReq ${z.ref}`, i: `Dependent requirement of planned order ${z.ref} (${z.c}), which starts today · not counted: the planned order is not firmed (MRP type D1 leaves planned orders out, D2 counts only firmed ones); counted once it is converted to a production order`, q: -z.q, dd: 0 }));
   if (k.firm) el.push({ d: 0, e: "DepReq", i: `${k.firmTxt}${S.mrp[id] === "D2" ? " · qualified demand with MRP type D2" : " · not counted with MRP type D1"}`, q: -k.firm, dd: S.mrp[id] === "D2" ? 1 : 0 });
   k.rec.forEach((r, ix) => el.push({ d: r.d, e: `${r.t}${r.no ? " " + r.no : ""}`, i: r.created ? "Created in Replenishment Planning" + (r.firmOn != null ? ` · created unfirmed, firmed by the planning run on ${day(r.firmOn)} (planning time fence)` : "") : r.exp ? `Expedited on ${day(0)}` : "Open supply", q: r.q, dd: 1, ix, act: r.created }));
   x.spikes.forEach(s => { const docs = (k.fut || []).filter(l => l.d === s.d), sp = s.ok ? "Qualified Spike" : "Not qualified", tot = docs.length > 1 ? ` · day total ${f(s.q)}` : "";
-    if (docs.length && docs.reduce((t, l) => t + l.q, 0) === s.q) docs.forEach(l => el.push({ d: s.d, e: l.t === "SO" ? `CusOrd ${l.no}/${l.item}` : `OrdRes ${l.no}`, i: (l.t === "SO" ? `Sales order item · sold-to party ${l.c}` : `Reservation for the production order of ${l.c}`) + tot, q: -l.q, sp, dd: s.ok ? 1 : 0 }));
+    if (docs.length && docs.reduce((t, l) => t + l.q, 0) === s.q) docs.forEach(l => el.push({ d: s.d, e: l.t === "SO" ? `CusOrd ${l.no}/${l.item}` : l.t === "Res" ? `OrdRes ${l.no}` : `DepReq ${l.no}`, i: (l.t === "SO" ? `Sales order item · sold-to party ${l.c}` : l.t === "Res" ? `Reservation for production order ${l.ref} (${l.c}), which starts that day` : `Dependent requirement of planned order ${l.ref} (${l.c}), which starts that day`) + tot, q: -l.q, sp, dd: s.ok ? 1 : 0 }));
     else el.push({ d: s.d, e: "OrdRes", i: "Qualified demand", q: -s.q, sp, dd: s.ok ? 1 : 0 }); });
   if (S.hz[id].f > 0) [7, 14].forEach(d => el.push({ d, e: "IndReq", i: "Planned independent requirement (not part of NFP)", q: -p.adu * 7, dd: 0 }));
   let run = 0;
@@ -2942,7 +2987,7 @@ function bindActs(box, id) {
       if (!(q >= 1)) { $("#qe", L).innerHTML = `<div class="strip err">Enter a quantity of at least 1.</div>`; return false; }
       if (!(d >= 1)) { $("#qe", L).innerHTML = `<div class="strip err">Enter an availability date from ${day(1)}.</div>`; return false; }
       r.q = q; r.d = d; toast("Supply changed"); go(cur); } }])],
-      ...(r.t === "PldOrd" ? [["Convert", () => dialog("Convert", `<p style="margin:0">Convert planned order ${r.no} to a production order?</p>`, [{ t: "Convert", e: 1, fn: () => { r.t = "PrdOrd"; toast(`Planned order converted to Production Order ${r.no}`); go(cur); } }])]] : []),
+      ...(r.t === "PldOrd" ? [["Convert", () => dialog("Convert", `<p style="margin:0">Convert planned order ${r.no} to a production order?</p>`, [{ t: "Convert", e: 1, fn: () => { r.t = "PrdOrd"; const cs = (BOM[id] || []).filter(c => STK[c]); toast(`Planned order converted to Production Order ${r.no}${cs.length ? `; its reservations now count for ${cs.join(", ")}` : ""}`); go(cur); } }])]] : []),
       ["Delete", () => { STK[id].rec.splice(+b.dataset.act, 1); toast("Supply deleted"); go(cur); }]]);
   });
 }
@@ -2987,7 +3032,7 @@ function rplan(fb, ct) {
   bindClr(ct);
   ct.querySelectorAll("tr[data-id]").forEach(tr => tr.onclick = e => { if (e.target.closest("input,button")) return; S.rpSel = tr.dataset.id; S.rpTab = "Supply/Demand List"; go(cur); });
   ct.querySelectorAll("[data-ck]").forEach(c => c.onchange = () => { S.rpChk[c.dataset.ck] = c.checked; go(cur); });
-  const cs = list => { const j = jid(); list.forEach(id => createSupply(id)); S.rpChk = {}; dialog("Information", `<p style="margin:0">Supply order creation in progress with job ID ${j}.</p>`); go(cur); };
+  const cs = list => { const j = jid(), made = list.filter(id => createSupply(id)), comps = [...new Set(made.flatMap(id => (BOM[id] || []).filter(c => STK[c])))]; S.rpChk = {}; dialog("Information", `<p style="margin:0">Supply order creation in progress with job ID ${j}.</p>${comps.length ? `<p style="margin:8px 0 0">The new planned orders create dependent requirements for ${comps.join(", ")} (see their Stock/Requirements List). They count in a component's net flow position once the planned order is converted to a production order, or firmed with MRP type D2.</p>` : ""}`); go(cur); };
   ct.querySelectorAll("[data-cs]").forEach(b => b.onclick = () => cs([b.dataset.cs]));
   $("#mcs", ct).onclick = () => cs(chosen.filter(id => !by[id].blocked));
   $("#cols", ct).onclick = () => { S.rpCols = !S.rpCols; go(cur); };
