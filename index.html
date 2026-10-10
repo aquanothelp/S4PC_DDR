@@ -4,9 +4,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ddr-build" content="20261010140321">
+<meta name="ddr-build" content="20261010142829">
 <script>try{var t=localStorage.getItem("ddr-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
-<script>(function(){var B="20261010140321";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+<script>(function(){var B="20261010142829";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>S4PC DDR Walkthrough</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
@@ -891,6 +891,14 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
   .ix-toc { position: static; }
   #intro .ix-sec { scroll-margin-top: 16px; }
 }
+/* buffer lab: typed number fields */
+.ix-fld input[type=number] { width: 100%; max-width: 180px; margin-top: 4px; padding: 6px 10px; border: 1px solid var(--ix-rule); border-radius: 6px; background: var(--ix-sheet); color: var(--ix-ink); font: 600 15px var(--ix-mono); }
+.ix-fld input[type=number]:focus { outline: 2px solid var(--ix-steel); outline-offset: 1px; border-color: var(--ix-steel); }
+.ix-fld input[type=number][aria-invalid] { border-color: var(--ix-r-ink); box-shadow: 0 0 0 1px var(--ix-r-ink); }
+.ix-hint { font-size: 12px; color: var(--ix-mute); }
+.ix-fld input[aria-invalid] + .ix-hint { color: var(--ix-r-ink); font-weight: 600; }
+/* buffer lab: the typed fields sit two per row on desktop (one column only on narrow screens) */
+@media (min-width: 1000px) { .ix-labgrid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); } .ix-labgrid .ix-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; align-content: start; } .ix-labgrid .ix-controls hr { grid-column: 1 / -1; width: 100%; } }
 </style>
 
 <!-- DDMRP theory page shown before the mock-up (theory only: Ptak & Smith, Demand Driven Institute) -->
@@ -1045,21 +1053,21 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
     <section class="ix-sec ix-lab" id="ix-lab" aria-labelledby="ix-labh">
       <p class="ix-num">Buffer lab</p>
       <h2 id="ix-labh">Size a buffer, then plan and execute against it</h2>
-      <ul class="ix-plain"><li>The sliders on the left size the buffer; the list shows each zone with the formula behind it, and the diagram draws it.</li><li><b>Net flow position</b> and <b>On-hand</b> are separate sliders you set by hand: use them to see when an order is triggered (NFP at or below TOY) and what the shop floor sees (on-hand compared with TOR).</li><li>The lab starts with a 7-day desired order cycle, so green is 70 and TOG 186. Set the order cycle to 0 to get the worked example's 140.</li><li><b>Planning review every</b> only changes the 90-day charts in the next section.</li></ul>
+      <ul class="ix-plain"><li>Type any values on the left to size the buffer (only the two factors with a fixed 0 to 1 range are sliders); the list shows each zone with the formula behind it, and the diagram draws it.</li><li><b>Net flow position</b> and <b>On-hand</b> are separate fields you set by hand: use them to see when an order is triggered (NFP at or below TOY) and what the shop floor sees (on-hand compared with TOR).</li><li>The lab starts with a 7-day desired order cycle, so green is 70 and TOG 186. Set the order cycle to 0 to get the worked example's 140.</li><li><b>Planning review every</b> only changes the 90-day charts in the next section.</li></ul>
       <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, from sample inputs and the formulas shown (formulas from knowledge of Ptak &amp; Smith; verify). They are not data from Ptak &amp; Smith or DDI.</p>
       <div class="ix-labgrid">
         <form class="ix-controls" id="ixForm" onsubmit="return false">
-          <div class="ix-fld"><label for="ix-adu"><span data-ip="adu">ADU</span> <output id="o-adu"></output></label><input id="ix-adu" type="range" min="1" max="100" step="1" value="10"><span class="ix-rng" aria-hidden="true"><i>1</i><i>100</i></span></div>
-          <div class="ix-fld"><label for="ix-dlt"><span data-ip="dlt">DLT (days)</span> <output id="o-dlt"></output></label><input id="ix-dlt" type="range" min="1" max="40" step="1" value="8"><span class="ix-rng" aria-hidden="true"><i>1</i><i>40</i></span></div>
+          <div class="ix-fld"><label for="ix-adu"><span data-ip="adu">ADU (units a day)</span></label><input id="ix-adu" type="number" inputmode="decimal" min="0" step="any" value="10" aria-describedby="h-adu"><span class="ix-hint" id="h-adu">above 0</span></div>
+          <div class="ix-fld"><label for="ix-dlt"><span data-ip="dlt">DLT (days)</span></label><input id="ix-dlt" type="number" inputmode="decimal" min="0" step="any" value="8" aria-describedby="h-dlt"><span class="ix-hint" id="h-dlt">above 0</span></div>
           <div class="ix-fld"><label for="ix-ltf"><span data-ip="ltf">Lead time factor</span> <output id="o-ltf"></output></label><input id="ix-ltf" type="range" min="0.2" max="1" step="0.05" value="0.3"><span class="ix-rng" aria-hidden="true"><i>0.2</i><i>1</i></span></div>
           <div class="ix-fld"><label for="ix-vf"><span data-ip="vf">Variability factor</span> <output id="o-vf"></output></label><input id="ix-vf" type="range" min="0" max="1" step="0.05" value="0.5"><span class="ix-rng" aria-hidden="true"><i>0</i><i>1</i></span></div>
-          <div class="ix-fld"><label for="ix-doc"><span data-ip="green">Desired order cycle (days)</span> <output id="o-doc"></output></label><input id="ix-doc" type="range" min="0" max="30" step="1" value="7"><span class="ix-rng" aria-hidden="true"><i>0</i><i>30</i></span></div>
-          <div class="ix-fld"><label for="ix-moq"><span data-ip="green">Minimum order quantity</span> <output id="o-moq"></output></label><input id="ix-moq" type="range" min="0" max="300" step="10" value="0"><span class="ix-rng" aria-hidden="true"><i>0</i><i>300</i></span></div>
-          <div class="ix-fld"><label for="ix-daf"><span data-ip="adjust">Demand adjustment factor (DAF)</span> <output id="o-daf"></output></label><input id="ix-daf" type="range" min="0.5" max="2" step="0.1" value="1"><span class="ix-rng" aria-hidden="true"><i>0.5</i><i>2</i></span></div>
-          <div class="ix-fld"><label for="ix-rev"><span data-ip="nfp">Planning review every (days)</span> <output id="o-rev"></output></label><input id="ix-rev" type="range" min="1" max="7" step="1" value="1"><span class="ix-rng" aria-hidden="true"><i>1</i><i>7</i></span></div>
+          <div class="ix-fld"><label for="ix-doc"><span data-ip="green">Desired order cycle (days)</span></label><input id="ix-doc" type="number" inputmode="decimal" min="0" step="any" value="7" aria-describedby="h-doc"><span class="ix-hint" id="h-doc">0 = none</span></div>
+          <div class="ix-fld"><label for="ix-moq"><span data-ip="green">Minimum order quantity</span></label><input id="ix-moq" type="number" inputmode="decimal" min="0" step="any" value="0" aria-describedby="h-moq"><span class="ix-hint" id="h-moq">0 = none</span></div>
+          <div class="ix-fld"><label for="ix-daf"><span data-ip="adjust">Demand adjustment factor (DAF)</span></label><input id="ix-daf" type="number" inputmode="decimal" min="0" step="any" value="1" aria-describedby="h-daf"><span class="ix-hint" id="h-daf">1 = no adjustment</span></div>
+          <div class="ix-fld"><label for="ix-rev"><span data-ip="nfp">Planning review every (days)</span></label><input id="ix-rev" type="number" inputmode="decimal" min="1" step="1" value="1" aria-describedby="h-rev"><span class="ix-hint" id="h-rev">whole days, 1 to 90</span></div>
           <hr>
-          <div class="ix-fld"><label for="ix-nfp"><span data-ip="nfp">Net flow position</span> <output id="o-nfp"></output></label><input id="ix-nfp" type="range" min="-50" max="250" step="1" value="55"><span class="ix-rng" aria-hidden="true"><i>-50</i><i>250</i></span></div>
-          <div class="ix-fld"><label for="ix-oh"><span data-ip="onhand">On-hand</span> <output id="o-oh"></output></label><input id="ix-oh" type="range" min="0" max="250" step="1" value="30"><span class="ix-rng" aria-hidden="true"><i>0</i><i>250</i></span></div>
+          <div class="ix-fld"><label for="ix-nfp"><span data-ip="nfp">Net flow position</span></label><input id="ix-nfp" type="number" step="any" value="55" aria-describedby="h-nfp"><span class="ix-hint" id="h-nfp">can be negative</span></div>
+          <div class="ix-fld"><label for="ix-oh"><span data-ip="onhand">On-hand</span></label><input id="ix-oh" type="number" inputmode="decimal" min="0" step="any" value="30" aria-describedby="h-oh"><span class="ix-hint" id="h-oh">0 or more</span></div>
         </form>
         <div class="ix-labfig">
           <svg id="ixLabBuf" viewBox="0 0 340 330" role="img" aria-label="Live buffer diagram"></svg>
@@ -3224,6 +3232,15 @@ function drawBuffer(svg, z, mk = {}) {
   mks.forEach(([t, v, c], i) => { s += `<g><line x1="${x - 34}" x2="${x + w}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(${c});stroke-width:2.5;stroke-dasharray:${t === "NFP" ? "0" : "5 3"}"/><circle cx="${x - 34}" cy="${y(v)}" r="4" style="fill:var(${c})"/><text x="${x - 40}" y="${my[i] + 4}" style="text-anchor:end;fill:var(${c});font-weight:700">${t} ${r1(v)}</text></g>`; });
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = s;
 }
+// buffer lab inputs: typed numbers (sliders only for LTF and VF). Rules per field; a value that breaks a rule is marked and the last good one is used.
+const IX_LAB_RULE = { adu: v => v > 0, dlt: v => v > 0, ltf: v => v >= 0, vf: v => v >= 0, doc: v => v >= 0, moq: v => v >= 0, daf: v => v > 0, rev: v => Number.isInteger(v) && v >= 1 && v <= 90, nfp: () => true, oh: v => v >= 0 };
+const IX_LAB_LAST = { adu: 10, dlt: 8, ltf: 0.3, vf: 0.5, doc: 7, moq: 0, daf: 1, rev: 1, nfp: 55, oh: 30 };
+function ixLabVal(k) {
+  const e = document.getElementById("ix-" + k); if (!e) return IX_LAB_LAST[k];
+  const raw = String(e.value).trim(), v = raw === "" ? NaN : +raw, ok = Number.isFinite(v) && IX_LAB_RULE[k](v);
+  e.toggleAttribute("aria-invalid", !ok); if (ok) IX_LAB_LAST[k] = v;
+  return IX_LAB_LAST[k];
+}
 (function intro() {
   const box = document.getElementById("intro"); if (!box) return;
   const show = on => { document.body.classList.toggle("intro-on", on); window.scrollTo(0, 0); try { history.replaceState(null, "", on ? location.pathname : "#mockup"); } catch (e) { /* sandboxed */ } };
@@ -3241,8 +3258,8 @@ function drawBuffer(svg, z, mk = {}) {
   const ids = ["adu", "dlt", "ltf", "vf", "doc", "moq", "daf", "rev", "nfp", "oh"], el = k => document.getElementById("ix-" + k), r1 = n => Math.round(n).toLocaleString("en-US"), pct = n => (n * 100).toFixed(0) + " %";
   const pill = (c, t) => `<span class="ix-pill ${c}">${t}</span>`;
   const upd = () => {
-    const o = Object.fromEntries(ids.map(k => [k, +el(k).value]));
-    ids.forEach(k => { document.getElementById("o-" + k).textContent = ["ltf", "vf"].includes(k) ? pct(o[k]) : k === "daf" ? o[k].toFixed(1) : r1(o[k]); });
+    const o = Object.fromEntries(ids.map(k => [k, ixLabVal(k)]));
+    ["ltf", "vf"].forEach(k => { document.getElementById("o-" + k).textContent = pct(o[k]); }); // the typed fields show their own value
     const z = ddmrpZones(o);
     drawBuffer(document.getElementById("ixLabBuf"), z, { nfp: o.nfp, oh: o.oh });
     const pp = o.nfp / z.tog, pz = o.nfp <= z.tor ? ["r", "Red"] : o.nfp <= z.toy ? ["y", "Yellow"] : o.nfp <= z.tog ? ["g", "Green"] : ["b", "Over TOG"];
@@ -3396,7 +3413,7 @@ const ixKpi = items => items.map(([t, v, sub]) => `<div><dt>${t}</dt><dd>${v}</d
 (function analytics() {
   if (!document.getElementById("ixPlan")) return;
   let seed = 7;
-  const read = () => Object.fromEntries(["adu", "dlt", "ltf", "vf", "doc", "moq", "daf", "rev"].map(k => [k, +document.getElementById("ix-" + k).value]));
+  const read = () => Object.fromEntries(["adu", "dlt", "ltf", "vf", "doc", "moq", "daf", "rev"].map(k => [k, ixLabVal(k)]));
   const run = () => {
     const o = read(), z = ddmrpZones(o), rows = ddmrpSimulate(o, z, seed), r1 = v => Math.round(v).toLocaleString("en-US"), n = rows.length;
     drawPlan(document.getElementById("ixPlan"), z, rows); drawExec(document.getElementById("ixExec"), z, rows); drawRun(document.getElementById("ixRun"), z, rows); drawDist(document.getElementById("ixDist"), z, rows);
@@ -5413,6 +5430,64 @@ const IX_ORDER = ["positioning", "adu", "dlt", "profile", "ltf", "vf", "red", "y
     if (!pop.hidden && !pop.contains(e.target)) closePop();
   }, true);
   document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if (!pop.hidden) closePop(); else if (!det.hidden) closeDetail(); });
+})();
+
+/* ============ Theory labs: typed number fields instead of sliders ============ */
+// Sliders stay only for factors with a fixed 0 to 1 range (LTF, VF, weights, reaction speed). Every other lab input becomes a number field.
+// Rules: pos = above 0 · nn = 0 or more · num = any number · int = whole number. [rule, min, max]: null = open-ended.
+// Fields on a fixed timeline (a 180-day run, a 60-day history, a short execution timeline) keep their day range.
+// A value that breaks the rule is marked red and not passed on; leaving the field puts back the last good value.
+const IX_NUM = {
+  // decoupling lab, matrix BOM, bullwhip
+  "ix-ctt": ["int", 1, null], "ix-mx-ctt": ["int", 1, null], "ix-bw-lt": ["int", 1, 30],
+  // buffer key figures
+  "ix-bk-adu": ["pos", 0, null], "ix-bk-dlt": ["pos", 0, null], "ix-bk-moq": ["nn", 0, null], "ix-bk-doc": ["nn", 0, null], "ix-bk-cost": ["pos", 0, null], "ix-bk-today": ["nn", 0, null],
+  // parameter calculators: ADU, DLT/LTF classes, VF, NFP, green, red, yellow, qualified demand
+  "ix-aph": ["int", 1, 60], "ix-afh": ["int", 1, 30],
+  "ix-ls": ["int", 1, null], "ix-lm": ["int", 2, null], "ix-vs": ["nn", 0, null], "ix-vl": ["nn", 0, null],
+  "ix-noh": ["nn", 0, null], "ix-nost": ["pos", 0, null], "ix-nosh": ["int", 1, null], "ix-nmult": ["int", 1, null],
+  "ix-gadu": ["pos", 0, null], "ix-gdlt": ["pos", 0, null], "ix-gdoc": ["nn", 0, null], "ix-gmoq": ["nn", 0, null],
+  "ix-radu": ["pos", 0, null], "ix-rdlt": ["pos", 0, null], "ix-rzaf": ["pos", 0, null],
+  "ix-yadu": ["pos", 0, null], "ix-ydlt": ["pos", 0, null], "ix-ydaf": ["pos", 0, null], "ix-ycum": ["pos", 0, null],
+  "ix-qtor": ["pos", 0, null], "ix-qost": ["pos", 0, null, true], "ix-qosh": ["int", 1, null],
+  // dynamic adjustment lab (180-day runs)
+  "ix-dy-win": ["int", 2, 90], "ix-dy-peak": ["nn", 0, null], "ix-dy-lead": ["int", 0, 60], "ix-dy-plan": ["pos", 0, null], "ix-dy-plead": ["int", 0, 60],
+  "ix-dy-ltaf": ["pos", 0, null], "ix-dy-len": ["int", 1, 90], "ix-dy-cyc": ["int", 1, 60], "ix-dy-zaf": ["pos", 0, null],
+  // performance signals, product transition
+  "ix-sg-jump": ["num", -90, null], "ix-sg-longW": ["int", 2, 90], "ix-sg-shortW": ["int", 1, 60], "ix-sg-thr": ["pos", 0, null], "ix-sg-tol": ["nn", 0, null], "ix-sg-late": ["int", 0, 30], "ix-sg-factor": ["pos", 0, null],
+  "ix-tr-len": ["int", 1, 90], "ix-tr-gap": ["int", -60, 60], "ix-tr-lead": ["int", 0, 60],
+  // explosion and order sizing, distribution, spike methods
+  "ix-xp-qty": ["pos", 0, null], "ix-os-nfp": ["num", null, null], "ix-os-moq": ["nn", 0, null], "ix-os-mult": ["int", 1, null],
+  "ix-ds-avail": ["nn", 0, null], "ix-spk-k": ["pos", 0, null],
+  // execution visuals (short timelines)
+  "ix-ex-oh": ["num", null, null], "ix-ex-oo": ["nn", 0, null], "ix-ex-d1": ["int", 0, 30], "ix-ex-d2": ["int", 0, 30], "ix-ex-reqDay": ["int", 1, 30], "ix-ex-supDay": ["int", 1, 30],
+  "ix-ex-coh": ["nn", 0, null], "ix-ex-today": ["int", 0, 60], "ix-ex-pct": ["pos", 0, 100],
+  // DDOM: time and capacity buffers
+  "ix-tb-b": ["int", 1, 60], "ix-tb-d": ["int", -60, 60], "ix-cb-load": ["nn", 0, null]
+};
+const ixNumOk = (cfg, v) => { const [r, a, b] = cfg; if (!Number.isFinite(v)) return false;
+  if (r === "pos" && !(v > 0)) return false; if (r === "nn" && v < 0) return false; if (r === "int" && !Number.isInteger(v)) return false;
+  return (a == null || r === "pos" || v >= a) && (b == null || v <= b); };
+const ixNumHint = ([r, a, b]) => r === "pos" ? (b != null ? `above 0, up to ${b}` : "above 0") : r === "nn" ? "0 or more" : r === "int" ? (b != null ? `whole number, ${a} to ${b}` : `whole number from ${a}`) : a != null ? `${a} or more` : "any number";
+function ixNumify(root) {
+  root.querySelectorAll('input[type="range"]').forEach(e => { const cfg = IX_NUM[e.id]; if (!cfg) return;
+    const v = e.value; e.type = "number"; e.removeAttribute("max"); e.removeAttribute("min");
+    if (cfg[0] === "int") e.step = "1"; else e.step = "any";
+    if (cfg[0] !== "pos" && cfg[1] != null) e.min = cfg[1]; else if (cfg[0] === "pos") e.min = "0";
+    if (cfg[2] != null) e.max = cfg[2];
+    e.value = v; if (cfg[1] != null && cfg[1] >= 0 || cfg[0] === "pos") e.inputMode = cfg[0] === "int" ? "numeric" : "decimal"; e.dataset.num = "1"; e.dataset.last = v; // fields that allow negatives keep the keyboard with a minus sign
+    const fld = e.closest(".ix-fld"); if (fld) { const rng = fld.querySelector(".ix-rng"); if (rng) rng.remove(); const out = fld.querySelector("output"); if (out && !cfg[3]) out.hidden = true;
+      if (!fld.querySelector(".ix-hint")) { const h = document.createElement("span"); h.className = "ix-hint"; h.id = e.id + "-h"; h.textContent = ixNumHint(cfg); e.after(h); e.setAttribute("aria-describedby", h.id); } } });
+}
+(function () {
+  const intro = document.getElementById("intro"); if (!intro) return;
+  // runs before the labs' own handlers: a value that breaks the rule is marked and stopped; leaving the field restores the last good value
+  document.addEventListener("input", ev => { const e = ev.target; if (!e.dataset || !e.dataset.num) return; const cfg = IX_NUM[e.id], v = e.value.trim() === "" ? NaN : +e.value;
+    if (ixNumOk(cfg, v)) { e.removeAttribute("aria-invalid"); e.dataset.last = e.value; } else { e.setAttribute("aria-invalid", "true"); ev.stopImmediatePropagation(); } }, true);
+  document.addEventListener("focusout", ev => { const e = ev.target; if (e.dataset && e.dataset.num && e.hasAttribute("aria-invalid")) { e.value = e.dataset.last; e.removeAttribute("aria-invalid"); } }, true);
+  ixNumify(intro);
+  // labs that redraw their controls (adjustment scenarios, signal tabs) get number fields again
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) ixNumify(n.matches && n.matches(".ix-fld") ? n.parentElement || n : n); }))).observe(intro, { childList: true, subtree: true });
 })();
 
 /* ============ Sun / moon theme toggle (GitHub Pages build only) ============ */
