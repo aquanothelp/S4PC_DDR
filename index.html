@@ -4,9 +4,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="ddr-build" content="20261010144503">
+<meta name="ddr-build" content="20261013210422">
 <script>try{var t=localStorage.getItem("ddr-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
-<script>(function(){var B="20261010144503";try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+<script>(function(){var B="20261013210422";function c(){try{fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){var m=t.match(/name="ddr-build" content="(\d+)"/);if(!m||m[1]<=B)return;var u=new URL(location.href);if(u.searchParams.get("v")===m[1])return;u.searchParams.set("v",m[1]);location.replace(u.toString());}).catch(function(){});}catch(e){}}c();document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")c();});})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>S4PC DDR Walkthrough</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
@@ -293,6 +293,7 @@ nav .apps button[aria-current="true"]::before { content: ""; position: absolute;
 /* ===== DDMRP theory page (shown before the mock-up) =====
    Layout: engineering field notes — a long single column with a buffer diagram as the hero, two-column component spreads, a live buffer lab. */
 :root {
+  --ix-rb: #f7c3c3; --ix-yb: #fbe7a3; --ix-gb: #bde6cd; --ix-drb: #e3a1a1; /* zone fills behind chart lines */
   --ix-paper: #f3f5f6; --ix-sheet: #ffffff; --ix-ink: #15212b; --ix-mute: #56656f; --ix-rule: #d8dfe3;
   --ix-steel: #1668c4; --ix-r: #ec3b3b; --ix-y: #f7c600; --ix-g: #1fb35a; --ix-dr: #9b1414; --ix-over: #2f8fe8; --ix-vio: #7a4fd0; --ix-band: .32; --ix-r-ink: #c42323; --ix-g-ink: #137a3c;
   --ix-disp: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
@@ -300,9 +301,11 @@ nav .apps button[aria-current="true"]::before { content: ""; position: absolute;
   --ix-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ix-rb: #a3363c; --ix-yb: #b07f14; --ix-gb: #1d8a4e; --ix-drb: #74242a; /* zone fills: saturated mid tones, lines stay visible */
   --ix-paper: #0f1519; --ix-sheet: #172027; --ix-ink: #e6ecef; --ix-mute: #9badb8; --ix-rule: #2b3a44;
   --ix-steel: #4dc3ff; --ix-r: #ff4d4d; --ix-y: #ffd21f; --ix-g: #2ee07a; --ix-dr: #ff8a8a; --ix-over: #5aa9ff; --ix-vio: #b794ff; --ix-band: .5; --ix-r-ink: #ff6b6b; --ix-g-ink: #2ee07a; } }
 :root[data-theme="dark"] {
+  --ix-rb: #a3363c; --ix-yb: #b07f14; --ix-gb: #1d8a4e; --ix-drb: #74242a; /* zone fills: saturated mid tones, lines stay visible */
   --ix-paper: #0f1519; --ix-sheet: #172027; --ix-ink: #e6ecef; --ix-mute: #9badb8; --ix-rule: #2b3a44;
   --ix-steel: #4dc3ff; --ix-r: #ff4d4d; --ix-y: #ffd21f; --ix-g: #2ee07a; --ix-dr: #ff8a8a; --ix-over: #5aa9ff; --ix-vio: #b794ff; --ix-band: .5; --ix-r-ink: #ff6b6b; --ix-g-ink: #2ee07a; }
 
@@ -396,8 +399,8 @@ body.intro-on { background: var(--ix-paper); }
 .ix-pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-family: var(--ix-body); font-weight: 600; color: var(--ix-sheet); }
 .ix-pill.r { background: var(--ix-r); } .ix-pill.y { background: var(--ix-y); color: #10181f; } .ix-pill.g { background: var(--ix-g); color: #10181f; } .ix-pill.dr { background: var(--ix-dr); } .ix-pill.b { background: var(--ix-over); }
 
-#ixHeroBuf text, #ixLabBuf text { font-family: var(--ix-mono); font-size: 12px; fill: var(--ix-ink); }
-#ixHeroBuf .lab, #ixLabBuf .lab { font-family: var(--ix-disp); font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+#ixHeroBuf text, #ixLabBuf text, .ix-xc-buf text { font-family: var(--ix-mono); font-size: 12px; fill: var(--ix-ink); }
+#ixHeroBuf .lab, #ixLabBuf .lab, .ix-xc-buf .lab { font-family: var(--ix-disp); font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
 
 .ix-sheet { margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0; border: 1px solid var(--ix-rule); border-radius: 6px; overflow: hidden; background: var(--ix-sheet); }
 .ix-sheet > div { padding: 12px 14px; border-right: 1px solid var(--ix-rule); border-bottom: 1px solid var(--ix-rule); min-width: 0; }
@@ -770,7 +773,7 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
 .ix-day-nav .sp { flex: 1; }
 /* section bar: chips wrap onto a second line instead of running past the edge */
 .ix-toc { align-items: flex-start; }
-.ix-toc-t { padding-top: 5px; }
+.ix-toc-t { align-self: center; margin-right: 6px; }
 .ix-toc-l { flex-wrap: wrap; overflow: visible; row-gap: 6px; }
 #intro .ix-sec { scroll-margin-top: 100px; }
 .ix-day-in { width: 52px; padding: 2px 3px; }
@@ -892,7 +895,7 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
   #intro .ix-sec { scroll-margin-top: 16px; }
 }
 /* buffer lab: typed number fields */
-.ix-fld input[type=number] { width: 100%; max-width: 180px; margin-top: 4px; padding: 6px 10px; border: 1px solid var(--ix-rule); border-radius: 6px; background: var(--ix-sheet); color: var(--ix-ink); font: 600 15px var(--ix-mono); }
+.ix-fld input[type=number] { width: 100%; max-width: none; box-sizing: border-box; margin-top: 4px; padding: 6px 10px; border: 1px solid var(--ix-rule); border-radius: 6px; background: var(--ix-sheet); color: var(--ix-ink); font: 600 15px var(--ix-mono); }
 .ix-fld input[type=number]:focus { outline: 2px solid var(--ix-steel); outline-offset: 1px; border-color: var(--ix-steel); }
 .ix-fld input[type=number][aria-invalid] { border-color: var(--ix-r-ink); box-shadow: 0 0 0 1px var(--ix-r-ink); }
 .ix-hint { font-size: 12px; color: var(--ix-mute); }
@@ -921,6 +924,122 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
 #intro #ixRclTbl th, #intro #ixRclTbl td, #intro #ixTkTbl th, #intro #ixTkTbl td, #intro #ixPfTbl th, #intro #ixPfTbl td { padding: 4px 6px; font-size: 13px; }
 #intro #ixTkTbl th { white-space: normal; vertical-align: bottom; }
 #intro #ixPfTbl th { white-space: normal; vertical-align: bottom; } #intro #ixPfTbl td small { white-space: normal; }
+/* round 31: seasonal lab, why-DDMRP context, fast mover batch */
+.ix-sea-bar { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+.ix-sea-bar .ix-calc-ctl { margin: 0; flex: 1 1 520px; }
+.ix-sea-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 10px; }
+.ix-sea-grid > div { min-width: 0; } #ixSeaA, #ixSeaB { display: block; width: 100%; height: auto; }
+.ix-why-more { margin-top: 16px; }
+#intro .ix-why-t th, #intro .ix-why-t td { white-space: normal; padding: 5px 8px; font-size: 13px; vertical-align: top; }
+.ix-fast { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: end; margin-top: 10px; }
+.ix-fast .ix-calc-ctl { margin: 0; }
+@media (max-width: 1000px) { .ix-sea-grid { grid-template-columns: minmax(0, 1fr); } }
+/* public site: implementation contact message */
+.ix-contact { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, #000 55%, transparent); }
+.ix-contact[hidden] { display: none; }
+.ix-contact-box { width: min(560px, 100%); background: var(--ix-sheet); color: var(--ix-ink); border: 1px solid var(--ix-steel); border-radius: 12px; padding: 24px 26px; display: flex; flex-direction: column; gap: 12px; font: 16px/1.55 var(--ix-body); box-shadow: 0 18px 50px rgba(0, 0, 0, .35); }
+.ix-contact-box h2 { margin: 0; font: 700 28px/1.15 var(--ix-disp); }
+.ix-contact-box p { margin: 0; }
+.ix-contact-mail { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 14px; border-radius: 8px; background: var(--ix-paper); }
+.ix-contact-addr { font: 700 17px var(--ix-mono); user-select: all; overflow-wrap: anywhere; }
+.ix-contact-x { display: flex; justify-content: flex-end; }
+/* public site: our solutions */
+.ix-sol-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.ix-sol-card { display: flex; flex-direction: column; gap: 8px; text-align: left; padding: 18px 18px 16px; border: 1px solid var(--ix-rule); border-radius: 10px; background: var(--ix-sheet); color: var(--ix-ink); font: 15px/1.5 var(--ix-body); cursor: pointer; transition: border-color .15s, transform .15s; }
+.ix-sol-card:hover, .ix-sol-card:focus-visible { border-color: var(--ix-steel); transform: translateY(-2px); }
+.ix-sol-card b { font: 700 21px/1.2 var(--ix-disp); }
+.ix-sol-card > span:not(.ix-sol-tag):not(.ix-sol-go) { color: var(--ix-mute); flex: 1; }
+.ix-sol-tag { align-self: flex-start; font: 600 11px var(--ix-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ix-steel); }
+.ix-sol-go { font-weight: 700; color: var(--ix-steel); }
+@media (max-width: 1100px) { .ix-sol-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .ix-sol-grid { grid-template-columns: minmax(0, 1fr); } }
+/* three views: named demand patterns */
+.ix-pat { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 10px 0 4px; }
+.ix-pat .ix-seg { flex-wrap: wrap; }
+.ix-pat .ix-note { flex-basis: 100%; margin: 0; min-height: 1.5em; }
+/* exam calculator: every calculation in one place */
+.ix-xc { display: flex; flex-direction: column; gap: 16px; }
+.ix-xc-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.ix-xc-p { min-width: 0; }
+.ix-xc-grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 20px 32px; align-items: start; }
+.ix-xc-in { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; align-content: start; font-size: 14px; }
+.ix-xc-in .ix-xc-wide { grid-column: 1 / -1; }
+.ix-xc-in .ix-fld > label, .ix-xc-lab { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; font-size: 14px; }
+.ix-xc-in .ix-fld output { font-family: var(--ix-mono); color: var(--ix-steel); font-weight: 400; }
+.ix-xc-in input[type=range] { width: 100%; accent-color: var(--ix-steel); }
+.ix-xc textarea, .ix-xc-in select, .ix-xc-shtop select, .ix-xc-txt { width: 100%; box-sizing: border-box; margin-top: 4px; padding: 6px 10px; border: 1px solid var(--ix-rule); border-radius: 6px; background: var(--ix-sheet); color: var(--ix-ink); font: 600 14px var(--ix-body); }
+.ix-xc textarea { font: 14px/1.5 var(--ix-mono); resize: vertical; min-height: 5.5em; }
+.ix-xc textarea[aria-invalid] { border-color: var(--ix-r-ink); box-shadow: 0 0 0 1px var(--ix-r-ink); }
+.ix-xc .ix-seg { align-self: flex-start; margin-top: 4px; }
+.ix-xc .ix-chk { margin: 2px 0; }
+.ix-xc-adj { border: 1px solid var(--ix-rule); border-radius: 6px; padding: 8px 12px; }
+.ix-xc-adj summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.ix-xc-adj .ix-xc-in { margin-top: 10px; }
+.ix-xc-pull { justify-content: flex-end; }
+.ix-xc-pull .ix-go { text-align: left; }
+.ix-xc-thr { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ix-xc-out { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.ix-xc-buf { display: block; width: 100%; height: auto; }
+/* the buffer is the first result card, beside the zone cards; each zone card carries its zone colour */
+.ix-xc-zrow { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 8px; align-items: stretch; }
+.ix-xc-zrow.wide { grid-template-columns: 300px minmax(0, 1fr); }
+.ix-xc-zrow > .ix-xc-steps { align-content: start; }
+.ix-xc-bufc { display: flex; flex-direction: column; gap: 6px; padding: 9px 12px; background: var(--ix-sheet); border: 1px solid var(--ix-rule); border-radius: 6px; min-width: 0; }
+.ix-xc-bufc .nm { font-weight: 600; font-size: 14px; }
+.ix-xc-st.zg { box-shadow: inset 4px 0 0 var(--ix-g); } .ix-xc-st.zy { box-shadow: inset 4px 0 0 var(--ix-y); }
+.ix-xc-st.zr { box-shadow: inset 4px 0 0 var(--ix-r); } .ix-xc-st.zb { box-shadow: inset 4px 0 0 var(--ix-over); }
+@media (max-width: 1200px) { .ix-xc-zrow { grid-template-columns: 200px minmax(0, 1fr); align-items: start; } .ix-xc-zrow.wide { grid-template-columns: 260px minmax(0, 1fr); } }
+@media (max-width: 640px) { .ix-xc-zrow, .ix-xc-zrow.wide { grid-template-columns: minmax(0, 1fr); } .ix-xc-bufc .ix-xc-buf { max-width: 280px; margin: 0 auto; } }
+.ix-xc-steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 8px; }
+.ix-xc-st { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-content: start; padding: 9px 12px; background: var(--ix-sheet); border: 1px solid var(--ix-rule); border-radius: 6px; min-width: 0; }
+.ix-xc-st .nm { font-weight: 600; font-size: 14px; }
+.ix-xc-st b { font: 700 17px/1.25 var(--ix-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.ix-xc-st .fm, .ix-xc-st .wk { grid-column: 1 / -1; font: 12px/1.45 var(--ix-mono); color: var(--ix-mute); overflow-wrap: anywhere; }
+.ix-xc-st .wk { color: var(--ix-ink); }
+.ix-xc-st.key { border-color: var(--ix-steel); box-shadow: inset 3px 0 0 var(--ix-steel); }
+#intro .ix-xc-h { font: 12px var(--ix-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ix-steel); margin: 6px 0 -4px; }
+#intro .ix-xc-in .ix-xc-h { margin: 4px 0 -6px; }
+.ix-xc-warn { color: var(--ix-r-ink); font-weight: 600; }
+.ix-xc-acts { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.ix-xc-scroll { max-height: 340px; overflow-y: auto; border: 1px solid var(--ix-rule); border-radius: 6px; }
+.ix-xc-scroll th { position: sticky; top: 0; background: var(--ix-sheet); z-index: 1; }
+.ix-xc-pick { border: 1px solid transparent; background: none; color: var(--ix-steel); font: 600 13px var(--ix-mono); padding: 1px 6px; border-radius: 4px; cursor: pointer; }
+.ix-xc-pick:hover, .ix-xc-pick[aria-pressed="true"] { border-color: var(--ix-vio); color: var(--ix-vio); }
+.ix-xc tr.on td { background: var(--ix-paper); }
+.ix-xc-cell { width: 5.5em; box-sizing: border-box; padding: 4px 6px; border: 1px solid var(--ix-rule); border-radius: 4px; background: var(--ix-sheet); color: var(--ix-ink); font: 13px var(--ix-mono); text-align: right; }
+.ix-xc-cell.name { width: 9em; text-align: left; font-family: var(--ix-body); }
+.ix-xc-cell.wide { width: 11em; }
+/* qualified demand: days run across, row labels pinned on the left */
+.ix-xc-hscroll { overflow-x: auto; border: 1px solid var(--ix-rule); border-radius: 6px; min-width: 0; }
+#intro .ix-xc-hscroll table { border: 0; border-radius: 0; }
+.ix-xc-qd th[scope=row] { position: sticky; left: 0; z-index: 1; background: var(--ix-sheet); text-align: left; white-space: nowrap; border-right: 1px solid var(--ix-rule); }
+.ix-xc-qd th[scope=col], .ix-xc-qd td { min-width: 70px; padding: 6px 8px; white-space: nowrap; }
+.ix-xc-qd .ix-xc-cell { width: 100%; min-width: 0; text-align: right; }
+.ix-xc-qd .out { background: var(--ix-paper); color: var(--ix-mute); }
+.ix-xc-qd .edge { border-left: 2px dashed var(--ix-steel); }
+.ix-xc-cell[aria-invalid] { border-color: var(--ix-r-ink); box-shadow: 0 0 0 1px var(--ix-r-ink); }
+.ix-xc-cell:focus, .ix-xc textarea:focus, .ix-xc select:focus, .ix-xc-txt:focus { outline: 2px solid var(--ix-steel); outline-offset: 1px; }
+.ix-xc-x { border: 1px solid var(--ix-rule); background: var(--ix-sheet); color: var(--ix-mute); border-radius: 4px; width: 26px; height: 26px; cursor: pointer; font-size: 16px; line-height: 1; }
+.ix-xc-x:hover { color: var(--ix-r-ink); border-color: var(--ix-r-ink); }
+.ix-xc-shtop { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin-bottom: 12px; }
+.ix-xc-shtop .ix-fld { flex: 0 1 300px; }
+.ix-xc-sh { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 20px 28px; align-items: start; }
+.ix-xc-sh table select { padding: 3px 6px; border: 1px solid var(--ix-rule); border-radius: 4px; background: var(--ix-sheet); color: var(--ix-ink); font: 600 13px var(--ix-body); }
+.ix-pill.n { background: var(--ix-rule); color: var(--ix-ink) !important; }
+.ix-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 1200px) { .ix-xc-sh { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 900px) { .ix-xc-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 480px) { .ix-xc-in { grid-template-columns: minmax(0, 1fr); } }
+.ix-xc-aduw { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 16px; align-items: start; }
+.ix-xc-aduw svg { width: 100%; height: auto; display: block; }
+.ix-xc-aduw .ix-xc-scroll { max-height: 300px; }
+.ix-xc-scroll .ix-dyn-kpi th, .ix-xc-scroll .ix-dyn-kpi td { padding: 4px 10px; }
+@media (max-width: 1100px) { .ix-xc-aduw { grid-template-columns: minmax(0, 1fr); } }
+.ix-xc-sh { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+#intro .ix-dyn-kpi.ix-xc-sht { width: auto; }
+.ix-xc-shtop .ix-fld > label { font-weight: 600; font-size: 14px; }
+.ix-xc-hbar { display: block; width: 100%; max-width: 680px; height: auto; }
+@media (min-width: 1201px) { .ix-xc-sh.side { grid-template-columns: auto minmax(0, 1fr); gap: 20px 28px; } }
 </style>
 
 <!-- DDMRP theory page shown before the mock-up (theory only: Ptak & Smith, Demand Driven Institute) -->
@@ -967,6 +1086,14 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
         <div class="ix-panel"><p class="ix-sub">Bullwhip effect</p><p>Each tier plans from the orders of the tier below, not from real demand. Forecast error and batching grow at every step, so suppliers see far more variability than end customers create.</p></div>
         <div class="ix-panel"><p class="ix-sub">Bimodal inventory</p><p>Too much of what is not needed and too little of what is, at the same time: high inventory and poor service together. See the distribution chart in the <a href="#ix-an">three views</a>.</p></div>
         <div class="ix-panel"><p class="ix-sub">Flow first</p><p>DDI builds on Plossl's first law of manufacturing: the benefits depend on how fast relevant information and materials flow. Decoupling points and actual-demand signals protect that flow.</p></div>
+      </div>
+      <div class="ix-two-viz ix-why-more">
+        <div class="ix-panel"><p class="ix-sub">Why now: the new normal</p><p>Planning got harder while the tools stayed the same. Supply and demand cross the world; products live for months, not decades; customers wait days, not weeks; there are many more variants and options; long lead time parts are common; forecasts miss; and there is pressure to hold less stock. The past is a weaker guide to the future than it used to be.</p></div>
+        <div class="ix-panel"><p class="ix-sub">MRP versus Lean, and where DDMRP sits</p><div class="ix-tw"><table class="ix-dyn-kpi ix-why-t"><tr><th></th><th>MRP</th><th>Lean (kanban)</th><th>DDMRP</th></tr>
+          <tr><td>Links between items</td><td>Everything depends on everything (full BOM explosion)</td><td>Every loop is independent</td><td>Independent at decoupling points, dependent in between</td></tr>
+          <tr><td>Where orders come from</td><td>The plan (forecast and MPS)</td><td>Visible consumption on the floor</td><td>The plan, driven by actual demand (net flow), with buffer status for execution</td></tr>
+          <tr><td>Strength</td><td>Synchronises complex structures</td><td>Clear, simple signals</td><td>Both</td></tr></table></div>
+          <p class="ix-note">Both camps want flow; the tension is about dependence and where orders are generated. Summarised from knowledge of Ptak &amp; Smith and DDI (verify).</p></div>
       </div>
       <div class="ix-dyn" id="ix-bw">
         <div class="ix-dyn-head"><p class="ix-sub">Bullwhip, illustrated</p><h3>Small ups and downs in customer demand become big swings further up the chain</h3>
@@ -1123,7 +1250,8 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
         <div role="listitem"><b>Execution view</b><span>Which open orders need attention?</span><em>On-hand vs. top of red</em></div>
         <div role="listitem"><b>Analytics view</b><span>Is the buffer sized right?</span><em>History of zones and on-hand</em></div>
       </div>
-      <div class="ix-ch-head"><div><ul class="ix-plain"><li>Each day customers order about ADU. Now and then a big order (red diamond) is booked for a later date.</li><li>A big order counts against net flow early when it is above half the red zone and due within one DLT.</li><li>On review days: if NFP is at or below TOY, order TOG − NFP (at least the MOQ). It is due one DLT later and sometimes arrives late.</li><li>Here a higher variability factor also brings more big orders, more uneven demand and more late deliveries. That is this page's assumption, not a DDMRP rule.</li></ul><p class="ix-note ix-who">Who calculates these numbers: this page does, with a simple random-demand simulation. The ordering rule is DDMRP's (from knowledge of Ptak &amp; Smith; verify); the demand, big orders and late deliveries are the page's own invention: an illustration, not data.</p></div><button class="ix-go small" type="button" id="ixReseed">New demand pattern</button></div>
+      <div class="ix-ch-head"><div><ul class="ix-plain"><li>Each day customers order about ADU. Now and then a big order (red diamond) is booked for a later date.</li><li>A big order counts against net flow early when it is above half the red zone and due within one DLT.</li><li>On review days: if NFP is at or below TOY, order TOG − NFP (at least the MOQ). It is due one DLT later and sometimes arrives late.</li><li>Pick a demand pattern below. In "Variable" a higher variability factor also brings more big orders, more uneven demand and more late deliveries; late deliveries follow the VF in every pattern. That is this page's assumption, not a DDMRP rule.</li></ul><p class="ix-note ix-who">Who calculates these numbers: this page does, with a simple random-demand simulation. The ordering rule is DDMRP's (from knowledge of Ptak &amp; Smith; verify); the demand, big orders and late deliveries are the page's own invention: an illustration, not data.</p></div></div>
+      <div class="ix-pat"><span class="ix-sub">Demand pattern</span><span class="ix-seg" id="ixPat" role="group" aria-label="Demand pattern"></span><button class="ix-go small" type="button" id="ixReseed" title="Same pattern, new random draw">↻ Draw again</button><p class="ix-note" id="ixPatD" aria-live="polite"></p></div>
 
       <h3 class="ix-h3"><span>1</span>Planning view</h3>
       <div class="ix-an-top">
@@ -1196,6 +1324,7 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
         <dl class="ix-defs">
           <dt>Recalculated adjustments</dt><dd>Zones are recalculated as rolling ADU (and DLT or MOQ) changes.</dd>
           <dt>Planned adjustments</dt><dd>Factors applied for a period: seasonality, promotions, product introductions and phase-outs.</dd>
+          <dt>Promotions</dt><dd>A <b>campaign</b> runs for weeks and changes demand: give it a DAF before, during and maybe after. An <b>event</b> is a one-off that doesn't change ADU: enter it as an internal order so it shows up as a spike (see qualified demand in component 4), and cancel it on its due date so it never sits as past-due demand.</dd>
           <dt>Manual adjustments</dt><dd>Planner overrides for known situations the data can't see.</dd>
         </dl>
       </div>
@@ -1222,6 +1351,12 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
           <ul class="ix-plain"><li>Every week the zones are recalculated from that week's inputs. While ADU climbs and settles, all three zones move with it.</li><li><b>MOQ floor:</b> with an MOQ from week 1, green stays flat at the MOQ while the lead-time green is smaller; red and yellow still move.</li><li><b>Lead time cut:</b> a shorter lead time shrinks yellow (ADU × DLT) and moves the part into another lead time category, so the LTF changes too.</li><li><b>MOQ added later:</b> green jumps to the new MOQ the week it applies.</li></ul>
           <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, for a made-up part (cycle crankset CK-8: weekly ADU 20 to 47, lead time 12 days, LTF 40 %, VF 50 %). The rule that every buffer input triggers a recalculation is a DDI concept (verify with Ptak &amp; Smith).</p></div>
         <div id="ixRclViz"></div>
+      </div>
+      <div class="ix-span ix-dyn" id="ix-sea">
+        <div class="ix-dyn-head"><p class="ix-sub">Planned adjustment · strong seasonality</p><h3>ADU window, supply offset and a capacity cap</h3>
+          <ul class="ix-plain"><li><b>ADU window and type:</b> a long past-looking ADU trails the season, too low on the way up and too high on the way down. A shorter, blended or forward-looking ADU follows it more closely, and the DAF covers what is left.</li><li><b>Capacity:</b> if the peak is above what the plant can make, the extra has to be made earlier. The DAF is then pulled forward to the week the build-ahead starts, to level the load.</li><li><b>Supply offset:</b> components need their DAF earlier still, by their cumulative lead time, unless their own buffers can take the swing.</li></ul>
+          <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, from made-up weekly demand for pool shock granules PS-2. The seasonality factors (severity, ADU window and type, component lead time, capacity) are DDI concepts (verify with Ptak &amp; Smith); the as-late-as-possible build plan is our illustration. The forward ADU here uses the coming weeks' actual demand, as if the forecast were perfect.</p></div>
+        <div id="ixSeaViz"></div>
       </div>
     </section>
 
@@ -1276,6 +1411,9 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
         <li><b>Prioritized share, too little stock:</b> work zone by zone. First lift every region that is in red just out of red (TOR + 1), then every region just into green (TOY + 1), and only then share the rest so all reach the same planning priority (NFP ÷ TOG). If a stage can't be completed, what is left is shared so the regions it lifts reach the same priority.</li>
         <li><b>Prioritized share, too much stock:</b> when the source has made more than the regions need (for example its minimum order quantity was larger), the surplus is pushed out so every region sits at the same percentage above TOG, instead of sitting at the source.</li>
         <li><b>Equal %</b> is the simple version (equal NFP ÷ TOG from the start). It gives the same result only when every region's buffer has the same proportions; here North and West have large red zones and South a large green, so the two differ. At 150 units Equal % leaves North in red; at 400 only prioritized share gets every region into green; at 800 the surplus is spread above TOG.</li>
+        <li><b>Choosing the central location:</b> where most demand is, close to the main suppliers, on good transport lanes, and with room to grow.</li>
+        <li><b>Several central DCs:</b> in a large network each central DC can stock what is sourced near it and supply the others, with lanes running both ways.</li>
+        <li><b>Hybrid:</b> fast movers can go straight from the plant to the regions while slow movers go through the central DC. For a fast mover the plant makes one batch for all regions: the sum of every region's TOG − NFP (also those not yet due), at least the plant's minimum, shared out with prioritized share. Try "Fast mover: one plant batch" below.</li>
         <li><b>Variability pooling:</b> the central DC sees the sum of the regions' demand. Their ups and downs partly cancel, so the sum varies less relative to its average (lower coefficient of variation) than any single region.</li>
       </ul>
       <p class="ix-note ix-who">Who calculates these numbers: this page does, live in your browser, from a made-up network (supplier 20 days, transfer 3 days, ADU 10 per region, customer tolerance 5 days), made-up regional buffers and random demand generated in your browser. Distribution positioning is DDI's DDP module; the zone-by-zone prioritized share and the surplus case follow DDI's description of coverage optimisation (concepts only, own numbers; verify with DDI or Ptak &amp; Smith).</p>
@@ -1414,6 +1552,15 @@ html.ix-lock, html.ix-lock body { overflow: hidden; }
       <ul class="ix-plain"><li>Eight short questions on zones, net flow, ordering, execution status, spikes, priority and adjustments.</li><li>Pick an answer to see whether it's right and the worked explanation. <b>New questions</b> draws fresh numbers.</li></ul>
       <p class="ix-note ix-who">Who calculates these numbers: this page generates them at random and works out the answers with the formulas used on this page (from knowledge of Ptak &amp; Smith; verify). The wrong options are typical mistakes.</p>
       <div id="ixQuiz"></div>
+    </section>
+
+    <!-- exam calculator: every calculation in one place (our own starting numbers) -->
+    <section class="ix-sec" id="ix-xc" aria-labelledby="ix-xch">
+      <p class="ix-num">Exam practice</p>
+      <h2 id="ix-xch">Exam calculator: every DDMRP calculation in one place</h2>
+      <ul class="ix-plain"><li>Seven calculators: rolling ADU, buffer zones (with what the zones tell you, the profile code and a min/max comparison), qualified demand, net flow and the supply order, prioritized share across locations, on-hand and lead time alerts, and the inventory value of two options.</li><li>Type the numbers of a question; every result shows its formula and the numbers put in. Paste a usage list straight from a spreadsheet; table cells take sums such as 4*300 + 2*75.</li><li>Buttons pass results on: an ADU to the zones, the zones to net flow and alerts, qualified demand to net flow. <b>↺ Starting numbers</b> resets the open calculator.</li></ul>
+      <p class="ix-note ix-who">Who calculates these numbers: this page, with the formulas used throughout it (from knowledge of Ptak &amp; Smith and DDI; verify in the book). The starting numbers are made up. Where exercises differ there is a switch: rounding the zones, whether today counts in the spike horizon, and whether a day exactly at the threshold is a spike.</p>
+      <div id="ixXc" class="ix-xc"></div>
     </section>
 
     <section class="ix-sec" id="ix-abbr" aria-labelledby="ix-abbrh">
@@ -3256,11 +3403,11 @@ function ixSpread(ys, gap, minY, maxY) {
   for (let k = o.length - 1; k >= 0; k--) o[k].y = Math.min(o[k].y, k < o.length - 1 ? o[k + 1].y - gap : maxY);
   const out = []; o.forEach(p => out[p.i] = p.y); return out;
 }
-// vertical buffer: stacked zones with TOR/TOY/TOG on the right; optional NFP and on-hand markers on the left
+// vertical buffer: stacked zones with TOR/TOY/TOG on the right; optional NFP and on-hand markers on the left; mk.sizes: each zone's size in its band; mk.crop: no room for markers
 function drawBuffer(svg, z, mk = {}) {
   const W = 340, H = 330, top = 18, bot = 300, x = 136, w = 86, lo = Math.min(0, mk.nfp ?? 0, mk.oh ?? 0), hi = Math.max(z.tog * 1.18, mk.nfp ?? 0, mk.oh ?? 0, 1);
   const y = v => bot - (v - lo) / (hi - lo) * (bot - top), r1 = n => Math.round(n).toLocaleString("en-US");
-  const zone = (a, b, c, t) => `<g><rect x="${x}" y="${y(b)}" width="${w}" height="${Math.max(0, y(a) - y(b))}" style="fill:var(${c})"/>${y(a) - y(b) > 18 ? `<text class="lab" x="${x + w / 2}" y="${(y(a) + y(b)) / 2 + 5}" style="text-anchor:middle;fill:${c === "--ix-r" ? "#ffffff" : "#10181f"}">${t}</text>` : ""}</g>`;
+  const zone = (a, b, c, t) => `<g><rect x="${x}" y="${y(b)}" width="${w}" height="${Math.max(0, y(a) - y(b))}" style="fill:var(${c})"/>${y(a) - y(b) > 18 ? `<text class="lab" x="${x + w / 2}" y="${(y(a) + y(b)) / 2 + 5}" style="text-anchor:middle;fill:${c === "--ix-r" ? "#ffffff" : "#10181f"}">${mk.sizes ? `${t} ${r1(b - a)}` : t}</text>` : ""}</g>`;
   let s = zone(0, z.tor, "--ix-r", "Red") + zone(z.tor, z.toy, "--ix-y", "Yellow") + zone(z.toy, z.tog, "--ix-g", "Green");
   s += `<rect x="${x}" y="${y(z.tog)}" width="${w}" height="${y(0) - y(z.tog)}" rx="3" style="fill:none;stroke:var(--ix-ink);stroke-width:1.5"/>`;
   // right-hand level labels, spread so they never overlap
@@ -3270,7 +3417,7 @@ function drawBuffer(svg, z, mk = {}) {
   // left-hand markers (NFP, on-hand), labels spread apart
   const mks = [["NFP", mk.nfp, "--ix-steel"], ["On-hand", mk.oh, "--ix-ink"]].filter(m => m[1] != null), my = ixSpread(mks.map(m => y(m[1])), 15, top, H - 8);
   mks.forEach(([t, v, c], i) => { s += `<g><line x1="${x - 34}" x2="${x + w}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(${c});stroke-width:2.5;stroke-dasharray:${t === "NFP" ? "0" : "5 3"}"/><circle cx="${x - 34}" cy="${y(v)}" r="4" style="fill:var(${c})"/><text x="${x - 40}" y="${my[i] + 4}" style="text-anchor:end;fill:var(${c});font-weight:700">${t} ${r1(v)}</text></g>`; });
-  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = s;
+  svg.setAttribute("viewBox", mk.crop ? `${x - 12} 4 ${W - x + 8} ${H - 4}` : `0 0 ${W} ${H}`); svg.innerHTML = s;
 }
 // buffer lab inputs: typed numbers (sliders only for LTF and VF). Rules per field; a value that breaks a rule is marked and the last good one is used.
 const IX_LAB_RULE = { adu: v => v > 0, dlt: v => v > 0, ltf: v => v >= 0, vf: v => v >= 0, doc: v => v >= 0, moq: v => v >= 0, daf: v => v > 0, rev: v => Number.isInteger(v) && v >= 1 && v <= 90, nfp: () => true, oh: v => v >= 0 };
@@ -3326,16 +3473,29 @@ const ixRand = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 //   qualified spike: a future day whose total open orders exceed the order spike threshold (OST = 50 % of red), within the order spike horizon (OSH = 1 DLT)
 // Customer orders arrive daily; occasionally a large order (spike) is booked for a later date — more often for a higher variability factor.
 // On planning review days, if NFP ≤ TOY an order of max(TOG − NFP, MOQ) is placed, due one DLT later (sometimes a few days late).
-function ddmrpSimulate(o, z, seed, days = 90) {
+// demand patterns for the 90-day run (the page's own illustration); each one averages about ADU over the run
+const IX_PAT = {
+  steady: ["Steady", "Close to ADU every day, with no big orders."],
+  variable: ["Variable", "Everyday ups and downs plus occasional big orders booked ahead; more of both with a higher variability factor."],
+  seasonal: ["Seasonal", "One season over the 90 days: demand climbs to about 1.4 × ADU mid-way and drops to about a third at both ends."],
+  trend: ["Trending up", "Demand grows steadily from about 0.6 × to 1.4 × ADU: the buffer, sized for ADU, starts too big and ends too small."],
+  sporadic: ["Sporadic", "On most days nobody orders; now and then a large order arrives (lumpy, intermittent demand)."],
+  spiky: ["Spiky", "Small everyday demand plus frequent big orders booked ahead, so the qualified-spike rule does most of the work."]
+};
+function ddmrpSimulate(o, z, seed, days = 90, pat = "variable") {
   const rnd = ixRand(seed), L = Math.max(1, Math.round(o.dlt)), rev = Math.max(1, Math.round(o.rev || 1));
-  const ost = 0.5 * z.tor, osh = L, pSpike = 0.02 + 0.035 * o.vf, kMean = 9.5, cv = 0.1 + 0.4 * o.vf, pLate = 0.1 + 0.15 * o.vf;
+  const P = IX_PAT[pat] ? pat : "variable", ost = 0.5 * z.tor, osh = L, pLate = 0.1 + 0.15 * o.vf, kMean = 9.5;
+  const pSpike = P === "variable" ? 0.02 + 0.035 * o.vf : P === "spiky" ? 0.08 : 0, cv = P === "steady" ? 0.08 : P === "variable" ? 0.1 + 0.4 * o.vf : 0.15;
+  const level = t => { const u = days > 1 ? t / (days - 1) : 0; return P === "seasonal" ? 0.35 + 1.02 * Math.sin(Math.PI * u) : P === "trend" ? 0.6 + 0.8 * u : 1; };
   const baseMean = z.adu * (1 - pSpike * kMean); // keeps average demand at ADU
   let oh = z.tor + z.grn / 2 + z.yel / 2; const book = [], pipe = [], rows = [];
   for (let t = 0; t < days; t++) {
     let rec = 0; for (let i = pipe.length - 1; i >= 0; i--) if (pipe[i].due === t) { rec += pipe[i].q; pipe.splice(i, 1); }
     oh += rec;
     // orders booked today: regular demand due today, maybe a spike due later
-    const u = (rnd() + rnd() + rnd() - 1.5) / 0.5, base = Math.max(0, baseMean * (1 + cv * u));
+    const u = (rnd() + rnd() + rnd() - 1.5) / 0.5;
+    // sporadic: an order on about one day in five, five times ADU on average; otherwise demand around the pattern's level
+    const base = P === "sporadic" ? (rnd() < 0.2 ? z.adu * 5 * (0.5 + rnd()) : 0) : Math.max(0, baseMean * level(t) * (1 + cv * u));
     book.push({ due: t, q: base });
     let spike = 0; if (rnd() < pSpike) { spike = z.adu * (5 + rnd() * 9); book.push({ due: t + 1 + Math.floor(rnd() * Math.max(1, osh)), q: spike }); }
     // ship what is due (oldest first); anything not shipped stays as past-due backlog
@@ -3358,7 +3518,7 @@ function ixFrame(z, rows, vals, H, extraBottom = 0) {
   const lo = Math.min(0, ...vals), hi = Math.max(z.tog * 1.15, ...vals);
   const x = t => L + t / (n - 1) * (W - L - R), y = v => T + (hi - v) / (hi - lo) * (H - T - B), r1 = v => Math.round(v).toLocaleString("en-US");
   let s = "";
-  [[0, z.tor, "--ix-r"], [z.tor, z.toy, "--ix-y"], [z.toy, z.tog, "--ix-g"]].forEach(([a, b, c]) => { s += `<rect x="${L}" y="${y(b)}" width="${W - L - R}" height="${y(a) - y(b)}" style="fill:var(${c});opacity:var(--ix-band)"/>`; });
+  [[0, z.tor, "--ix-r"], [z.tor, z.toy, "--ix-y"], [z.toy, z.tog, "--ix-g"]].forEach(([a, b, c]) => { s += `<rect x="${L}" y="${y(b)}" width="${W - L - R}" height="${y(a) - y(b)}" style="fill:var(${c}b)"/>`; });
   const lv = [["TOG", z.tog], ["TOY", z.toy], ["TOR", z.tor]], ly = ixSpread(lv.map(([, v]) => y(v)), 15, T + 4, H - B);
   lv.forEach(([t, v], i) => { s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--ix-mute);stroke-width:1;stroke-dasharray:3 3"/><text x="${W - R + 8}" y="${ly[i] + 4}" class="ax">${t} ${r1(v)}</text>`; });
   const span = Math.max(hi - lo, 1), mag = Math.pow(10, Math.floor(Math.log10(span))), tick = mag * (span / mag > 5 ? 2 : 1);
@@ -3404,7 +3564,7 @@ function drawRun(svg, z, rows) {
   const W = 1000, H = 300, L = 54, R = 150, T = 14, B = 34, n = rows.length, hi = Math.max(z.tog * 1.3, ...rows.map(r => r.oh)), lo = 0;
   const x = t => L + t / (n - 1) * (W - L - R), y = v => T + (hi - Math.min(v, hi)) / (hi - lo) * (H - T - B), r1 = v => Math.round(v).toLocaleString("en-US");
   let s = "";
-  ixRunBands(z).forEach(([a, b, c, t]) => { const top = Math.min(b, hi); if (top > a) s += `<rect x="${L}" y="${y(top)}" width="${W - L - R}" height="${y(a) - y(top)}" style="fill:var(${c});opacity:${t === "Optimal" ? "calc(var(--ix-band) + .25)" : "var(--ix-band)"}"/>`; });
+  ixRunBands(z).forEach(([a, b, c, t]) => { const top = Math.min(b, hi); if (top > a) s += `<rect x="${L}" y="${y(top)}" width="${W - L - R}" height="${y(a) - y(top)}" style="fill:var(${c}b)"/>`; });
   const lv = [["TOG", z.tog], ["TOR+G", z.tor + z.grn], ["Target", z.tor + z.grn / 2], ["TOR", z.tor], ["½ TOR", z.tor / 2]], ly = ixSpread(lv.map(([, v]) => y(v)), 15, T + 4, H - B);
   lv.forEach(([t, v], i) => { s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--ix-mute);stroke-width:1;stroke-dasharray:${t === "Target" ? "6 3" : "2 3"}"/><text x="${W - R + 8}" y="${ly[i] + 4}" class="ax" style="${t === "Target" ? "font-weight:700;fill:var(--ix-ink)" : ""}">${t} ${r1(v)}</text>`; });
   const span = hi - lo, mag = Math.pow(10, Math.floor(Math.log10(Math.max(span, 1)))), tick = mag * (span / mag > 5 ? 2 : 1);
@@ -3452,10 +3612,10 @@ const ixZoneDays = (nz, n) => { const z = [["r", "red"], ["y", "yellow"], ["g", 
 const ixKpi = items => items.map(([t, v, sub]) => `<div><dt>${t}</dt><dd>${v}</dd><span>${sub}</span></div>`).join("");
 (function analytics() {
   if (!document.getElementById("ixPlan")) return;
-  let seed = 7;
+  let seed = 7, pat = "variable";
   const read = () => Object.fromEntries(["adu", "dlt", "ltf", "vf", "doc", "moq", "daf", "rev"].map(k => [k, ixLabVal(k)]));
   const run = () => {
-    const o = read(), z = ddmrpZones(o), rows = ddmrpSimulate(o, z, seed), r1 = v => Math.round(v).toLocaleString("en-US"), n = rows.length;
+    const o = read(), z = ddmrpZones(o), rows = ddmrpSimulate(o, z, seed, 90, pat), r1 = v => Math.round(v).toLocaleString("en-US"), n = rows.length;
     drawPlan(document.getElementById("ixPlan"), z, rows); drawExec(document.getElementById("ixExec"), z, rows); drawRun(document.getElementById("ixRun"), z, rows); drawDist(document.getElementById("ixDist"), z, rows);
     const orders = rows.filter(r => r.q), avgPre = orders.length ? orders.reduce((s, r) => s + r.pre / z.tog, 0) / orders.length : 0;
     const nz = [0, 0, 0, 0]; rows.forEach(r => nz[r.pre <= z.tor ? 0 : r.pre <= z.toy ? 1 : r.pre <= z.tog ? 2 : 3]++);
@@ -3479,6 +3639,9 @@ const ixKpi = items => items.map(([t, v, sub]) => `<div><dt>${t}</dt><dd>${v}</d
   };
   ["adu", "dlt", "ltf", "vf", "doc", "moq", "daf", "rev"].forEach(k => document.getElementById("ix-" + k).addEventListener("input", run));
   document.getElementById("ixReseed").onclick = () => { seed = (seed * 48271) % 2147483647 || 7; run(); };
+  const pb = document.getElementById("ixPat"), showPat = () => { pb.querySelectorAll("[data-pat]").forEach(b => b.setAttribute("aria-pressed", b.dataset.pat === pat)); document.getElementById("ixPatD").textContent = IX_PAT[pat][1]; };
+  pb.innerHTML = Object.entries(IX_PAT).map(([k, [t]]) => `<button type="button" data-pat="${k}">${t}</button>`).join("");
+  pb.querySelectorAll("[data-pat]").forEach(b => b.onclick = () => { pat = b.dataset.pat; showPat(); run(); }); showPat();
   drawBimodal(document.getElementById("ixBimodal")); drawPrio(document.getElementById("ixPrio")); run();
 })();
 
@@ -3810,7 +3973,7 @@ function ixYellowCalc(box) {
     const r = ixYellow(st), f1 = v => (Math.round(v * 10) / 10).toString(), red = ixRed({ adu: r.adu, dlt: st.dlt, ltf: 0.3, vf: 0.5 }).red;
     box.querySelector("#o-yadu").textContent = st.adu; box.querySelector("#o-ydlt").textContent = st.dlt + " d"; box.querySelector("#o-ydaf").textContent = st.daf.toFixed(1) + " → ADU " + f1(r.adu); box.querySelector("#o-ycum").textContent = st.cum + " d";
     const L = 40, W = 460, H = 214, T = 14, B = 36, mx = Math.max(r.yel, 1) * 1.15, x = d => L + d / st.dlt * (W - L - 20), y = v => T + (mx - v) / mx * (H - T - B);
-    let s = `<rect x="${L}" y="${y(r.yel)}" width="${W - L - 20}" height="${y(0) - y(r.yel)}" style="fill:var(--ix-y);opacity:var(--ix-band)"/>`;
+    let s = `<rect x="${L}" y="${y(r.yel)}" width="${W - L - 20}" height="${y(0) - y(r.yel)}" style="fill:var(--ix-yb)"/>`;
     s += `<line x1="${L}" x2="${W - 20}" y1="${y(r.yel)}" y2="${y(r.yel)}" style="stroke:var(--ix-y);stroke-width:2"/><text x="${W - 22}" y="${y(r.yel) - 5}" class="ax" style="text-anchor:end;font-weight:700;fill:var(--ix-ink)">yellow ${f1(r.yel)}</text>`;
     s += `<polyline points="${Array.from({ length: st.dlt + 1 }, (_, d) => `${x(d).toFixed(1)},${y(r.adu * d).toFixed(1)}`).join(" ")}" style="fill:none;stroke:var(--ix-steel);stroke-width:2.5"/>`;
     Array.from({ length: st.dlt + 1 }, (_, d) => d).filter(d => st.dlt <= 12 || d % Math.ceil(st.dlt / 8) === 0 || d === st.dlt).forEach(d => { s += `<circle cx="${x(d)}" cy="${y(r.adu * d)}" r="3" style="fill:var(--ix-steel)"><title>Day ${d}: ${f1(r.adu * d)} consumed</title></circle><text x="${x(d)}" y="${H - 20}" class="ax" style="text-anchor:middle">${d}</text>`; });
@@ -3983,7 +4146,7 @@ function ixDynLab(box) {
     const L = 54, R = 886, n = IX_DYN_P.days, X = t => L + t / (n - 1) * (R - L);
     const lo = Math.min(0, ...show.map(r => r.oh), ...other.map(r => r.oh)), hi = Math.max(...show.map(r => r.tog), ...show.map(r => r.oh), ...other.map(r => r.oh), 1) * 1.06;
     const Y1 = v => 10 + (hi - v) / (hi - lo) * 220;
-    const band = (a, b, c) => `<path d="M${show.map(r => `${X(r.t).toFixed(1)},${Y1(a(r)).toFixed(1)}`).join("L")}L${show.slice().reverse().map(r => `${X(r.t).toFixed(1)},${Y1(b(r)).toFixed(1)}`).join("L")}Z" style="fill:var(${c});opacity:var(--ix-band)"/>`;
+    const band = (a, b, c) => `<path d="M${show.map(r => `${X(r.t).toFixed(1)},${Y1(a(r)).toFixed(1)}`).join("L")}L${show.slice().reverse().map(r => `${X(r.t).toFixed(1)},${Y1(b(r)).toFixed(1)}`).join("L")}Z" style="fill:var(${c}b)"/>`;
     const [w0, w1] = sc.win.map(t => ixClamp(t, 0, n - 1));
     let s = w1 > w0 ? `<rect x="${X(w0)}" y="10" width="${X(w1) - X(w0)}" height="385" style="fill:var(--ix-over);opacity:.09"/><text x="${X(w0) + 4}" y="22" class="ax">${sc.winTxt}</text>` : "";
     s += band(r => 0, r => r.tor, "--ix-r") + band(r => r.tor, r => r.toy, "--ix-y") + band(r => r.toy, r => r.tog, "--ix-g");
@@ -4074,7 +4237,7 @@ function ixExecViz(box) {
       const { tor, dlt } = IX_EXB, dem = [0, 10, 10, 35, 10, 10, 10, 10, 10], sup = [{ n: "S1", d: 2 + st.d1, q: 50 }, { n: "S2", d: 6 + st.d2, q: 60 }];
       const p = ixExProject({ oh: 60, tor, days: dlt, dem, sup }), all = [{ d: 0, v: 60, st: ixExStatus(60, tor) }, ...p];
       const L = 74, R = 680, T = 12, B = 150, lo = Math.min(-20, ...all.map(x => x.v)), hi = Math.max(120, ...all.map(x => x.v)) * 1.05, X = d => L + d / dlt * (R - L), Y = v => T + (hi - v) / (hi - lo) * (B - T);
-      const band = (a, b, c) => `<rect x="${L}" y="${Y(b)}" width="${R - L}" height="${Y(a) - Y(b)}" style="fill:var(${c});opacity:var(--ix-band)"/>`;
+      const band = (a, b, c) => `<rect x="${L}" y="${Y(b)}" width="${R - L}" height="${Y(a) - Y(b)}" style="fill:var(${c}b)"/>`;
       let s = band(lo, 0, "--ix-dr") + band(0, tor / 2, "--ix-r") + band(tor / 2, tor, "--ix-y") + band(tor, hi, "--ix-g");
       [[tor / 2, "half TOR"], [tor, "TOR"], [0, "0"]].forEach(([v, t]) => { s += `<text x="${L - 6}" y="${Y(v) + 4}" class="ax" style="text-anchor:end">${t}</text>`; });
       // supply labels: one per receipt day; a second label is dropped a line when the days are close
@@ -4456,12 +4619,12 @@ function ixBufKeysViz(box) {
   box.innerHTML = `<div class="ix-calc-ctl ix-row-ctl">${ixFld(st, "bk", "adu", "ADU (units a day)", 5, 60, 1)}${ixFld(st, "bk", "dlt", "Decoupled lead time (days)", 2, 30, 1)}${ixFld(st, "bk", "ltf", "Lead time factor", 0.2, 1, 0.05)}${ixFld(st, "bk", "vf", "Variability factor", 0, 1, 0.05)}</div>
     <div class="ix-calc-ctl ix-row-ctl">${ixFld(st, "bk", "moq", "Minimum order quantity", 0, 600, 10)}${ixFld(st, "bk", "doc", "Desired order cycle (days)", 0, 20, 1)}${ixFld(st, "bk", "cost", "Unit cost ($)", 1, 60, 1)}${ixFld(st, "bk", "today", "Today's average on-hand (units)", 100, 2000, 10)}</div>
     <svg id="ixBkSvg" viewBox="0 0 900 250" role="img" aria-label="Expected on-hand pattern: stock falls by ADU each day and a green-zone-sized order arrives each cycle"></svg>
-    <p class="ix-legend"><span><i class="sq" style="background:var(--ix-r)"></i>red zone</span><span><i class="sq" style="background:var(--ix-g)"></i>green zone (typical on-hand range above red)</span><span><i class="ln" style="border-top:2.5px solid var(--ix-steel)"></i>expected on-hand</span><span><i class="ln" style="border-top:2px dashed var(--ix-ink)"></i>average on-hand</span></p>
+    <p class="ix-legend"><span><i class="sq" style="background:var(--ix-rb)"></i>red zone</span><span><i class="sq" style="background:var(--ix-gb)"></i>green zone (typical on-hand range above red)</span><span><i class="ln" style="border-top:2.5px solid var(--ix-steel)"></i>expected on-hand</span><span><i class="ln" style="border-top:2px dashed var(--ix-ink)"></i>average on-hand</span></p>
     <div class="ix-calc-res" id="ixBkOut"></div>`;
   const svg = box.querySelector("#ixBkSvg"), out = box.querySelector("#ixBkOut"), f0 = v => Math.round(v).toLocaleString("en-US"), f1 = v => (Math.round(v * 10) / 10).toFixed(1);
   const draw = () => {
     const k = ixBufKeys(st), L = 50, R = 730, T = 16, B = 210, days = 40, X = d => L + d / days * (R - L), top = Math.max(k.hi, st.today) * 1.12, Y = v => B - v / top * (B - T);
-    let s = `<rect x="${L}" y="${Y(k.tor)}" width="${R - L}" height="${Y(0) - Y(k.tor)}" style="fill:var(--ix-r);opacity:var(--ix-band)"/><rect x="${L}" y="${Y(k.hi)}" width="${R - L}" height="${Y(k.tor) - Y(k.hi)}" style="fill:var(--ix-g);opacity:var(--ix-band)"/>`;
+    let s = `<rect x="${L}" y="${Y(k.tor)}" width="${R - L}" height="${Y(0) - Y(k.tor)}" style="fill:var(--ix-rb)"/><rect x="${L}" y="${Y(k.hi)}" width="${R - L}" height="${Y(k.tor) - Y(k.hi)}" style="fill:var(--ix-gb)"/>`;
     s += `<line x1="${L}" x2="${R}" y1="${Y(0)}" y2="${Y(0)}" style="stroke:var(--ix-rule)"/>`;
     [[k.tor, "TOR " + f0(k.tor)], [k.hi, "TOR + green " + f0(k.hi)]].forEach(([v, t]) => { s += `<line x1="${L}" x2="${R}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--ix-rule)"/><text x="${R + 6}" y="${Y(v) + 4}" class="ax">${t}</text>`; });
     // ideal pattern: on-hand falls by ADU a day from TOR + green to TOR, then an order of the green zone arrives (sawtooth)
@@ -4749,6 +4912,66 @@ function ixRecalcViz(box) {
 }
 (function () { const b = document.getElementById("ixRclViz"); if (b) ixRecalcViz(b); })();
 
+/* ============ Seasonal product: ADU window, supply offset and a capacity cap (theory page) ============ */
+// Concepts (DDI; verify with Ptak & Smith): with strong seasonality a long past-looking ADU lags behind (understated on the way up,
+// overstated on the way down); a shorter or forward-looking ADU follows demand more closely. A DAF has to start early enough for the
+// supply behind it: for components, earlier by their cumulative lead time (supply offset) unless their buffer can absorb the swing.
+// If the peak is above what the resource can make, the extra has to be built earlier, so the DAF is pulled forward to level the load.
+// Our own example (made up): pool shock granules PS-2, demand per day in each of 52 weeks.
+const IX_SEA = Array.from({ length: 52 }, (_, i) => { const w = i + 1; return Math.round(55 + 230 * Math.exp(-(((w - 27) / 6.5) ** 2)) + 8 * Math.sin(w * 1.7)); });
+// ADU for week w (1-based) over a window of n weeks: past = the n weeks before, forward = this week and the next n − 1, blended = the mean
+// of both. The year repeats, so the windows wrap around.
+function ixSeaAdu(d, type, n) {
+  const N = d.length, at = i => d[((i % N) + N) % N], mean = (a, b) => { let s = 0; for (let i = a; i < b; i++) s += at(i); return s / (b - a); };
+  return d.map((_, i) => { const past = mean(i - n, i), fwd = mean(i, i + n); return type === "past" ? past : type === "forward" ? fwd : (past + fwd) / 2; });
+}
+// production plan under a capacity cap (per day): as late as possible, each week making its own demand plus what later weeks can't make.
+// The year repeats, so a shortfall early in the year is built at the end of the previous year (two passes).
+function ixSeaBuild(d, cap) {
+  const N = d.length, avg = d.reduce((s, v) => s + v, 0) / N; if (cap < avg - 1e-9) return { ok: false, avg };
+  const p = new Array(N).fill(0); let carry = 0;
+  for (let pass = 0; pass < 2; pass++) for (let i = N - 1; i >= 0; i--) { const req = d[i] + carry; p[i] = Math.min(cap, req); carry = req - p[i]; }
+  const stock = []; let s = 0, lo = Infinity; for (let i = 0; i < N; i++) { s += (p[i] - d[i]) * 7; stock.push(s); lo = Math.min(lo, s); }
+  const st = stock.map(v => v - lo), start = p.findIndex((v, i) => v > d[i] + 1e-9), peakI = st.indexOf(Math.max(...st));
+  return { ok: true, avg, p, stock: st, start: start < 0 ? null : start + 1, peak: Math.max(...st), peakWk: peakI + 1, over: d.filter(v => v > cap).length };
+}
+function ixSeasonViz(box) {
+  const st = { type: "past", n: 26, cap: 200, clt: 6 }, r1 = v => Math.round(v).toLocaleString("en-US");
+  box.innerHTML = `<div class="ix-sea-bar"><span class="ix-seg" id="ixSeaT"><button type="button" data-st="past">Past ADU</button><button type="button" data-st="blended">Blended</button><button type="button" data-st="forward">Forward ADU</button></span>
+      <div class="ix-calc-ctl ix-row-ctl">${ixFld(st, "sea", "n", "ADU window (weeks)", 1, 52, 1)}${ixFld(st, "sea", "cap", "Capacity (units a day)", 60, 400, 5)}${ixFld(st, "sea", "clt", "Component cumulative lead time (weeks)", 0, 20, 1)}</div></div>
+    <div class="ix-sea-grid"><div><p class="ix-sub">1 · Does the ADU follow the season?</p><svg id="ixSeaA" viewBox="0 0 640 230" role="img" aria-label="Weekly demand and the ADU over the year"></svg>
+        <p class="ix-legend"><span><i class="sq" style="background:var(--ix-rule)"></i>demand per day</span><span><i class="ln" style="border-top:3px solid var(--ix-steel)"></i>ADU</span><span><i class="sq" style="background:var(--ix-r);opacity:.5"></i>ADU too low</span><span><i class="sq" style="background:var(--ix-vio);opacity:.5"></i>ADU too high</span></p></div>
+      <div><p class="ix-sub">2 · Can the plant make the peak?</p><svg id="ixSeaB" viewBox="0 0 640 230" role="img" aria-label="Demand, capacity and the production plan with a pre-build"></svg>
+        <p class="ix-legend"><span><i class="sq" style="background:var(--ix-rule)"></i>demand per day</span><span><i class="ln" style="border-top:2px dashed var(--ix-r-ink)"></i>capacity</span><span><i class="ln" style="border-top:3px solid var(--ix-g-ink)"></i>production plan</span><span><i class="sq" style="background:var(--ix-g);opacity:.45"></i>built ahead</span></p></div></div>
+    <div class="ix-calc-res" id="ixSeaOut"></div><p class="ix-note" id="ixSeaNote"></p>`;
+  const draw = () => {
+    const d = IX_SEA, A = ixSeaAdu(d, st.type, st.n), B = ixSeaBuild(d, st.cap), L = 44, R = 628, T = 10, Bt = 196, N = d.length, sw = (R - L) / N, X = i => L + i * sw;
+    box.querySelectorAll("#ixSeaT [data-st]").forEach(b => b.setAttribute("aria-pressed", b.dataset.st === st.type));
+    const mx = Math.max(...d, ...A, st.cap) * 1.08, Y = v => Bt - v / mx * (Bt - T);
+    const axis = () => { let s = ""; [0, 0.5, 1].forEach(k => { const v = mx * k; s += `<line x1="${L}" x2="${R}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--ix-rule)"/><text x="${L - 6}" y="${Y(v) + 4}" class="ax" style="text-anchor:end">${r1(v)}</text>`; });
+      [1, 13, 26, 39, 52].forEach(w => { s += `<text x="${w === 1 ? L : X(w - 1) + sw / 2}" y="${Bt + 20}" class="ax" style="text-anchor:${w === 1 ? "start" : "middle"}">wk ${w}</text>`; }); return s; };
+    let a = axis(); d.forEach((v, i) => { const gap = A[i] - v; a += `<rect x="${X(i) + 1}" y="${Y(v)}" width="${sw - 2}" height="${Bt - Y(v)}" style="fill:var(--ix-rule)"/>`;
+      if (Math.abs(gap) > 0.5) a += `<rect x="${X(i) + 1}" y="${Y(Math.max(v, A[i]))}" width="${sw - 2}" height="${Math.abs(Y(v) - Y(A[i]))}" style="fill:var(${gap < 0 ? "--ix-r" : "--ix-vio"});opacity:.5"><title>Week ${i + 1}: demand ${r1(v)}, ADU ${r1(A[i])}</title></rect>`; });
+    a += ixPolyline(A.map((v, i) => [X(i) + sw / 2, Y(v)]), "stroke:var(--ix-steel);stroke-width:2.5");
+    box.querySelector("#ixSeaA").innerHTML = a;
+    let b = axis(); d.forEach((v, i) => { b += `<rect x="${X(i) + 1}" y="${Y(v)}" width="${sw - 2}" height="${Bt - Y(v)}" style="fill:var(--ix-rule)"/>`; if (B.ok && B.p[i] > v + 0.5) b += `<rect x="${X(i) + 1}" y="${Y(B.p[i])}" width="${sw - 2}" height="${Y(v) - Y(B.p[i])}" style="fill:var(--ix-g);opacity:.45"><title>Week ${i + 1}: make ${r1(B.p[i])} a day, ${r1(B.p[i] - v)} ahead of demand</title></rect>`; });
+    b += `<line x1="${L}" x2="${R}" y1="${Y(st.cap)}" y2="${Y(st.cap)}" style="stroke:var(--ix-r-ink);stroke-width:1.6;stroke-dasharray:6 4"/><text x="${R}" y="${Y(st.cap) - 5}" class="ax" style="text-anchor:end;fill:var(--ix-r-ink)">capacity ${r1(st.cap)}</text>`;
+    if (B.ok) { b += ixPolyline(B.p.map((v, i) => [X(i) + sw / 2, Y(v)]), "stroke:var(--ix-g-ink);stroke-width:2.5");
+      if (B.start) { const xs = X(B.start - 1), xc = X(Math.max(0, B.start - 1 - st.clt)); b += `<line x1="${xs}" x2="${xs}" y1="${T}" y2="${Bt}" style="stroke:var(--ix-g-ink);stroke-dasharray:3 3"/><text x="${xs + 4}" y="${T + 12}" class="ax" style="fill:var(--ix-g-ink)">DAF from wk ${B.start}</text>`;
+        if (st.clt) b += `<line x1="${xc}" x2="${xc}" y1="${T + 18}" y2="${Bt}" style="stroke:var(--ix-vio);stroke-dasharray:3 3"/><text x="${xc + 4}" y="${T + 30}" class="ax" style="fill:var(--ix-vio)">components from wk ${Math.max(1, B.start - st.clt)}</text>`; } }
+    else b += `<text x="${(L + R) / 2}" y="${T + 30}" class="ax" style="text-anchor:middle;fill:var(--ix-r-ink);font-weight:700">capacity below average demand (${r1(B.avg)} a day): not enough over the year</text>`;
+    box.querySelector("#ixSeaB").innerHTML = b;
+    const gaps = d.map((v, i) => A[i] - v), under = Math.min(...gaps), over = Math.max(...gaps), close = gaps.filter((g, i) => Math.abs(g) <= 0.15 * d[i]).length, lo = Math.min(...d), hi = Math.max(...d), rise = d.findIndex(v => v >= lo + 0.25 * (hi - lo)) + 1;
+    box.querySelector("#ixSeaOut").innerHTML = `<div><span>ADU too low, at most</span><b>${r1(-Math.min(0, under))} a day</b></div><div><span>ADU too high, at most</span><b>${r1(Math.max(0, over))} a day</b></div><div><span>Weeks within ±15 % of demand</span><b>${close} of 52</b></div>`
+      + (B.ok ? `<div><span>Weeks above capacity</span><b>${B.over}</b></div><div><span>Build ahead from · peak stock</span><b>${B.start ? `wk ${B.start} · ${r1(B.peak)} units` : "not needed"}</b></div>` : `<div><span>Capacity</span><b>too low</b></div>`);
+    box.querySelector("#ixSeaNote").innerHTML = `Demand climbs past a quarter of its seasonal swing in week ${rise}. ${B.ok && B.start ? `The plant can't make the peak, so production has to start building ahead in week ${B.start}: the DAF for PS-2 is pulled forward to then${st.clt ? `, and its components' DAF ${st.clt} weeks earlier (week ${Math.max(1, B.start - st.clt)}) for their cumulative lead time, unless their buffers can absorb the swing` : ""}.` : B.ok ? `Capacity covers the peak, so the DAF can follow the demand rise${st.clt ? `; components still need theirs ${st.clt} weeks earlier for their cumulative lead time` : ""}.` : "Raise capacity above the average demand to plan the season."} A ${st.n}-week ${st.type} ADU ${close >= 40 ? "follows the season well" : close >= 25 ? "follows the season only partly" : "lags far behind the season"}; a DAF covers the gap.`;
+  };
+  box.querySelectorAll("#ixSeaT [data-st]").forEach(bt => bt.onclick = () => { st.type = bt.dataset.st; draw(); });
+  ixBind(box, "sea", st, draw);
+  draw();
+}
+(function () { const b = document.getElementById("ixSeaViz"); if (b) ixSeasonViz(b); })();
+
 /* ============ Filling a truck or reaching a minimum order value: prioritized share across one supplier's items (theory page) ============ */
 // Concept (DDI's discount and freight uses of prioritized share; verify with Ptak & Smith): when a supplier gives a better price or freight
 // for a full truck or a minimum order value, first order what the buffers need (every item at or below TOY, up to TOG), then top up the
@@ -4791,7 +5014,7 @@ function ixTruckViz(box) {
     let s = `<text x="${L}" y="12" class="ax">net flow position as % of TOG</text>`;
     R.rows.forEach((r, i) => { const y = 24 + i * 46, zr = r.tor / r.tog, zy = r.toy / r.tog, mid = (r.nfp + r.base * r.upp) / r.tog;
       s += `<text x="${L - 8}" y="${y + 13}" class="ax" style="text-anchor:end;font-weight:700;fill:var(--ix-ink)">${r.id}</text>`;
-      s += `<rect x="${X(0)}" y="${y}" width="${X(zr) - X(0)}" height="${bh}" style="fill:var(--ix-r);opacity:var(--ix-band)"/><rect x="${X(zr)}" y="${y}" width="${X(zy) - X(zr)}" height="${bh}" style="fill:var(--ix-y);opacity:var(--ix-band)"/><rect x="${X(zy)}" y="${y}" width="${X(1) - X(zy)}" height="${bh}" style="fill:var(--ix-g);opacity:var(--ix-band)"/>`;
+      s += `<rect x="${X(0)}" y="${y}" width="${X(zr) - X(0)}" height="${bh}" style="fill:var(--ix-rb)"/><rect x="${X(zr)}" y="${y}" width="${X(zy) - X(zr)}" height="${bh}" style="fill:var(--ix-yb)"/><rect x="${X(zy)}" y="${y}" width="${X(1) - X(zy)}" height="${bh}" style="fill:var(--ix-gb)"/>`;
       if (r.base) s += `<rect x="${X(r.pB)}" y="${y + 3}" width="${X(mid) - X(r.pB)}" height="${bh - 6}" style="fill:var(--ix-steel)"><title>${r.id}: own order ${r.base} pallets (${r.base * r.upp})</title></rect>`;
       if (r.top) s += `<rect x="${X(mid)}" y="${y + 3}" width="${X(r.pA) - X(mid)}" height="${bh - 6}" style="fill:var(--ix-vio)"><title>${r.id}: top-up ${r.top} pallets (${r.top * r.upp})</title></rect>`;
       s += `<line x1="${X(r.pB)}" x2="${X(r.pB)}" y1="${y - 3}" y2="${y + bh + 3}" style="stroke:var(--ix-mute);stroke-width:3"/><line x1="${X(1)}" x2="${X(1)}" y1="${y - 2}" y2="${y + bh + 2}" style="stroke:var(--ix-ink)"/>`;
@@ -4870,9 +5093,10 @@ function ixPool(seed, days = 30) {
 }
 
 function ixDistViz(box) {
-  const st = { central: true, regional: true, avail: 150, method: "staged", seed: 7 };
+  const st = { central: true, regional: true, avail: 150, method: "staged", seed: 7, pmoq: 700 };
   box.innerHTML = `<div class="ix-two-viz"><div><p class="ix-sub">1 · Where to buffer in the network</p><div class="ix-dist-tg"><label class="ix-chk"><input type="checkbox" id="ixDC" checked> Buffer at the central DC</label><label class="ix-chk"><input type="checkbox" id="ixDR" checked> Buffer at the four regional DCs</label></div><svg id="ixNetSvg" viewBox="0 0 520 250" role="img" aria-label="Distribution network with buffers"></svg><div class="ix-calc-res" id="ixNetOut"></div></div>
     <div><p class="ix-sub">2 · Sharing central stock among the regions</p><div class="ix-calc-ctl ix-dyn-ctl">${ixFld(st, "ds", "avail", "Stock available at the central DC", 0, 800, 10)}</div><span class="ix-seg" id="ixAllocM"><button type="button" data-am="fcfs">First come</button><button type="button" data-am="prorata">Pro-rata</button><button type="button" data-am="prior">Equal %</button><button type="button" data-am="staged">Prioritized share</button></span>
+      <div class="ix-fast"><div class="ix-calc-ctl">${ixFld(st, "dp", "pmoq", "Plant minimum batch", 0, 2000, 10)}</div><button type="button" class="ix-go small" id="ixFast">Fast mover: one plant batch</button></div><p class="ix-note" id="ixFastNote" hidden></p>
       <svg id="ixAllocSvg" viewBox="0 0 520 250" role="img" aria-label="Regional buffers before and after allocation"></svg><div class="ix-calc-res" id="ixAllocOut"></div><div id="ixAllocStg"></div></div></div>
     <div class="ix-pool"><div><p class="ix-sub">3 · Variability pooling: the central DC sees the sum of the regions</p><svg id="ixPoolSvg" viewBox="0 0 640 270" role="img" aria-label="Daily demand of four regions and of their sum, each drawn as a share of its own average"></svg>
       <p class="ix-legend"><span><i class="ln" style="border-top:2px dashed var(--ix-mute)"></i>the line's own average (ADU)</span><span>each line is drawn as a share of its own ADU, so the swings compare directly</span></p></div>
@@ -4896,7 +5120,7 @@ function ixDistViz(box) {
     let s = `<text x="${L}" y="12" class="ax">net flow as % of TOG, before (grey mark) and after (bar)</text>`;
     R.forEach((l, i) => { const y = 28 + i * 54, zr = l.tor / l.tog, zy = l.toy / l.tog, c = l.after <= l.tor ? "--ix-r" : l.after <= l.toy ? "--ix-y" : "--ix-g";
       s += `<text x="${L - 8}" y="${y + 13}" class="ax" style="text-anchor:end;font-weight:700;fill:var(--ix-ink)">${l.id}</text>`;
-      s += `<rect x="${X(0)}" y="${y}" width="${X(zr) - X(0)}" height="${bh}" style="fill:var(--ix-r);opacity:var(--ix-band)"/><rect x="${X(zr)}" y="${y}" width="${X(zy) - X(zr)}" height="${bh}" style="fill:var(--ix-y);opacity:var(--ix-band)"/><rect x="${X(zy)}" y="${y}" width="${X(1) - X(zy)}" height="${bh}" style="fill:var(--ix-g);opacity:var(--ix-band)"/>`;
+      s += `<rect x="${X(0)}" y="${y}" width="${X(zr) - X(0)}" height="${bh}" style="fill:var(--ix-rb)"/><rect x="${X(zr)}" y="${y}" width="${X(zy) - X(zr)}" height="${bh}" style="fill:var(--ix-yb)"/><rect x="${X(zy)}" y="${y}" width="${X(1) - X(zy)}" height="${bh}" style="fill:var(--ix-gb)"/>`;
       s += `<rect x="${X(0)}" y="${y + 3}" width="${Math.max(0, X(l.pctA) - X(0))}" height="${bh - 6}" style="fill:var(${c})"><title>${l.id}: NFP ${Math.round(l.nfp)} → ${Math.round(l.after)} of TOG ${l.tog} · gets ${Math.round(l.alloc)} (asked ${Math.round(l.req)})</title></rect>`;
       s += `<line x1="${X(1)}" x2="${X(1)}" y1="${y - 2}" y2="${y + bh + 2}" style="stroke:var(--ix-ink);stroke-width:1"/><line x1="${X(l.pctB)}" x2="${X(l.pctB)}" y1="${y - 3}" y2="${y + bh + 3}" style="stroke:var(--ix-mute);stroke-width:2"/>`;
       s += `<text x="${X(0)}" y="${y + bh + 15}" class="ax">${Math.round(l.pctB * 100)} % → <tspan style="font-weight:700;fill:var(--ix-ink)">${Math.round(l.pctA * 100)} %</tspan> · gets ${Math.round(l.alloc)} (asked ${Math.round(l.req)})</text>`; });
@@ -4924,6 +5148,10 @@ function ixDistViz(box) {
   box.querySelector("#ixDC").onchange = e => { st.central = e.target.checked; drawNet(); };
   box.querySelector("#ixDR").onchange = e => { st.regional = e.target.checked; drawNet(); };
   box.querySelectorAll("#ixAllocM [data-am]").forEach(b => b.onclick = () => { st.method = b.dataset.am; drawAlloc(); });
+  box.querySelector("#ixFast").onclick = () => { const need = IX_LOCS.reduce((s, l) => s + Math.max(0, l.tog - l.nfp), 0), batch = Math.max(need, st.pmoq); st.avail = batch; st.method = "staged";
+    const a = box.querySelector("#ix-ds-avail"); a.value = batch; const o = box.querySelector("#o-ds-avail"); if (o) o.textContent = batch;
+    const n = box.querySelector("#ixFastNote"); n.hidden = false; n.textContent = `Plant batch = max(sum of every region's TOG − NFP = ${need}, plant minimum ${st.pmoq}) = ${batch}${batch > need ? `; the ${batch - need} extra is spread so every region ends at about the same % above TOG` : ""}.`; drawAlloc(); };
+  ixBind(box, "dp", st, () => {});
   box.querySelector("#ixPoolNew").onclick = () => { st.seed = st.seed * 31 + 11; drawPool(); };
   ixBind(box, "ds", st, drawAlloc);
   drawNet(); drawAlloc(); drawPool();
@@ -5451,13 +5679,13 @@ function ixQuiz(box) {
 (function () { const b = document.getElementById("ixQuiz"); if (b) ixQuiz(b); })();
 
 /* ============ "On this page" bar: one chip per theory section, active chip follows scrolling ============ */
-const IX_TOC = { "ix-whyh": "Why DDMRP", "ix-five": "Six components", "ix-c1": "1 · Decoupling", "ix-c2": "2 · Buffers", "ix-labh": "Buffer lab", "ix-bkh": "Buffer key figures", "ix-anh": "Three views",
+const IX_TOC = { "ix-solh": "Our solutions", "ix-whyh": "Why DDMRP", "ix-five": "Six components", "ix-c1": "1 · Decoupling", "ix-c2": "2 · Buffers", "ix-labh": "Buffer lab", "ix-bkh": "Buffer key figures", "ix-anh": "Three views",
   "ix-c3": "3 · Adjustments", "ix-c4": "4 · Planning", "ix-disth": "Distribution", "ix-c5": "5 · Execution", "ix-all": "Formula sheet", "ix-c6": "6 · Adaptation",
-  "ix-ddomh": "DDOM", "ix-paramsh": "Parameters", "ix-dayh": "Planning day", "ix-simh": "Simulation", "ix-nsh": "Network sim", "ix-quizh": "Quiz", "ix-abbrh": "Abbreviations" };
+  "ix-ddomh": "DDOM", "ix-paramsh": "Parameters", "ix-dayh": "Planning day", "ix-simh": "Simulation", "ix-nsh": "Network sim", "ix-quizh": "Quiz", "ix-xch": "Calculator", "ix-abbrh": "Abbreviations" };
 (function () {
   const nav = document.getElementById("ixToc"); if (!nav) return;
   const secs = Object.keys(IX_TOC).map(h => { const t = document.getElementById(h); return t && { h, sec: t.closest("section") }; }).filter(Boolean);
-  nav.innerHTML = `<span class="ix-toc-t">On this page</span><div class="ix-toc-l">${secs.map(({ h }) => `<a href="#${h}" data-toc="${h}">${IX_TOC[h]}</a>`).join("")}</div>`;
+  nav.innerHTML = `<div class="ix-toc-l"><span class="ix-toc-t">On this page</span>${secs.map(({ h }) => `<a href="#${h}" data-toc="${h}">${IX_TOC[h]}</a>`).join("")}</div>`;
   const links = Object.fromEntries([...nav.querySelectorAll("[data-toc]")].map(a => [a.dataset.toc, a]));
   let forced = null;
   nav.querySelectorAll("[data-toc]").forEach(a => a.onclick = e => { e.preventDefault(); forced = a.dataset.toc; document.getElementById(a.dataset.toc).closest("section").scrollIntoView({ behavior: "smooth", block: "start" }); mark(); });
@@ -5658,6 +5886,7 @@ const IX_NUM = {
   "ix-xp-qty": ["pos", 0, null], "ix-os-nfp": ["num", null, null], "ix-os-moq": ["nn", 0, null], "ix-os-mult": ["int", 1, null],
   "ix-ds-avail": ["nn", 0, null], "ix-spk-k": ["pos", 0, null],
   // profile comparison, filling a truck
+  "ix-sea-n": ["int", 1, 52], "ix-sea-cap": ["pos", 0, null], "ix-sea-clt": ["int", 0, 52], "ix-dp-pmoq": ["nn", 0, null],
   "ix-pf-adu": ["pos", 0, null], "ix-pf-dlt": ["pos", 0, null], "ix-pf-moq": ["nn", 0, null], "ix-pf-doc": ["nn", 0, null], "ix-tk-cap": ["int", 1, null], "ix-tk-min": ["nn", 0, null],
   // execution visuals (short timelines)
   "ix-ex-oh": ["num", null, null], "ix-ex-oo": ["nn", 0, null], "ix-ex-d1": ["int", 0, 30], "ix-ex-d2": ["int", 0, 30], "ix-ex-reqDay": ["int", 1, 30], "ix-ex-supDay": ["int", 1, 30],
@@ -5690,8 +5919,373 @@ function ixNumify(root) {
   new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) ixNumify(n.matches && n.matches(".ix-fld") ? n.parentElement || n : n); }))).observe(intro, { childList: true, subtree: true });
 })();
 
+/* ============ Exam calculator: every DDMRP calculation in one place (theory page) ============ */
+// For exam practice: type the numbers of a question and read the worked answer. Same formulas as the rest of this page
+// (from knowledge of Ptak & Smith / DDI; verify in the book). Every starting number is made up.
+// Where exercises differ there is a switch: rounding each zone to whole units, whether today counts as day 1 of the spike
+// horizon, and whether a day exactly at the threshold is a spike.
+
+// a cell with one or more quantities: "35 40 12" is summed; otherwise a small sum such as "4*300 + 2*75"
+// (+ − × ÷ and brackets; parsed here, never evaluated as code). Blank = 0, anything else = NaN.
+function ixXcExpr(s) {
+  s = String(s == null ? "" : s).trim(); if (!s) return 0;
+  const parts = s.split(/[\s,;]+/);
+  if (parts.length > 1 && parts.every(p => /^-?(\d+\.?\d*|\.\d+)$/.test(p))) return parts.reduce((a, p) => a + +p, 0);
+  const t = s.replace(/[×x]/g, "*").replace(/÷/g, "/").replace(/−/g, "-").replace(/\s+/g, ""); let i = 0;
+  const num = () => { const m = /^(\d+\.?\d*|\.\d+)/.exec(t.slice(i)); if (!m) throw 0; i += m[0].length; return +m[0]; };
+  const fac = () => { if (t[i] === "-") { i++; return -fac(); } if (t[i] === "+") { i++; return fac(); }
+    if (t[i] === "(") { i++; const v = add(); if (t[i] !== ")") throw 0; i++; return v; } return num(); };
+  const mul = () => { let v = fac(); while (t[i] === "*" || t[i] === "/") { const o = t[i++], w = fac(); v = o === "*" ? v * w : v / w; } return v; };
+  const add = () => { let v = mul(); while (t[i] === "+" || t[i] === "-") { const o = t[i++], w = mul(); v = o === "+" ? v + w : v - w; } return v; };
+  try { const v = add(); return i === t.length && Number.isFinite(v) ? v : NaN; } catch (e) { return NaN; }
+}
+// a pasted list of numbers (spaces, commas, semicolons, tabs or new lines between them); null if an entry isn't a number
+function ixXcList(s) {
+  const p = String(s == null ? "" : s).trim().split(/[\s,;]+/).filter(Boolean), v = p.map(Number);
+  return v.every(Number.isFinite) ? v : null;
+}
+// rolling ADU for each day. past: the N days up to and including that day; forward: that day and the N − 1 after it.
+// null where the window isn't complete.
+function ixXcAdu(u, n, look) {
+  return u.map((_, i) => { const a = look === "forward" ? i : i - n + 1, b = a + n; if (a < 0 || b > u.length) return null;
+    let s = 0; for (let k = a; k < b; k++) s += u[k]; return s / n; });
+}
+// buffer zones: yellow = ADU × DLT; red base = ADU × DLT × LTF; red safety = red base × VF; red = base + safety;
+// green = the largest of ADU × order cycle, ADU × DLT × LTF and the MOQ. Planned adjustments: DAF × ADU, LTAF × DLT, ZAF × one zone.
+// round: every zone to whole units, the safety from the rounded base.
+function ixXcZones(o) {
+  const R = o.round ? Math.round : v => v, adu = o.adu * (o.daf == null ? 1 : o.daf), dlt = o.dlt * (o.ltaf == null ? 1 : o.ltaf);
+  const zr = o.zr == null ? 1 : o.zr, zy = o.zy == null ? 1 : o.zy, zg = o.zg == null ? 1 : o.zg;
+  const yel = R(adu * dlt * zy), base = R(adu * dlt * o.ltf), safety = R(base * o.vf), red = zr === 1 ? base + safety : R((base + safety) * zr);
+  const cand = [["ADU × order cycle", adu * (o.doc || 0)], ["ADU × DLT × LTF", adu * dlt * o.ltf], ["MOQ", o.moq || 0]];
+  const win = cand.reduce((a, b) => b[1] > a[1] ? b : a), grn = R(win[1] * zg), tor = red, toy = red + yel, tog = toy + grn;
+  const mmNo = R(adu * dlt), mmMin = R(adu * dlt * (1 + o.vf));
+  return { adu, dlt, yel, base, safety, red, cand, gBy: win[0], grnRaw: win[1], grn, tor, toy, tog,
+    ltCat: o.ltf > 0.6 ? "S" : o.ltf > 0.4 ? "M" : "L", vCat: o.vf > 0.6 ? "H" : o.vf > 0.4 ? "M" : "L",
+    freq: adu ? grn / adu : 0, redDays: adu ? red / adu : 0, open: grn ? yel / grn : 0, avg: red + grn / 2, hi: red + grn,
+    mmNo, mmMin, mmAvg: mmMin - mmNo + grn / 2 };
+}
+// qualified demand = past due + due today + every future day inside the spike horizon whose total is above the threshold.
+// days[d] = total due on day d (0 = today). incToday: today is day 1 of the horizon, so it reaches day H − 1.
+// ge: a day exactly at the threshold is a spike too.
+function ixXcQd(o) {
+  const last = o.incToday ? o.h - 1 : o.h;
+  const rows = o.days.map((q, d) => { const cls = d === 0 ? "Due today" : d > last ? "Beyond the horizon" : (o.ge ? q >= o.thr : q > o.thr) ? "Qualified spike" : "Below the threshold";
+    return { d, q, cls, inQd: cls === "Due today" || cls === "Qualified spike" }; });
+  const today = rows.length ? rows[0].q : 0, spikes = rows.filter(r => r.cls === "Qualified spike"), sp = spikes.reduce((s, r) => s + r.q, 0);
+  return { last, rows, today, spikes, sp, qd: o.past + today + sp };
+}
+// NFP = on-hand + on-order − qualified demand; planning priority = NFP ÷ TOG. Order when NFP ≤ TOY: TOG − NFP, at least the MOQ,
+// rounded up to the order multiple (the same rule as this page's NFP calculation).
+function ixXcNfp(o) {
+  const nfp = o.oh + o.oo - o.qd, zone = nfp <= o.tor ? "Red" : nfp <= o.toy ? "Yellow" : nfp <= o.tog ? "Green" : "Above TOG";
+  let order = nfp <= o.toy ? Math.max(o.tog - nfp, o.moq || 0) : 0;
+  if (order && o.mult > 1) order = Math.ceil(order / o.mult) * o.mult;
+  return { nfp, zone, pr: o.tog ? nfp / o.tog : 0, raw: nfp <= o.toy ? o.tog - nfp : 0, order, after: nfp + order };
+}
+// lead time alert: the last part of the lead time (the alert horizon) is split into green, yellow and red thirds
+function ixXcLta(lt, h, today) {
+  const s = lt - h, z = h / 3, st = today >= lt ? "Past due" : today < s ? "No alert" : today < s + z ? "Green" : today < s + 2 * z ? "Yellow" : "Red";
+  return { s, z, st, bands: [["No alert", 0, s], ["Green", s, s + z], ["Yellow", s + z, s + 2 * z], ["Red", s + 2 * z, lt]] };
+}
+// relative priority across locations: NFP ÷ TOG, lowest first (rank 1 = most urgent; equal priorities share a rank).
+// A quantity to share is split with this page's allocation rules (ixAlloc, distribution section).
+function ixXcShare(locs, avail, method) {
+  const rows = locs.map(l => { const nfp = l.oh + l.oo - l.qd;
+    return { ...l, nfp, pr: nfp / l.tog, zone: nfp <= l.tor ? "Red" : nfp <= l.toy ? "Yellow" : nfp <= l.tog ? "Green" : "Above TOG" }; });
+  rows.forEach(r => { r.rank = 1 + rows.filter(x => x.pr < r.pr - 1e-12).length; });
+  const al = avail > 0 && rows.length ? ixAlloc(rows.map(r => ({ id: r.id, tor: r.tor, toy: r.toy, tog: r.tog, nfp: r.nfp })), avail, method) : null;
+  return { rows, al };
+}
+// inventory value of two options (e.g. buffer the finished product or its components): average on-hand × unit cost
+function ixXcInv(rows) {
+  const t = { A: 0, B: 0 }, out = rows.map(r => { const value = r.qty * r.cost; t[r.opt] += value; return { ...r, value }; });
+  return { rows: out, A: t.A, B: t.B, diff: t.B - t.A, pct: t.A ? (t.B - t.A) / t.A : 0 };
+}
+// starting numbers (made up for this page)
+const IX_XC0 = {
+  adu: { text: "14 9 17 12 0 22 15 11 13 19 8 16 14 10 25 12 9 18 13 15 11", n: 7, look: "past", pick: null },
+  z: { adu: 14, dlt: 9, ltf: 0.45, vf: 0.55, doc: 5, moq: 100, type: "P", round: true, daf: 1, ltaf: 1, zr: 1, zy: 1, zg: 1 },
+  qd: { past: 6, h: 9, thr: 44, k: 3, incToday: false, ge: false, rows: ["12 5", "16", "30 22", "9", "", "41", "18 30", "14", "", "60", "75", "13"] },
+  n: { oh: 140, oo: 150, qd: 183, tor: 88, toy: 214, tog: 314, moq: 100, mult: 1 },
+  sh: { avail: 400, method: "staged", rows: [
+    { id: "Site A", tor: "120", toy: "300", tog: "400", oh: "90", oo: "150", qd: "40" }, { id: "Site B", tor: "70", toy: "180", tog: "250", oh: "60", oo: "40", qd: "35" },
+    { id: "Site C", tor: "180", toy: "420", tog: "600", oh: "260", oo: "200", qd: "90" }, { id: "Site D", tor: "50", toy: "130", tog: "180", oh: "20", oo: "60", qd: "25" }] },
+  ex: { oh: 52, tor: 88, lt: 40, h: 12, today: 33 },
+  inv: { a: "Buffer the finished product", b: "Buffer the components", rows: [
+    { opt: "A", item: "Finished product", qty: "140", cost: "2*45 + 3*12 + 20" }, { opt: "B", item: "Component X", qty: "210", cost: "45" }, { opt: "B", item: "Component Y", qty: "300", cost: "12" }] }
+};
+const IX_XC_TABS = [["adu", "ADU"], ["z", "Buffer zones"], ["qd", "Qualified demand"], ["n", "Net flow & order"], ["sh", "Prioritized share"], ["ex", "Execution alerts"], ["inv", "Inventory value"]];
+function ixXcViz(box) {
+  const S = JSON.parse(JSON.stringify(IX_XC0)); S.tab = "adu";
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fx = (v, d = 2) => v == null || !Number.isFinite(v) ? "–" : (Math.round(v * 10 ** d) / 10 ** d + 0).toLocaleString("en-US", { maximumFractionDigits: d }).replace(/^-/, "−");
+  const pc = v => Number.isFinite(v) ? (Math.round(v * 1000) / 10 + 0).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace(/^-/, "−") + " %" : "–";
+  const pill = z => `<span class="ix-pill ${{ Red: "r", "Dark red": "dr", Yellow: "y", Green: "g", "Above TOG": "b", "Past due": "dr" }[z] || "n"}">${z}</span>`;
+  // inputs: typed number fields (rules shared with the page's other labs), sliders only for the 0 to 1 factors
+  const nf = (g, k, label, cfg) => { const id = `ix-xc-${g}-${k}`, v = S[g][k], mn = cfg[0] === "pos" ? 0 : cfg[1]; IX_NUM[id] = cfg;
+    return `<div class="ix-fld"><label for="${id}">${label}</label><input id="${id}" type="number" step="${cfg[0] === "int" ? 1 : "any"}"${mn != null ? ` min="${mn}"` : ""}${cfg[2] != null ? ` max="${cfg[2]}"` : ""}${mn != null && mn >= 0 ? ` inputmode="${cfg[0] === "int" ? "numeric" : "decimal"}"` : ""} value="${v}" data-num="1" data-last="${v}" data-g="${g}" data-k="${k}" aria-describedby="${id}-h"><span class="ix-hint" id="${id}-h">${ixNumHint(cfg)}</span></div>`; };
+  const sl = (g, k, label) => { const id = `ix-xc-${g}-${k}`, v = S[g][k];
+    return `<div class="ix-fld"><label for="${id}">${label} <output id="o-xc-${g}-${k}">${v.toFixed(2)}</output></label><input id="${id}" type="range" min="0" max="1" step="0.01" value="${v}" data-g="${g}" data-k="${k}"><span class="ix-rng" aria-hidden="true"><i>0</i><i>1</i></span></div>`; };
+  const ck = (g, k, label) => `<label class="ix-chk"><input type="checkbox" data-g="${g}" data-k="${k}"${S[g][k] ? " checked" : ""}> ${label}</label>`;
+  const seg = (g, k, opts, label) => `<span class="ix-seg" role="group" aria-label="${label}">${opts.map(([v, t]) => `<button type="button" data-sg="${g}" data-sk="${k}" data-sv="${v}" aria-pressed="${S[g][k] === v}">${t}</button>`).join("")}</span>`;
+  const sel = (g, k, label, opts) => `<div class="ix-fld"><label for="ix-xc-${g}-${k}">${label}</label><select id="ix-xc-${g}-${k}" data-g="${g}" data-k="${k}">${opts.map(([v, t]) => `<option value="${v}"${S[g][k] === v ? " selected" : ""}>${t}</option>`).join("")}</select></div>`;
+  // one worked step: name and result, then the formula and the numbers put in
+  const st = (name, formula, work, res, cls) => `<div class="ix-xc-st${cls ? " " + cls : ""}"><span class="nm">${name}</span><b>${res}</b>${formula ? `<span class="fm">${formula}</span>` : ""}${work ? `<span class="wk">${work}</span>` : ""}</div>`;
+  const hd = t => `<p class="ix-xc-h">${t}</p>`;
+  const setNum = (g, k, v) => { S[g][k] = v; const e = box.querySelector(`#ix-xc-${g}-${k}`); if (e) { e.value = v; e.dataset.last = v; e.removeAttribute("aria-invalid"); } };
+  const zNow = () => ixXcZones(S.z), qdNow = () => ixXcQd({ past: S.qd.past, h: S.qd.h, thr: S.qd.thr, incToday: S.qd.incToday, ge: S.qd.ge, days: qdDays().map(x => Number.isFinite(x) ? x : 0) });
+  const qdN = () => Math.min(60, Math.max(8, (S.qd.incToday ? S.qd.h - 1 : S.qd.h) + 3)), qdDays = () => Array.from({ length: qdN() }, (_, d) => ixXcExpr(S.qd.rows[d]));
+  const T = {}, C = {};
+
+  // 1 · ADU
+  T.adu = () => `<div class="ix-xc-grid"><div class="ix-xc-in">
+      <div class="ix-fld ix-xc-wide"><label for="ix-xc-adu-text">Daily usage, oldest day first</label><textarea id="ix-xc-adu-text" data-g="adu" data-k="text" rows="4" spellcheck="false" aria-describedby="ix-xc-adu-text-h">${esc(S.adu.text)}</textarea><span class="ix-hint" id="ix-xc-adu-text-h">numbers with spaces, commas or new lines between them: paste a row or column from a spreadsheet</span></div>
+      ${nf("adu", "n", "Rolling horizon (days)", ["int", 1, null])}
+      <div class="ix-fld"><span class="ix-xc-lab">Window</span>${seg("adu", "look", [["past", "Past"], ["forward", "Forward"]], "ADU window")}<span class="ix-hint" id="ixXcLookD"></span></div>
+    </div><div class="ix-xc-out" id="ixXcOut"></div></div>`;
+  C.adu = () => {
+    const out = box.querySelector("#ixXcOut"), u = ixXcList(S.adu.text), n = S.adu.n, fw = S.adu.look === "forward";
+    box.querySelector("#ix-xc-adu-text").toggleAttribute("aria-invalid", !u);
+    box.querySelector("#ixXcLookD").textContent = fw ? `day d and the ${n - 1} days after it` : `day d and the ${n - 1} days before it`;
+    if (!u) { out.innerHTML = `<p class="ix-note ix-xc-warn">Only numbers, please: one entry isn't a number.</p>`; return; }
+    const a = ixXcAdu(u, n, S.adu.look), have = a.map((v, i) => v == null ? -1 : i).filter(i => i >= 0);
+    if (!have.length) { out.innerHTML = `<p class="ix-note ix-xc-warn">${u.length} day${u.length === 1 ? "" : "s"} entered: a ${n}-day horizon needs at least ${n}.</p>`; return; }
+    let pick = S.adu.pick; if (pick == null || a[pick] == null) pick = fw ? have[0] : have[have.length - 1]; S.adu.pick = pick;
+    const lo = fw ? pick : pick - n + 1, win = u.slice(lo, lo + n), sum = win.reduce((s, v) => s + v, 0);
+    const list = win.length > 10 ? `${win.slice(0, 5).map(v => fx(v)).join(" + ")} + … + ${win.slice(-2).map(v => fx(v)).join(" + ")}` : win.map(v => fx(v)).join(" + ");
+    // chart: usage bars (the window highlighted), rolling ADU line
+    const N = u.length, L = 44, R = 630, Tp = 12, B = 176, bw = (R - L) / N, mx = Math.max(...u, ...a.filter(v => v != null), 1);
+    const stp = [1, 2, 2.5, 5, 10].map(m => m * 10 ** Math.floor(Math.log10(mx / 4))).find(s => mx / s <= 5) || mx / 4, top = Math.ceil(mx * 1.05 / stp) * stp, Y = v => B - v / top * (B - Tp);
+    let s = ""; for (let v = 0; v <= top + 1e-9; v += stp) s += `<line x1="${L}" x2="${R}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--ix-rule)"/><text x="${L - 6}" y="${Y(v) + 4}" class="ax" style="text-anchor:end">${fx(v)}</text>`;
+    u.forEach((v, i) => { s += `<rect x="${L + i * bw + bw * 0.15}" y="${Y(Math.max(v, 0))}" width="${bw * 0.7}" height="${Math.max(0, B - Y(Math.max(v, 0)))}" style="fill:var(${i >= lo && i < lo + n ? "--ix-over" : "--ix-rule"})"/>`; });
+    let d = ""; a.forEach((v, i) => { if (v == null) return; d += `${d && a[i - 1] != null ? "L" : "M"}${(L + (i + 0.5) * bw).toFixed(1)},${Y(v).toFixed(1)} `; });
+    s += `<path d="${d}" style="fill:none;stroke:var(--ix-vio);stroke-width:2.5"/><circle cx="${L + (pick + 0.5) * bw}" cy="${Y(a[pick])}" r="5" style="fill:var(--ix-vio);stroke:var(--ix-sheet);stroke-width:2"/>`;
+    const every = Math.ceil(N / 16); u.forEach((_, i) => { if (i % every === 0 || i === N - 1) s += `<text x="${L + (i + 0.5) * bw}" y="${B + 16}" class="ax" style="text-anchor:middle">${i + 1}</text>`; });
+    s += `<text x="${R}" y="${B + 32}" class="ax" style="text-anchor:end">day</text>`;
+    out.innerHTML = `<div class="ix-xc-steps">${st(`ADU on day ${pick + 1}`, `average of days ${lo + 1} to ${lo + n}`, `(${list}) ÷ ${n} = ${fx(sum)} ÷ ${n}`, fx(a[pick]), "key")}
+        ${st("Days entered", "", `ADU can be worked out for days ${have[0] + 1} to ${have[have.length - 1] + 1}`, String(N))}</div>
+      <p class="ix-xc-acts"><button type="button" class="ix-go small" id="ixXcAduUse">Use ADU ${fx(a[pick])} in Buffer zones →</button><span class="ix-hint">Click an ADU in the table to pick another day.</span></p>
+      <div class="ix-xc-aduw"><div><svg viewBox="0 0 640 214" role="img" aria-label="Daily usage as bars, the days in the window highlighted, and the rolling ADU as a line">${s}</svg>
+      <p class="ix-legend"><span><i class="sq" style="background:var(--ix-rule)"></i>daily usage</span><span><i class="sq" style="background:var(--ix-over)"></i>days in the window</span><span><i class="ln" style="border-top:2.5px solid var(--ix-vio)"></i>rolling ADU</span></p></div>
+      <div class="ix-xc-scroll"><table class="ix-dyn-kpi"><tr><th>Day</th><th class="n">Usage</th><th class="n" title="${n} days, ${fw ? "forward" : "past"}">ADU</th></tr>${u.map((v, i) => `<tr${i === pick ? ' class="on"' : ""}><td>${i + 1}</td><td class="n">${fx(v)}</td><td class="n">${a[i] == null ? '<span class="ix-mute">–</span>' : `<button type="button" class="ix-xc-pick" data-pick="${i}" aria-pressed="${i === pick}">${fx(a[i])}</button>`}</td></tr>`).join("")}</table></div></div>`;
+    out.querySelector("#ixXcAduUse").onclick = () => { S.z.adu = Math.round(a[pick] * 100) / 100; go("z"); };
+    out.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => { S.adu.pick = +b.dataset.pick; C.adu(); });
+  };
+
+  // 2 · buffer zones
+  T.z = () => `<div class="ix-xc-grid"><div class="ix-xc-in">
+      ${nf("z", "adu", "ADU (units a day)", ["pos", 0, null])}${nf("z", "dlt", "DLT (days)", ["pos", 0, null])}
+      ${sl("z", "ltf", "Lead time factor")}${sl("z", "vf", "Variability factor")}
+      ${nf("z", "doc", "Order cycle (days)", ["nn", 0, null])}${nf("z", "moq", "MOQ (units)", ["nn", 0, null])}
+      ${sel("z", "type", "Item type", Object.entries(IX_PROF_T).map(([k, t]) => [k, `${t} (${k})`]))}
+      <div class="ix-xc-wide">${ck("z", "round", "Round every zone to whole units")}</div>
+      <details class="ix-xc-wide ix-xc-adj"${[S.z.daf, S.z.ltaf, S.z.zr, S.z.zy, S.z.zg].some(v => v !== 1) ? " open" : ""}><summary>Planned adjustments (1 = none)</summary><div class="ix-xc-in">
+        ${nf("z", "daf", "DAF (× ADU)", ["pos", 0, null])}${nf("z", "ltaf", "LTAF (× DLT)", ["pos", 0, null])}${nf("z", "zr", "ZAF on red", ["pos", 0, null])}${nf("z", "zy", "ZAF on yellow", ["pos", 0, null])}${nf("z", "zg", "ZAF on green", ["pos", 0, null])}</div></details>
+    </div><div class="ix-xc-out" id="ixXcOut"></div></div>`;
+  C.z = () => {
+    const o = S.z, z = zNow(), rd = (raw, v) => o.round && Math.abs(raw - v) > 1e-9 ? `${fx(raw)} → ${fx(v)}` : fx(v);
+    const zy = o.zy !== 1 ? ` × ${fx(o.zy)}` : "", zr = o.zr !== 1, zg = o.zg !== 1, cat = (v, k) => IX_PROF_RNG[k].map(x => Math.round(x * 100)).join("–") + " %";
+    const ltOut = o.ltf < 0.2 ? " · below the usual 20–100 %" : "", code = o.type + z.ltCat + z.vCat;
+    let h = `<div class="ix-xc-zrow"><div class="ix-xc-bufc"><span class="nm">Buffer, zones to scale</span><svg id="ixXcBuf" class="ix-xc-buf" role="img" aria-label="Buffer with red, yellow and green zones"></svg></div><div class="ix-xc-steps">`;
+    if (o.daf !== 1) h += st("Adjusted ADU", "ADU × DAF", `${fx(o.adu)} × ${fx(o.daf)}`, fx(z.adu));
+    if (o.ltaf !== 1) h += st("Adjusted DLT", "DLT × LTAF", `${fx(o.dlt)} × ${fx(o.ltaf)}`, fx(z.dlt));
+    h += st("Green zone", "largest of ADU × order cycle, ADU × DLT × LTF, MOQ" + (zg ? ", × ZAF" : ""), `max(${z.cand.map(c => fx(c[1])).join(", ")}) = ${fx(z.grnRaw)}${zg ? ` × ${fx(o.zg)}` : ""}${o.round && Math.abs(z.grnRaw * o.zg - z.grn) > 1e-9 ? ` → ${fx(z.grn)}` : zg ? ` = ${fx(z.grn)}` : ""} · set by ${z.gBy}`, fx(z.grn), "zg")
+      + st("Yellow zone", "ADU × DLT" + (zy ? " × ZAF" : ""), `${fx(z.adu)} × ${fx(z.dlt)}${zy} = ${rd(z.adu * z.dlt * o.zy, z.yel)}`, fx(z.yel), "zy")
+      + st("Red base", "ADU × DLT × LTF", `${fx(z.adu)} × ${fx(z.dlt)} × ${fx(o.ltf)} = ${rd(z.adu * z.dlt * o.ltf, z.base)}`, fx(z.base), "zr")
+      + st("Red safety", "red base × VF", `${fx(z.base)} × ${fx(o.vf)} = ${rd(z.base * o.vf, z.safety)}`, fx(z.safety), "zr")
+      + st("Red zone", zr ? "(red base + red safety) × ZAF" : "red base + red safety", zr ? `(${fx(z.base)} + ${fx(z.safety)}) × ${fx(o.zr)} = ${rd((z.base + z.safety) * o.zr, z.red)}` : `${fx(z.base)} + ${fx(z.safety)}`, fx(z.red), "zr")
+      + st("Buffer levels", "TOR = red · TOY = TOR + yellow · TOG = TOY + green", `TOR ${fx(z.tor)} · TOY ${fx(z.tor)} + ${fx(z.yel)} = ${fx(z.toy)} · TOG ${fx(z.toy)} + ${fx(z.grn)} = ${fx(z.tog)}`, `${fx(z.tor)} · ${fx(z.toy)} · ${fx(z.tog)}`, "key") + `</div></div>`
+      + hd("What the zones tell you") + `<div class="ix-xc-steps">`
+      + st("Order frequency", "green ÷ ADU", `${fx(z.grn)} ÷ ${fx(z.adu)}`, `${fx(z.freq)} days`)
+      + st("Red zone covers", "red ÷ ADU", `${fx(z.red)} ÷ ${fx(z.adu)}`, `${fx(z.redDays)} days`)
+      + st("Supply orders open at a time", "yellow ÷ green", `${fx(z.yel)} ÷ ${fx(z.grn)}`, fx(z.open))
+      + st("Average on-hand target", "TOR + green ÷ 2", `${fx(z.tor)} + ${fx(z.grn / 2)}`, fx(z.avg))
+      + st("On-hand normally between", "TOR and TOR + green", "", `${fx(z.tor)} – ${fx(z.hi)}`) + `</div>`
+      + hd("Buffer profile") + `<div class="ix-xc-steps">`
+      + st("Lead time category", `LTF ${fx(o.ltf)}`, `${IX_PROF_L[z.ltCat]} lead time: LTF ${cat(o.ltf, z.ltCat)}${ltOut}`, IX_PROF_L[z.ltCat])
+      + st("Variability category", `VF ${fx(o.vf)}`, `${IX_PROF_V[z.vCat]} variability: VF ${cat(o.vf, "v" + z.vCat)}`, IX_PROF_V[z.vCat])
+      + st("Profile code", "item type + lead time + variability", ixProfName(code), code) + `</div>`
+      + hd("Compared with min/max: safety stock ADU × DLT × VF, order size = green") + `<div class="ix-xc-steps">`
+      + st("Min without safety", "ADU × DLT", `${fx(z.adu)} × ${fx(z.dlt)} = ${rd(z.adu * z.dlt, z.mmNo)}`, fx(z.mmNo))
+      + st("Min with safety", "ADU × DLT × (1 + VF)", `${fx(z.adu)} × ${fx(z.dlt)} × ${fx(1 + o.vf)} = ${rd(z.adu * z.dlt * (1 + o.vf), z.mmMin)}`, fx(z.mmMin))
+      + st("Average on-hand, min/max", "(min with − min without safety) + green ÷ 2", `${fx(z.mmMin - z.mmNo)} + ${fx(z.grn / 2)} · DDMRP target: ${fx(z.avg)}`, fx(z.mmAvg)) + `</div>`;
+    box.querySelector("#ixXcOut").innerHTML = h;
+    drawBuffer(box.querySelector("#ixXcBuf"), z, { sizes: true, crop: true });
+  };
+
+  // 3 · qualified demand
+  T.qd = () => `<div class="ix-xc-grid"><div class="ix-xc-in">
+      ${nf("qd", "past", "Past due (units)", ["nn", 0, null])}${nf("qd", "h", "Spike horizon (days)", ["int", 1, null])}
+      ${nf("qd", "thr", "Order spike threshold (units)", ["nn", 0, null])}${nf("qd", "k", "k for ADU × k", ["pos", 0, null])}
+      <div class="ix-xc-wide ix-xc-thr" id="ixXcThr"></div>
+      <div class="ix-xc-wide">${ck("qd", "incToday", "Today counts as day 1 of the horizon")}${ck("qd", "ge", "A day exactly at the threshold is a spike")}</div>
+    </div><div class="ix-xc-out"><div class="ix-xc-out" id="ixXcOut"></div>
+      <p class="ix-hint">Type each day's orders: one quantity, several (35 40) or a sum (35+40). Scroll sideways for later days.</p><div class="ix-xc-hscroll"><table class="ix-dyn-kpi ix-xc-qd" id="ixXcQdT"></table></div><p class="ix-hint" id="ixXcQdEdge"></p></div></div>`;
+  const qdTable = () => { const t = box.querySelector("#ixXcQdT"); if (!t) return;
+    const ds = Array.from({ length: qdN() }, (_, d) => d), row = (h, f) => `<tr><th scope="row">${h}</th>${ds.map(f).join("")}</tr>`;
+    t.innerHTML = row("Day", d => `<th scope="col" class="n" data-qd="${d}">${d === 0 ? "0 · today" : d}</th>`)
+      + row("Orders due", d => `<td data-qd="${d}"><input type="text" class="ix-xc-cell" inputmode="decimal" data-qrow="${d}" value="${esc(S.qd.rows[d] || "")}" aria-label="Orders due on day ${d}"></td>`)
+      + row("Total", d => `<td class="n" data-qd="${d}" id="ixXcQt${d}"></td>`) + row("Status", d => `<td class="n" data-qd="${d}" id="ixXcQs${d}"></td>`); };
+  C.qd = () => {
+    const z = zNow(), R = qdNow(), days = qdDays();
+    box.querySelector("#ixXcThr").innerHTML = `<span class="ix-hint">From Buffer zones:</span> <button type="button" class="ix-go small" data-thr="${z.red / 2}">50 % of red: ${fx(z.red / 2)}</button><button type="button" class="ix-go small" data-thr="${z.base}">Red base: ${fx(z.base)}</button><button type="button" class="ix-go small" data-thr="${z.adu * S.qd.k}">ADU × ${fx(S.qd.k)}: ${fx(z.adu * S.qd.k)}</button>`;
+    box.querySelectorAll("[data-thr]").forEach(b => b.onclick = () => { setNum("qd", "thr", Math.round(+b.dataset.thr * 100) / 100); C.qd(); });
+    R.rows.forEach(r => { const bad = !Number.isFinite(days[r.d]), c = box.querySelector(`[data-qrow="${r.d}"]`); if (c) c.toggleAttribute("aria-invalid", bad);
+      const tq = box.querySelector(`#ixXcQt${r.d}`), ts = box.querySelector(`#ixXcQs${r.d}`); if (!tq) return;
+      tq.textContent = bad ? "?" : r.q ? fx(r.q) : "–"; ts.title = bad ? "not a number" : r.cls;
+      ts.innerHTML = bad ? '<span class="ix-mute">not a number</span>' : !r.q && r.d ? "" : r.cls === "Qualified spike" ? '<span class="ix-pill r">Spike</span>' : r.cls === "Due today" ? '<span class="ix-pill b">Today</span>' : `<span class="ix-mute">${r.cls === "Beyond the horizon" ? "beyond" : "below"}</span>`;
+      // days past the spike horizon are shaded; a dashed line marks where the horizon ends
+      box.querySelectorAll(`[data-qd="${r.d}"]`).forEach(c => { c.classList.toggle("out", r.d > R.last); c.classList.toggle("edge", r.d === R.last + 1); }); });
+    box.querySelector("#ixXcQdEdge").textContent = R.last + 1 < R.rows.length ? `Shaded days (from day ${R.last + 1}) are beyond the spike horizon and never count. "below" = under the threshold.` : `"below" = under the threshold.`;
+    const sp = R.spikes.filter(r => r.q);
+    box.querySelector("#ixXcOut").innerHTML = `<div class="ix-xc-steps">`
+      + st("Spike horizon", S.qd.incToday ? `today is day 1 of ${S.qd.h}` : `${S.qd.h} days after today`, R.last >= 1 ? `future days 1 to ${R.last} are checked` : "no future day is checked", R.last >= 1 ? `days 1–${R.last}` : "none")
+      + st("Order spike threshold", S.qd.ge ? "a day's total at or above it is a spike" : "a day's total above it is a spike", "", fx(S.qd.thr))
+      + st("Qualified spikes", "days inside the horizon over the threshold", sp.length ? sp.map(r => `day ${r.d}: ${fx(r.q)}`).join(" · ") : "none", fx(R.sp))
+      + st("Qualified demand", "past due + due today + qualified spikes", `${fx(S.qd.past)} + ${fx(R.today)} + ${fx(R.sp)}`, fx(R.qd), "key") + `</div>`
+      + (days.some(v => !Number.isFinite(v)) ? `<p class="ix-note ix-xc-warn">A cell marked red isn't a number; it counts as 0.</p>` : "")
+      + `<p class="ix-xc-acts"><button type="button" class="ix-go small" id="ixXcQdUse">Use ${fx(R.qd)} in Net flow & order →</button></p>`;
+    box.querySelector("#ixXcQdUse").onclick = () => { S.n.qd = R.qd; go("n"); };
+  };
+
+  // 4 · net flow and order
+  T.n = () => `<div class="ix-xc-grid"><div class="ix-xc-in">
+      ${nf("n", "oh", "On-hand", ["num", null, null])}${nf("n", "oo", "On-order (open supply)", ["nn", 0, null])}
+      ${nf("n", "qd", "Qualified demand", ["nn", 0, null])}<div class="ix-fld ix-xc-pull"><button type="button" class="ix-go small" id="ixXcNQd"></button></div>
+      ${nf("n", "tor", "TOR", ["nn", 0, null])}${nf("n", "toy", "TOY", ["nn", 0, null])}${nf("n", "tog", "TOG", ["pos", 0, null])}<div class="ix-fld ix-xc-pull"><button type="button" class="ix-go small" id="ixXcNZ"></button></div>
+      ${nf("n", "moq", "MOQ (units)", ["nn", 0, null])}${nf("n", "mult", "Order multiple (units)", ["int", 1, null])}
+    </div><div class="ix-xc-out" id="ixXcOut"></div></div>`;
+  C.n = () => {
+    const o = S.n, R = ixXcNfp(o), z = zNow(), q = qdNow();
+    box.querySelector("#ixXcNQd").textContent = `← Qualified demand tab: ${fx(q.qd)}`; box.querySelector("#ixXcNZ").textContent = `← Buffer zones tab: ${fx(z.tor)} · ${fx(z.toy)} · ${fx(z.tog)}`;
+    box.querySelector("#ixXcNQd").onclick = () => { setNum("n", "qd", q.qd); C.n(); };
+    box.querySelector("#ixXcNZ").onclick = () => { setNum("n", "tor", z.tor); setNum("n", "toy", z.toy); setNum("n", "tog", z.tog); setNum("n", "moq", S.z.moq); C.n(); };
+    const bad = !(o.tor <= o.toy && o.toy <= o.tog), mo = R.order && (R.order !== R.raw);
+    box.querySelector("#ixXcOut").innerHTML = (bad ? `<p class="ix-note ix-xc-warn">Check the levels: TOR ≤ TOY ≤ TOG.</p><div class="ix-xc-steps">`
+      : `<div class="ix-xc-zrow wide"><div class="ix-xc-bufc"><span class="nm">Buffer with NFP and on-hand</span><svg id="ixXcBuf" class="ix-xc-buf" role="img" aria-label="Buffer with the net flow position and on-hand"></svg></div><div class="ix-xc-steps">`)
+      + st("Net flow position", "on-hand + on-order − qualified demand", `${fx(o.oh)} + ${fx(o.oo)} − ${fx(o.qd)}`, fx(R.nfp), "key")
+      + st("Planning priority", "NFP ÷ TOG", `${fx(R.nfp)} ÷ ${fx(o.tog)}`, pc(R.pr))
+      + st("Planning zone", "Red ≤ TOR < Yellow ≤ TOY < Green ≤ TOG", `${fx(R.nfp)} against ${fx(o.tor)} · ${fx(o.toy)} · ${fx(o.tog)}`, pill(R.zone), { Red: "zr", Yellow: "zy", Green: "zg", "Above TOG": "zb" }[R.zone])
+      + st("Supply order", "when NFP ≤ TOY: TOG − NFP (at least the MOQ, rounded up to the multiple)", R.order ? `${fx(o.tog)} − ${fx(R.nfp)} = ${fx(R.raw)}${mo ? ` → ${fx(R.order)}` : ""}` : `NFP ${fx(R.nfp)} is above TOY ${fx(o.toy)}: no order`, R.order ? fx(R.order) : "none", R.order ? "key" : "")
+      + st("NFP after the order", "NFP + order", `${fx(R.nfp)} + ${fx(R.order)} · ${pc(o.tog ? R.after / o.tog : 0)} of TOG`, fx(R.after)) + (bad ? `</div>` : `</div></div>`);
+    if (!bad) drawBuffer(box.querySelector("#ixXcBuf"), { tor: o.tor, toy: o.toy, tog: o.tog }, { nfp: R.nfp, oh: o.oh, sizes: true });
+  };
+
+  // 5 · prioritized share across locations
+  const SHC = [["tor", "TOR"], ["toy", "TOY"], ["tog", "TOG"], ["oh", "On-hand"], ["oo", "On-order"], ["qd", "Qual. demand"]];
+  T.sh = () => `<div class="ix-xc-shtop">${nf("sh", "avail", "Quantity to share (0 = rank only)", ["nn", 0, null])}${sel("sh", "method", "How to share it", [["staged", "Prioritized share, stage by stage"], ["prior", "Equal planning priority"], ["prorata", "Pro rata to the requests"], ["fcfs", "First come, first served (row order)"]])}</div>
+    <div class="ix-xc-sh"><div><p class="ix-sub">Locations · cells take sums such as 4*300 + 2*75</p><div class="ix-tw"><table class="ix-dyn-kpi ix-xc-sht" id="ixXcShT"></table></div><p class="ix-xc-acts"><button type="button" class="ix-go small" id="ixXcShAdd">+ Add a location</button></p></div>
+    <div class="ix-xc-out" id="ixXcOut"></div></div>`;
+  const shTable = () => { const t = box.querySelector("#ixXcShT");
+    t.innerHTML = `<tr><th>Location</th>${SHC.map(([, h]) => `<th class="n">${h}</th>`).join("")}<th><span class="ix-vh">Remove</span></th></tr>` + S.sh.rows.map((r, i) => `<tr><td><input type="text" class="ix-xc-cell name" data-srow="${i}" data-scol="id" value="${esc(r.id)}" aria-label="Location ${i + 1} name"></td>${SHC.map(([k, h]) => `<td class="n"><input type="text" class="ix-xc-cell" inputmode="decimal" data-srow="${i}" data-scol="${k}" value="${esc(r[k])}" aria-label="${h}, location ${i + 1}"></td>`).join("")}<td><button type="button" class="ix-xc-x" data-sdel="${i}" aria-label="Remove location ${i + 1}" title="Remove">×</button></td></tr>`).join("");
+    t.querySelectorAll("[data-sdel]").forEach(b => b.onclick = () => { S.sh.rows.splice(+b.dataset.sdel, 1); shTable(); C.sh(); }); };
+  C.sh = () => {
+    const ok = [], badRows = [];
+    S.sh.rows.forEach((r, i) => { const v = Object.fromEntries(SHC.map(([k]) => [k, ixXcExpr(r[k])])); let good = SHC.every(([k]) => Number.isFinite(v[k]));
+      SHC.forEach(([k]) => { const c = box.querySelector(`[data-srow="${i}"][data-scol="${k}"]`); if (c) c.toggleAttribute("aria-invalid", !Number.isFinite(v[k])); });
+      if (good && !(v.tog > 0 && v.tor <= v.toy && v.toy <= v.tog)) good = false;
+      (good ? ok : badRows).push(good ? { id: r.id.trim() || `Location ${i + 1}`, ...v } : i + 1); });
+    const R = ixXcShare(ok, S.sh.avail, S.sh.method), al = R.al, byId = (al || []).reduce((m, x, i) => (m[i] = x, m), {});
+    const sorted = R.rows.map((r, i) => ({ ...r, i })).sort((a, b) => a.rank - b.rank || a.i - b.i);
+    let h = badRows.length ? `<p class="ix-note ix-xc-warn">Left out: row${badRows.length > 1 ? "s" : ""} ${badRows.join(", ")} (numbers needed, TOG above 0 and TOR ≤ TOY ≤ TOG).</p>` : "";
+    if (!R.rows.length) { box.querySelector("#ixXcOut").innerHTML = h + `<p class="ix-note">Add a location to rank.</p>`; return; }
+    h += `<div class="ix-tw"><table class="ix-dyn-kpi"><tr><th>Rank</th><th>Location</th><th class="n">NFP</th><th class="n">NFP ÷ TOG</th><th>Zone</th>${al ? `<th class="n">Request</th><th class="n">Gets</th><th class="n">After</th>` : ""}</tr>`
+      + sorted.map(r => { const a = byId[r.i]; return `<tr><td>${r.rank}</td><td><b>${esc(r.id)}</b></td><td class="n">${fx(r.nfp)}</td><td class="n">${pc(r.pr)}</td><td>${pill(r.zone)}</td>${a ? `<td class="n">${fx(a.req)}</td><td class="n"><b>${fx(a.alloc)}</b></td><td class="n">${pc(a.pctA)}</td>` : ""}</tr>`; }).join("") + `</table></div>`;
+    h += `<div class="ix-xc-steps">` + st("Net flow position", "on-hand + on-order − qualified demand, per location", sorted.slice(0, 3).map(r => `${esc(r.id)}: ${fx(r.oh)} + ${fx(r.oo)} − ${fx(r.qd)} = ${fx(r.nfp)}`).join(" · ") + (sorted.length > 3 ? " · …" : ""), "")
+      + st("Relative priority", "NFP ÷ TOG; the lowest % is served first", sorted.map(r => `${esc(r.id)} ${pc(r.pr)}`).join(" < "), esc(sorted[0].id), "key");
+    if (al) h += st("Requested in total", "sum of TOG − NFP", `${fx(al.need)} requested, ${fx(S.sh.avail)} to share`, fx(al.need)) + st("Not shared", S.sh.method === "staged" ? "stage by stage shares everything, the surplus above TOG" : "what is left after every request is met", "", fx(S.sh.method === "staged" ? 0 : al.kept));
+    h += `</div>`;
+    if (al && al.stages) h += `<div class="ix-tw"><table class="ix-dyn-kpi"><tr><th>Stage</th><th class="n">Needed</th><th class="n">Given</th></tr>${al.stages.map((g, i) => `<tr><td>${i + 1} · ${g.t}</td><td class="n">${g.need == null ? "–" : fx(g.need)}</td><td class="n">${fx(g.amt)}</td></tr>`).join("")}</table></div>`;
+    box.querySelector("#ixXcOut").innerHTML = h;
+  };
+
+  // 6 · execution alerts: on-hand and lead time
+  T.ex = () => `<div class="ix-xc-grid"><div class="ix-xc-in">
+      <p class="ix-xc-h ix-xc-wide">On-hand alert</p>${nf("ex", "oh", "On-hand", ["num", null, null])}${nf("ex", "tor", "TOR", ["pos", 0, null])}
+      <div class="ix-fld ix-xc-wide ix-xc-pull"><button type="button" class="ix-go small" id="ixXcExZ"></button></div>
+      <p class="ix-xc-h ix-xc-wide">Lead time alert</p>${nf("ex", "lt", "Lead time (days)", ["pos", 0, null])}${nf("ex", "h", "Alert horizon (days)", ["pos", 0, null])}
+      ${nf("ex", "today", "Days since the order was placed", ["nn", 0, null])}
+    </div><div class="ix-xc-out" id="ixXcOut"></div></div>`;
+  C.ex = () => {
+    const o = S.ex, z = zNow(), sts = ixExStatus(o.oh, o.tor), h = Math.min(o.h, o.lt), L = ixXcLta(o.lt, h, o.today);
+    const b = box.querySelector("#ixXcExZ"); b.textContent = `← TOR from Buffer zones: ${fx(z.tor)}`; b.onclick = () => { setNum("ex", "tor", z.tor); C.ex(); };
+    // on-hand bar: dark red at 0 and below, red to half of TOR, yellow to TOR, green above
+    const W = 620, x0 = 20, x1 = 600, lo = Math.min(0, Math.max(o.oh, -o.tor)), hi = Math.max(o.tor * 1.6, Math.min(o.oh, o.tor * 3)) * 1.05, X = v => x0 + (v - lo) / (hi - lo) * (x1 - x0), cx = X(Math.max(lo, Math.min(hi, o.oh)));
+    const anc = x => x > x1 - 60 ? "end" : x < x0 + 60 ? "start" : "middle";
+    let s = (lo < 0 ? `<rect x="${X(lo)}" y="20" width="${X(0) - X(lo)}" height="26" style="fill:var(--ix-drb)"/>` : "")
+      + `<rect x="${X(0)}" y="20" width="${X(o.tor / 2) - X(0)}" height="26" style="fill:var(--ix-rb)"/><rect x="${X(o.tor / 2)}" y="20" width="${X(o.tor) - X(o.tor / 2)}" height="26" style="fill:var(--ix-yb)"/><rect x="${X(o.tor)}" y="20" width="${x1 - X(o.tor)}" height="26" style="fill:var(--ix-gb)"/>`;
+    [[0, "0"], [o.tor / 2, "½ TOR " + fx(o.tor / 2)], [o.tor, "TOR " + fx(o.tor)]].forEach(([v, t], i) => { s += `<line x1="${X(v)}" x2="${X(v)}" y1="16" y2="50" style="stroke:var(--ix-ink)"/><text x="${X(v)}" y="64" class="ax" style="text-anchor:${i === 0 ? "start" : "middle"}">${t}</text>`; });
+    s += `<path d="M${cx - 7},4 L${cx + 7},4 L${cx},16 Z" style="fill:var(--ix-ink)"/><text x="${cx}" y="80" class="ax" style="text-anchor:${anc(cx)};fill:var(--ix-ink);font-weight:700">on-hand ${fx(o.oh)}${o.oh > hi ? " →" : o.oh < lo ? " ←" : ""}</text>`;
+    // lead time bar: no alert, then the horizon in thirds; the marker is today
+    const Lx = v => x0 + Math.max(0, Math.min(v, o.lt * 1.08)) / (o.lt * 1.08) * (x1 - x0), tx = Lx(o.today);
+    let t = L.bands.map(([n, a, e], i) => `<rect x="${Lx(a)}" y="20" width="${Math.max(0, Lx(e) - Lx(a))}" height="26" style="fill:var(${["--ix-rule", "--ix-gb", "--ix-yb", "--ix-rb"][i]})"/>`).join("");
+    t += `<rect x="${Lx(o.lt)}" y="20" width="${x1 - Lx(o.lt)}" height="26" style="fill:var(--ix-drb)"/>`;
+    [[0, "0"], [L.s, fx(L.s)], [o.lt, "due " + fx(o.lt)]].filter(([v], i) => i !== 1 || (Lx(v) - Lx(0) > 40 && Lx(o.lt) - Lx(v) > 80)).forEach(([v, l], i, arr) => { i = v === 0 ? 0 : v === o.lt ? 2 : 1; t += `<line x1="${Lx(v)}" x2="${Lx(v)}" y1="16" y2="50" style="stroke:var(--ix-ink)"/><text x="${Lx(v)}" y="64" class="ax" style="text-anchor:${i === 0 ? "start" : i === 2 ? "end" : "middle"}">${l}</text>`; });
+    t += `<path d="M${tx - 7},4 L${tx + 7},4 L${tx},16 Z" style="fill:var(--ix-ink)"/><text x="${tx}" y="80" class="ax" style="text-anchor:${anc(tx)};fill:var(--ix-ink);font-weight:700">day ${fx(o.today)}</text>`;
+    box.querySelector("#ixXcOut").innerHTML = `${hd("On-hand alert")}<div class="ix-xc-steps">`
+      + st("On-hand status", "on-hand ÷ TOR", `${fx(o.oh)} ÷ ${fx(o.tor)}`, pc(o.oh / o.tor), "key")
+      + st("Alert colour", "dark red ≤ 0 < red ≤ ½ TOR < yellow ≤ TOR < green", `${fx(o.oh)} against 0 · ${fx(o.tor / 2)} · ${fx(o.tor)}`, pill(sts)) + `</div>`
+      + `<svg class="ix-xc-hbar" viewBox="0 0 ${W} 88" role="img" aria-label="On-hand against the alert zones">${s}</svg>`
+      + hd("Lead time alert") + (o.h > o.lt ? `<p class="ix-note ix-xc-warn">The alert horizon is longer than the lead time; the whole lead time is used.</p>` : "") + `<div class="ix-xc-steps">`
+      + st("Alert starts", "lead time − alert horizon", `${fx(o.lt)} − ${fx(h)}`, `day ${fx(L.s)}`)
+      + st("Each colour lasts", "alert horizon ÷ 3", `${fx(h)} ÷ 3`, `${fx(L.z)} days`)
+      + st("Zones", "", L.bands.map(([n, a, e]) => `${n} ${fx(a)}–${fx(e)}`).join(" · "), "")
+      + st("Today", `day ${fx(o.today)} of ${fx(o.lt)}`, "", pill(L.st), "key") + `</div>`
+      + `<svg class="ix-xc-hbar" viewBox="0 0 ${W} 88" role="img" aria-label="Lead time with the alert zones and today">${t}</svg>`;
+  };
+
+  // 7 · inventory value of two options
+  T.inv = () => `<div class="ix-xc-shtop"><div class="ix-fld"><label for="ix-xc-inv-a">Option A</label><input type="text" id="ix-xc-inv-a" class="ix-xc-txt" data-g="inv" data-k="a" value="${esc(S.inv.a)}"></div><div class="ix-fld"><label for="ix-xc-inv-b">Option B</label><input type="text" id="ix-xc-inv-b" class="ix-xc-txt" data-g="inv" data-k="b" value="${esc(S.inv.b)}"></div></div>
+    <div class="ix-xc-sh side"><div><p class="ix-sub">Items · cells take sums such as 2*45 + 3*12</p><div class="ix-tw"><table class="ix-dyn-kpi ix-xc-sht" id="ixXcInvT"></table></div><p class="ix-xc-acts"><button type="button" class="ix-go small" id="ixXcInvAdd">+ Add an item</button><span class="ix-hint" id="ixXcInvZ"></span></p></div>
+    <div class="ix-xc-out" id="ixXcOut"></div></div>`;
+  const invTable = () => { const t = box.querySelector("#ixXcInvT");
+    t.innerHTML = `<tr><th>Option</th><th>Item</th><th class="n">Average on-hand</th><th class="n">Unit cost</th><th class="n">Value</th><th><span class="ix-vh">Remove</span></th></tr>` + S.inv.rows.map((r, i) => `<tr><td><select data-irow="${i}" data-icol="opt" aria-label="Option, item ${i + 1}"><option value="A"${r.opt === "A" ? " selected" : ""}>A</option><option value="B"${r.opt === "B" ? " selected" : ""}>B</option></select></td><td><input type="text" class="ix-xc-cell name" data-irow="${i}" data-icol="item" value="${esc(r.item)}" aria-label="Item ${i + 1} name"></td><td class="n"><input type="text" class="ix-xc-cell" inputmode="decimal" data-irow="${i}" data-icol="qty" value="${esc(r.qty)}" aria-label="Average on-hand, item ${i + 1}"></td><td class="n"><input type="text" class="ix-xc-cell wide" inputmode="decimal" data-irow="${i}" data-icol="cost" value="${esc(r.cost)}" aria-label="Unit cost, item ${i + 1}"></td><td class="n" id="ixXcIv${i}"></td><td><button type="button" class="ix-xc-x" data-idel="${i}" aria-label="Remove item ${i + 1}" title="Remove">×</button></td></tr>`).join("");
+    t.querySelectorAll("[data-idel]").forEach(b => b.onclick = () => { S.inv.rows.splice(+b.dataset.idel, 1); invTable(); C.inv(); }); };
+  C.inv = () => {
+    const rows = S.inv.rows.map((r, i) => { const qty = ixXcExpr(r.qty), cost = ixXcExpr(r.cost);
+      [["qty", qty], ["cost", cost]].forEach(([k, v]) => { const c = box.querySelector(`[data-irow="${i}"][data-icol="${k}"]`); if (c) c.toggleAttribute("aria-invalid", !Number.isFinite(v)); });
+      return { i, opt: r.opt, item: r.item.trim() || `Item ${i + 1}`, qty, cost, ok: Number.isFinite(qty) && Number.isFinite(cost) }; });
+    const R = ixXcInv(rows.filter(r => r.ok));
+    rows.forEach(r => { const c = box.querySelector(`#ixXcIv${r.i}`); if (c) c.textContent = r.ok ? fx(r.qty * r.cost) : "?"; });
+    const z = zNow(); box.querySelector("#ixXcInvZ").textContent = `Buffer zones tab: average on-hand target ${fx(z.avg)}.`;
+    const line = o => { const rs = R.rows.filter(r => r.opt === o); return rs.length ? rs.map(r => `${fx(r.qty)} × ${fx(r.cost)}`).join(" + ") : "no items"; };
+    box.querySelector("#ixXcOut").innerHTML = (rows.some(r => !r.ok) ? `<p class="ix-note ix-xc-warn">A cell marked red isn't a number; that item is left out.</p>` : "") + `<div class="ix-xc-steps">`
+      + st(`A · ${esc(S.inv.a)}`, "sum of average on-hand × unit cost", line("A"), fx(R.A))
+      + st(`B · ${esc(S.inv.b)}`, "sum of average on-hand × unit cost", line("B"), fx(R.B))
+      + st("Difference, B − A", "value B − value A", `${fx(R.B)} − ${fx(R.A)}${R.A ? ` · ${R.diff > 0 ? "+" : ""}${pc(R.pct)}` : ""}`, (R.diff > 0 ? "+" : "") + fx(R.diff), "key") + `</div>`
+      + `<p class="ix-note">${R.diff < 0 ? `Option B ties up ${fx(-R.diff)} less inventory.` : R.diff > 0 ? `Option A ties up ${fx(R.diff)} less inventory.` : "Both options tie up the same inventory."}</p>`;
+  };
+
+  // shell: tabs, the active calculator, a reset
+  box.innerHTML = `<div class="ix-xc-bar"><div class="ix-dyn-tabs" role="tablist" aria-label="Calculators">${IX_XC_TABS.map(([k, t], i) => `<button type="button" role="tab" id="ixXcTab-${k}" data-xt="${k}" aria-controls="ixXcP">${i + 1} · ${t}</button>`).join("")}</div>
+    <button type="button" class="ix-go small" id="ixXcReset" title="Put back this calculator's starting numbers">↺ Starting numbers</button></div><div class="ix-xc-p" id="ixXcP" role="tabpanel"></div>`;
+  const panel = box.querySelector("#ixXcP");
+  const go = k => { S.tab = k; box.querySelectorAll("[data-xt]").forEach(b => b.setAttribute("aria-selected", b.dataset.xt === k)); panel.setAttribute("aria-labelledby", "ixXcTab-" + k);
+    panel.innerHTML = T[k](); if (k === "qd") qdTable(); if (k === "sh") { shTable(); box.querySelector("#ixXcShAdd").onclick = () => { S.sh.rows.push({ id: `Site ${String.fromCharCode(65 + S.sh.rows.length % 26)}`, tor: "", toy: "", tog: "", oh: "", oo: "", qd: "" }); shTable(); C.sh(); }; }
+    if (k === "inv") { invTable(); box.querySelector("#ixXcInvAdd").onclick = () => { S.inv.rows.push({ opt: "B", item: "", qty: "", cost: "" }); invTable(); C.inv(); }; }
+    C[k](); };
+  box.querySelectorAll("[data-xt]").forEach(b => b.onclick = () => go(b.dataset.xt));
+  box.querySelector("#ixXcReset").onclick = () => { S[S.tab] = JSON.parse(JSON.stringify(IX_XC0[S.tab])); go(S.tab); };
+  // one handler for every field: number fields pass only values that keep their rule (the page-wide guard runs first)
+  panel.addEventListener("input", e => { const t = e.target, ds = t.dataset;
+    if (ds.qrow != null) { S.qd.rows[+ds.qrow] = t.value; C.qd(); return; }
+    if (ds.srow != null) { S.sh.rows[+ds.srow][ds.scol] = t.value; C.sh(); return; }
+    if (ds.irow != null) { S.inv.rows[+ds.irow][ds.icol] = t.value; C.inv(); return; }
+    const g = ds.g, k = ds.k; if (!g || !k) return;
+    S[g][k] = t.type === "checkbox" ? t.checked : t.type === "number" ? +ds.last : t.type === "range" ? +t.value : t.value;
+    if (t.type === "range") { const o = box.querySelector(`#o-xc-${g}-${k}`); if (o) o.textContent = (+t.value).toFixed(2); }
+    if (g === "adu" && k !== "text") S.adu.pick = null;
+    if (g === "qd" && (k === "h" || k === "incToday")) qdTable();
+    C[S.tab](); });
+  panel.addEventListener("click", e => { const b = e.target.closest("[data-sg]"); if (!b) return; S[b.dataset.sg][b.dataset.sk] = b.dataset.sv;
+    b.parentElement.querySelectorAll("[data-sg]").forEach(x => x.setAttribute("aria-pressed", x === b)); if (b.dataset.sg === "adu") S.adu.pick = null; C[S.tab](); });
+  go("adu");
+}
+(function () { const b = document.getElementById("ixXc"); if (b) ixXcViz(b); })();
+
 /* ============ Sun / moon theme toggle (GitHub Pages build only) ============ */
-// Only the stand-alone site (site/index.html, marked by <meta name="ddr-build">) shows the toggle: it opens dark and
+// Only the stand-alone copies (site/public and site/private index.html, marked by <meta name="ddr-build">) shows the toggle: it opens dark and
 // remembers each visitor's choice. The claude.ai artifact follows the viewer's theme, so the buttons stay hidden there.
 (function () {
   if (!document.querySelector('meta[name="ddr-build"]')) return;
